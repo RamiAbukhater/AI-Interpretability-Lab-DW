@@ -8,7 +8,8 @@ In person we only cover the high-level ideas. Setup, reading, and the notebook a
 
 - **Setup on Kaggle**: account, phone verification, OpenRouter key, the Gemma 2 license, GPU T4 x2, model inputs, secrets, the smoke test, quota, saving, and troubleshooting.
 - **Seven concept pages**, in the order the notebook uses them, each with intuition, a diagram, the link to the paper, a code walkthrough with tensor shapes, click-to-reveal questions, and common mistakes.
-- **Homework**: three assignments and an extension proposal.
+- **Calendar**: meetings every Wednesday and Thursday, 7 to 8 pm, through the end of Fall 2026 instruction.
+- **Homework 1** (setup, smoke test, Sections 1 and 2) and **Homework 2** (an extension proposal), each on its own page.
 - **Resources**: sources, a glossary, and introductory interpretability reading.
 
 Students run an adapted version of ARENA's notebook 4.4, *LLM Psychology & Persona Vectors*, on Kaggle's free tier with Gemma 2 9B Instruct (`gemma-2-9b-it`). The scope is Section 1 (Mapping Persona Space) and Section 2 up to steering along the Assistant Axis. Activation capping and ARENA's Sections 3 and 4 are out of scope for now.
@@ -40,7 +41,9 @@ docs/                   the website (GitHub Pages serves this folder)
   index.html            home
   setup.html            setup on Kaggle (the most important page)
   concepts/             01-personas.html … 07-steering.html
-  homework.html
+  calendar.html         meeting calendar (Wed and Thu, 7–8 pm)
+  homework-1.html       setup, smoke test, Sections 1 and 2
+  homework-2.html       extension proposal
   resources.html        sources and glossary
   assets/css/style.css  all styles; light and dark themes follow the system setting
   assets/js/site.js     sidebar, prev/next links, footer, copy buttons, screenshot slots, math
@@ -81,7 +84,8 @@ The final notebooks have not been added yet. When they are ready:
   - `docs/concepts/06-hooks-and-drift.html`: 1 (transcripts loaded, `max_assistant_turns`)
   - `docs/concepts/07-steering.html`: 1 (suggested alpha values)
 - [ ] **Judge model name.** ARENA's `AUTORATER_MODEL = "anthropic/claude-3.5-haiku"` **is no longer listed on OpenRouter** (checked 2026-10-19), so any judge or autorater call using it will fail. Currently listed options include `anthropic/claude-haiku-4.5` and `openai/gpt-4.1-mini` (the judge the paper used). Make sure the final notebook uses one that exists, and update `concepts/02-responses-and-judging.html` to match.
-- [ ] **Homework due dates and submission method**: `DUE_DATE_HW1`, `DUE_DATE_HW2`, `DUE_DATE_HW3`, `DUE_DATE_EXTENSION`, and `SUBMISSION_METHOD` in `docs/homework.html`.
+- [ ] **Homework due dates and submission method**: `DUE_DATE_HW1` and `SUBMISSION_METHOD` in `docs/homework-1.html`; `DUE_DATE_HW2` and `SUBMISSION_METHOD` in `docs/homework-2.html`.
+- [ ] **Meeting location**: `LOCATION` placeholders in `docs/calendar.html`. Also confirm the date range (Wed Oct 21 to Thu Dec 3, 2026) and that there is no meeting on Veterans Day (Nov 11) or Thanksgiving (Nov 26). To change dates, edit the month tables and the "All meetings" table in that file directly.
 - [ ] **Screenshots**: 12 placeholders, listed below.
 
 ### Screenshot placeholders

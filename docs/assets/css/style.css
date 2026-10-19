@@ -625,3 +625,34 @@ details.hint > summary { font-size: 0.9rem; color: var(--ink-soft); }
   details { border: 0; }
   details > .answer { display: block; }
 }
+
+/* ---------- calendar ---------- */
+.weekly { max-width: 30rem; }
+.cal-legend { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; font-family: var(--font-ui); font-size: 0.88rem; color: var(--ink-soft); margin: 1.5rem 0 0.25rem; }
+.cal-legend .sw { display: inline-block; width: 0.9rem; height: 0.9rem; border-radius: 3px; vertical-align: -0.12rem; margin-right: 0.4rem; border: 1px solid var(--rule); }
+.cal-legend .sw.meet { background: var(--accent-soft); border-color: var(--accent); }
+.cal-legend .sw.off { background: var(--bg-sunken); border-style: dashed; }
+.cal-month { margin: 1.25rem 0 1.75rem; }
+table.cal { width: 100%; border-collapse: collapse; table-layout: fixed; font-family: var(--font-ui); }
+table.cal caption { text-align: left; font-weight: 700; font-size: 1.1rem; padding: 0 0 0.5rem; color: var(--ink); }
+table.cal th { font-size: 0.75rem; font-weight: 650; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint); padding: 0.35rem 0.4rem; text-align: left; border-bottom: 1px solid var(--rule); }
+table.cal th.mday { color: var(--accent); }
+table.cal td { height: 4.6rem; vertical-align: top; padding: 0.35rem 0.4rem; border: 1px solid var(--rule); background: var(--bg-raised); }
+table.cal td.out { background: transparent; border-color: transparent; }
+table.cal .dnum { display: block; font-size: 0.85rem; font-weight: 600; color: var(--ink-soft); }
+table.cal td.meet { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
+table.cal td.meet .dnum { color: var(--accent-ink); }
+table.cal .ev { display: block; font-size: 0.8rem; font-weight: 700; color: var(--accent-ink); margin-top: 0.15rem; line-height: 1.2; }
+table.cal .tm { display: block; font-size: 0.78rem; color: var(--ink-soft); }
+table.cal td.off { background: repeating-linear-gradient(135deg, transparent 0 6px, color-mix(in srgb, var(--rule) 55%, transparent) 6px 7px), var(--bg-sunken); }
+table.cal td.off .ev { color: var(--ink-soft); font-weight: 600; }
+table.cal td.off .why { display: block; font-size: 0.72rem; color: var(--ink-faint); line-height: 1.2; }
+table.meetings tr.off td { color: var(--ink-faint); }
+@media (max-width: 560px) {
+  table.cal th { font-size: 0.66rem; padding: 0.3rem 0.15rem; letter-spacing: 0; }
+  table.cal td { height: 3.6rem; padding: 0.25rem 0.2rem; }
+  table.cal .dnum { font-size: 0.78rem; }
+  table.cal .ev { font-size: 0.66rem; }
+  table.cal .tm, table.cal .why { font-size: 0.62rem; }
+}
+.due-line { font-family: var(--font-ui); margin: -0.5rem 0 1.25rem; }

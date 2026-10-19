@@ -12,7 +12,8 @@
   "use strict";
 
   var PAGES = [
-    { id: "home", href: "index.html", title: "Home", group: "Start" },
+    { id: "home", href: "index.html", title: "Home", group: "Start", icon: "&#8962;" },
+    { id: "calendar", href: "calendar.html", title: "Calendar", group: "Start", icon: "&#9638;" },
     { id: "setup", href: "setup.html", title: "Setup on Kaggle", group: "Start", step: true },
     { id: "c1", href: "concepts/01-personas.html", title: "Personas and the persona selection model", short: "Personas", group: "Concepts", step: true },
     { id: "c2", href: "concepts/02-responses-and-judging.html", title: "Role-play responses and LLM judges", short: "Responses and judging", group: "Concepts", step: true },
@@ -21,8 +22,9 @@
     { id: "c5", href: "concepts/05-pca-assistant-axis.html", title: "PCA and the Assistant Axis", short: "PCA and the Assistant Axis", group: "Concepts", step: true },
     { id: "c6", href: "concepts/06-hooks-and-drift.html", title: "PyTorch hooks and monitoring persona drift", short: "Hooks and persona drift", group: "Concepts", step: true },
     { id: "c7", href: "concepts/07-steering.html", title: "Steering along the Assistant Axis", short: "Steering", group: "Concepts", step: true },
-    { id: "homework", href: "homework.html", title: "Homework", group: "Do", step: true },
-    { id: "resources", href: "resources.html", title: "Resources and glossary", short: "Resources and glossary", group: "Reference" }
+    { id: "hw1", href: "homework-1.html", title: "Homework 1: Setup, smoke test, Sections 1 and 2", short: "Homework 1: Notebook", group: "Homework", step: true },
+    { id: "hw2", href: "homework-2.html", title: "Homework 2: Propose an extension", short: "Homework 2: Extension", group: "Homework", step: true },
+    { id: "resources", href: "resources.html", title: "Resources and glossary", short: "Resources and glossary", group: "Reference", icon: "&#9733;" }
   ];
 
   var INSTRUCTORS = "Rami Abukhater, Alec Min, and Akshar Sinha";
@@ -49,8 +51,9 @@
     links.className = "header-links";
     links.setAttribute("aria-label", "Quick links");
     links.innerHTML =
+      '<a href="' + root + 'calendar.html">Calendar</a>' +
       '<a href="' + root + 'setup.html">Setup</a>' +
-      '<a href="' + root + 'homework.html">Homework</a>' +
+      '<a href="' + root + 'homework-1.html">Homework</a>' +
       '<a href="' + root + 'resources.html">Glossary</a>';
     header.appendChild(links);
 
@@ -80,7 +83,7 @@
         html += '<div class="path-label">' + esc(group) + "</div>";
         html += '<ol class="path' + (p.group === "Concepts" ? " steps" : "") + '">';
       }
-      var num = p.step ? String(++n) : (p.id === "home" ? "&#8962;" : "&#9733;");
+      var num = p.step ? String(++n) : (p.icon || "&#8226;");
       var cls = i < idx && p.step ? ' class="done"' : "";
       var cur = i === idx ? ' aria-current="page"' : "";
       html += '<li><a href="' + root + p.href + '"' + cls + cur + ">" +
@@ -88,7 +91,7 @@
         '<span class="label">' + esc(p.short || p.title) + "</span></a></li>";
     });
     html += "</ol>";
-    html += '<p class="meta">Work through the numbered pages in order: setup (0), concepts 1 to 7, then the homework (8).</p>';
+    html += '<p class="meta">Work through the numbered pages in order: setup (0), concepts 1 to 7, then Homework 1 (8) and Homework 2 (9).</p>';
     sidebar.innerHTML = html;
 
     // close the drawer on phone after choosing a page, or on Escape
