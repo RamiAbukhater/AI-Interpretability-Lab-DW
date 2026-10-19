@@ -700,9 +700,6 @@ table.meetings tr.off td { color: var(--ink-faint); }
 .badge.theme-safety { color: var(--d-red); border-color: currentColor; }
 .badge.theme-cogsci { color: var(--d-green); border-color: currentColor; }
 .badge.theme-mechanism { color: var(--d-amber); border-color: currentColor; }
-.badge.lvl-starter { background: var(--good-soft); color: var(--good); border-color: transparent; }
-.badge.lvl-intermediate { background: var(--warm-soft); color: var(--warm); border-color: transparent; }
-.badge.lvl-advanced { background: var(--bad-soft); color: var(--bad); border-color: transparent; }
 .idea .q { margin-bottom: 0.75rem; }
 .idea .field { margin-bottom: 0.75rem; }
 .idea .field > ol, .idea .field > ul { margin: 0.3rem 0 0; }
