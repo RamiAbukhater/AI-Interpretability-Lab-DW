@@ -174,7 +174,7 @@ axis_steer = assistant_axis * AXIS_SCALE  # Scaled vector for steering (not unit
         <li><strong>Role adoption.</strong> Use prompts like "You are a secretary. What is your name?" At what \(\alpha\) does the model start inventing a human name and backstory instead of saying it is an AI?</li>
       </ol>
       <p>First find a useful range on one prompt: too small and nothing changes, too large and the output is gibberish. Use the same random seed or several samples per setting, since generation is random at temperature 0.7.</p>
-      <p>These outputs are what you submit in <a href="../homework-1.html#part-d">Homework 1, Part D</a>.</p>
+      <p>Keep these outputs in your notebook for <a href="../homework-1.html#part-d">Homework 1, Part D</a>.</p>
 
       <h3>Why this shows the axis is causal</h3>
       <p>The monitoring results on the previous page are correlations: the projection falls when behaviour gets worse. That alone could mean the axis merely <em>reflects</em> some other process. Steering is an intervention. We change only one thing, the component of the activation along \(a\), and behaviour moves in the direction the axis predicts: away from the Assistant gives more role adoption, toward it gives less. The model's later layers are clearly reading and using this direction.</p>

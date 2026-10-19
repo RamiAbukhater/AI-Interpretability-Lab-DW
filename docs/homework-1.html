@@ -35,11 +35,11 @@
 <div class="eyebrow">Homework 1</div>
       <h1>Setup, smoke test, Sections 1 and 2</h1>
       <p class="lede">This is the main assignment: get the notebook running, then work through both sections of it. Do the four parts in order; each one depends on the one before.</p>
-      <p class="due-line"><strong>Due:</strong> <span class="todo-inline">DUE_DATE_HW1</span></p>
+      <p class="due-line"><strong>Due:</strong> Wednesday, October 28</p>
 
       <div class="callout">
         <span class="callout-title">How to submit</span>
-        <p><span class="todo-inline">SUBMISSION_METHOD</span> Leaders will say where submissions go (for example a shared folder or form). Name files <code>lastname_hw1_item.png</code>. Never include your API key in anything you submit; blur it in screenshots.</p>
+        <p>Post <strong>one screenshot of your PCA plot with your two projected personas</strong> (the plot from <a href="#part-c">Part C</a>) in the <strong>homework submissions channel</strong> on Discord. That screenshot is the whole submission. Details are at the <a href="#submit">bottom of this page</a>.</p>
       </div>
 
       <div class="callout warn">
@@ -50,14 +50,13 @@
       <nav class="page-toc" aria-label="On this page"><strong>On this page</strong><ol>
         <li><a href="#part-a">Part A: Setup</a></li><li><a href="#part-b">Part B: Smoke test</a></li>
         <li><a href="#part-c">Part C: Section 1 + your personas</a></li><li><a href="#part-d">Part D: Section 2</a></li>
-        <li><a href="#checklist">Submission checklist</a></li></ol></nav>
+        <li><a href="#submit">How to submit</a></li></ol></nav>
 
       <section class="assignment" id="part-a">
         <h2>Part A: Setup</h2>
         <dl>
           <dt>What to do</dt><dd>Work through <a href="setup.html">Setup on Kaggle</a>, steps 1 to 8: Kaggle account and phone verification, OpenRouter key with a credit limit, Gemma 2 license, importing the notebook, GPU T4 x2 and Internet, both Gemma inputs, and the <code>OPENROUTER_API_KEY</code> secret.</dd>
           <dt>Expected result</dt><dd>A notebook in your Kaggle account with two GPUs, Internet on, <code>gemma-2-9b-it</code> and <code>gemma-2-2b-it</code> attached, and the secret ticked.</dd>
-          <dt>Submit</dt><dd>Nothing separately; Part B's screenshot shows that this worked.</dd>
         </dl>
       </section>
 
@@ -67,7 +66,7 @@
           <dt>What to do</dt><dd>With <code>SMOKE_TEST = True</code>, run the notebook until the 2B model loads and prints its first in-character responses (<a href="setup.html#step-smoke">setup step 9</a>). Then stop the session.</dd>
           <dt>Notebook part</dt><dd>Setup cells, model loading, and the first generation cell of Section 1.</dd>
           <dt>Expected output</dt><dd>The model-loading cell completes for <code>gemma-2-2b-it</code>, and a cell prints short responses from a few personas. No errors above it.</dd>
-          <dt>Submit</dt><dd><strong>B1.</strong> One screenshot of the first successful model output, with the cell and its output visible and your Kaggle notebook title in view.</dd>
+          <dt>Next</dt><dd>Nothing to submit for this part. Once you see this output, set <code>SMOKE_TEST = False</code> and move on to Part C.</dd>
         </dl>
         <p class="small">Stuck? Check <a href="setup.html#troubleshooting">Troubleshooting</a> first, then post in the group channel with the full error message.</p>
       </section>
@@ -105,13 +104,14 @@
         <p>Some prompts make the model refuse or stay in Assistant mode, and those responses are dropped because they score low on the role-play scale. The cell prints how many of each persona's responses survived, and warns you if fewer than half did. If that happens, <strong>report it with the judge scores</strong> (the cell prints them); a persona the model will not play is a result worth discussing. Then pick a substitute, claim it on the sign-up sheet, and run that one too.</p>
 
         <h3>What to submit</h3>
-        <ol>
-          <li><strong>C1.</strong> The PCA plot with your two personas highlighted (<code>my_personas_plot.png</code>).</li>
-          <li><strong>C2.</strong> Your predictions, written before running.</li>
-          <li><strong>C3.</strong> Two to four sentences on whether the results matched your predictions, and why you think they did or didn't.</li>
-          <li><strong>C4.</strong> Each persona's cosine similarity to the Assistant persona vector and its projection on PC1. The cell prints both, next to the shared set's PC1 range for reference.</li>
-          <li><strong>C5.</strong> The link to your saved Kaggle version, shared with the leads.</li>
-        </ol>
+        <p>A screenshot of the plot the cell draws, <code>my_personas_plot.png</code>, posted in the homework submissions channel on Discord. Your two personas should be visible and labelled, with your name in the plot title. See <a href="#submit">How to submit</a>.</p>
+        <h3>Keep in your notebook</h3>
+        <p>These are not submitted, but write them in a markdown cell under your plot. They are what you will want when we talk about results in meetings.</p>
+        <ul>
+          <li>Your predictions, written before running.</li>
+          <li>Two to four sentences on whether the results matched your predictions, and why you think they did or didn't.</li>
+          <li>Each persona's cosine similarity to the Assistant persona vector and its projection on PC1. The cell prints both, next to the shared set's PC1 range for reference.</li>
+        </ul>
       </section>
 
       <section class="assignment" id="part-d">
@@ -121,31 +121,25 @@
           <dt>What to do</dt><dd>Complete the Section 2 exercises up to and including the steering experiments, using the 9B model.</dd>
           <dt>Notebook part</dt><dd>Section 2, Steering along the Assistant Axis: <code>ConversationAnalyzer</code>, <code>rate_delusion_risk</code>, the drift plots, <code>generate_with_steering</code>, and the steering experiments. Activation capping is not part of this assignment.</dd>
           <dt>Expected output</dt><dd>Drift plots for the two delusion transcripts, with a negative printed correlation between projection and risk for at least one of them; steered generations that change noticeably between negative, zero, and positive \(\alpha\).</dd>
-          <dt>Submit</dt><dd>
+          <dt>Keep in your notebook</dt><dd>
+            <p>Not submitted, but do both: they are the point of Section 2.</p>
             <ol>
-              <li><strong>D1.</strong> Your steering outputs: for at least three personas and at least four values of \(\alpha\) (including 0), the generated text in a table or as notebook output. Include the role-adoption prompt results too.</li>
-              <li><strong>D2.</strong> A short reflection (200 to 300 words). At what \(\alpha\) did behaviour clearly change, and at what \(\alpha\) did text fall apart? Did steering away produce nonhuman or mystical personas, as the paper reports for Gemma? Do your drift plots and steering results together convince you the axis is causal? What would you need to check to be more sure?</li>
+              <li>Your steering outputs: for at least three personas and at least four values of \(\alpha\) (including 0), the generated text in a table or as notebook output. Include the role-adoption prompt results too.</li>
+              <li>A short reflection (200 to 300 words). At what \(\alpha\) did behaviour clearly change, and at what \(\alpha\) did text fall apart? Did steering away produce nonhuman or mystical personas, as the paper reports for Gemma? Do your drift plots and steering results together convince you the axis is causal? What would you need to check to be more sure?</li>
             </ol>
           </dd>
         </dl>
       </section>
 
-      <h2 id="checklist">Submission checklist</h2>
-      <div class="table-scroll">
-        <table class="plain">
-          <thead><tr><th scope="col">Item</th><th scope="col">What</th><th scope="col">Format</th></tr></thead>
-          <tbody>
-            <tr><td>B1</td><td>First successful model output (smoke test)</td><td>Screenshot</td></tr>
-            <tr><td>C1</td><td>PCA plot with your two personas highlighted, 9B</td><td>Image</td></tr>
-            <tr><td>C2</td><td>Your predictions, written before running</td><td>Text</td></tr>
-            <tr><td>C3</td><td>Did the results match? 2 to 4 sentences</td><td>Text</td></tr>
-            <tr><td>C4</td><td>Cosine to the Assistant and PC1 projection, per persona</td><td>Numbers</td></tr>
-            <tr><td>C5</td><td>Link to your saved Kaggle version, shared with the leads</td><td>Link</td></tr>
-            <tr><td>D1</td><td>Steering outputs, at least 3 personas × 4 values of \(\alpha\), plus role adoption</td><td>Table or notebook output</td></tr>
-            <tr><td>D2</td><td>Reflection on drift and steering, 200 to 300 words</td><td>Text</td></tr>
-          </tbody>
-        </table>
-      </div>
+      <h2 id="submit">How to submit</h2>
+      <section class="assignment">
+        <dl>
+          <dt>What</dt><dd>One screenshot of your PCA plot with your two projected personas highlighted and labelled (<code>my_personas_plot.png</code> from Part C, made on <code>gemma-2-9b-it</code>).</dd>
+          <dt>Where</dt><dd>The <strong>homework submissions channel</strong> on our Discord.</dd>
+          <dt>When</dt><dd>By <strong>Wednesday, October 28</strong>.</dd>
+          <dt>Check first</dt><dd>Your name is in the plot title, both personas are labelled, and no API key or other private information is visible in the screenshot.</dd>
+        </dl>
+      </section>
       <p>When you are done, save a version of your notebook (<a href="setup.html#step-save">setup step 11</a>) so your outputs are kept, and move on to <a href="homework-2.html">Homework 2</a>, where your team picks an extension from the menu of ideas.</p>
       <nav class="pager" id="pager"></nav>
       <footer class="site-footer" id="site-footer">

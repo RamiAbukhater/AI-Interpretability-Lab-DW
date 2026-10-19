@@ -711,3 +711,21 @@ ol.checklist li { margin-bottom: 0.5rem; }
 table.cal td.due { background: var(--good-soft); box-shadow: inset 3px 0 0 var(--good); }
 table.cal td.due .ev { color: var(--good); }
 .cal-legend .sw.due { background: var(--good-soft); border-color: var(--good); }
+
+/* calendar: workshops, milestones, lab dinner, and several events per day */
+table.cal td.workshop { background: color-mix(in srgb, var(--d-blue) 22%, var(--bg-raised)); box-shadow: inset 3px 0 0 var(--d-blue); }
+table.cal td.milestone { background: var(--bad-soft); box-shadow: inset 3px 0 0 var(--bad); }
+table.cal td.social { background: var(--warm-soft); box-shadow: inset 3px 0 0 var(--warm); }
+table.cal .ev-workshop { color: var(--d-blue); }
+table.cal .ev-due, table.cal .ev-due a { color: var(--good); }
+table.cal .ev-milestone { color: var(--bad); }
+table.cal .ev-social { color: var(--warm); }
+table.cal .ev a { text-decoration: none; }
+table.cal .ev a:hover { text-decoration: underline; }
+table.cal .ev + .tm + .ev { margin-top: 0.3rem; }
+.cal-legend .sw.workshop { background: color-mix(in srgb, var(--d-blue) 22%, var(--bg-raised)); border-color: var(--d-blue); }
+.cal-legend .sw.milestone { background: var(--bad-soft); border-color: var(--bad); }
+.cal-legend .sw.social { background: var(--warm-soft); border-color: var(--warm); }
+table.meetings tr.ws td { font-weight: 600; }
+table.keydates td:first-child { white-space: nowrap; font-family: var(--font-ui); font-weight: 600; }
+@media (max-width: 560px) { table.keydates td:first-child { white-space: normal; } }
