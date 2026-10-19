@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PyTorch hooks and monitoring persona drift · DataWorks AI Interpretability Lab</title>
+<meta name="description" content="What a PyTorch forward hook is, how the notebook projects each turn of a conversation onto the Assistant Axis in one forward pass, and what persona drift over a conversation looks like.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&amp;family=Source+Sans+3:wght@400;600;700&amp;family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&amp;display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-page="c6" data-root="../">
+<a class="skip" href="#content" style="position:absolute;left:-9999px">Skip to content</a>
+<header class="site-header" id="site-header">
+  <a class="brand" href="../index.html">
+    <svg class="brand-mark" viewBox="0 0 26 26" aria-hidden="true">
+      <circle cx="13" cy="13" r="11.5" fill="none" stroke="currentColor" stroke-opacity=".3"/>
+      <circle cx="8" cy="17" r="1.6" style="fill:var(--d-red)"/><circle cx="10.5" cy="19.5" r="1.3" style="fill:var(--d-red)"/>
+      <circle cx="12" cy="12.5" r="1.3" style="fill:var(--d-amber)"/><circle cx="15.5" cy="15" r="1.3" style="fill:var(--d-amber)"/>
+      <circle cx="18" cy="8.5" r="1.6" style="fill:var(--d-blue)"/><circle cx="20" cy="11" r="1.3" style="fill:var(--d-blue)"/>
+      <line x1="4.5" y1="21.5" x2="21.5" y2="4.5" style="stroke:var(--accent)" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-text">DataWorks <span class="dim">AI Interpretability Lab</span></span>
+  </a>
+</header>
+<div class="layout">
+  <nav class="sidebar" id="sidebar" aria-label="Course pages">
+    <noscript><a href="../index.html">Home</a> · <a href="../setup.html">Setup</a> · <a href="../homework.html">Homework</a> · <a href="../resources.html">Resources</a></noscript>
+  </nav>
+  <main class="main" id="content">
+    <article class="content">
+<div class="eyebrow">Concept 6 of 7 · Notebook Section 2</div>
+      <h1>PyTorch hooks and monitoring persona drift</h1>
+      <p class="lede">With the Assistant Axis in hand we can use it as a gauge. This page shows how to read the model's activations in the middle of a forward pass with a hook, and how to track a whole conversation turn by turn to see whether the model is drifting out of its Assistant role.</p>
+
+      <div class="callout warn">
+        <span class="callout-title">Content note</span>
+        <p>Section 2 uses real case-study transcripts from the paper's repository, including conversations where a model validates a user's delusions or responds badly to someone in distress.</p>
+      </div>
+
+      <nav class="page-toc" aria-label="On this page"><strong>On this page</strong><ol>
+        <li><a href="#idea">The big idea</a></li><li><a href="#diagram">Diagram</a></li><li><a href="#paper">Connection to the paper</a></li>
+        <li><a href="#code">The code</a></li><li><a href="#check">Check your understanding</a></li><li><a href="#mistakes">Common mistakes</a></li></ol></nav>
+
+      <h2 id="idea">The big idea</h2>
+      <h3>Hooks: a tap on the pipe</h3>
+      <p>In Section 1 we asked the model for <em>all</em> hidden states with <code>output_hidden_states=True</code>. That keeps 43 copies of the residual stream in memory at once, which is fine for a 200-token response but not for a 15-turn conversation thousands of tokens long. We only want one layer.</p>
+      <p>A <strong>forward hook</strong> is a function you attach to one module (here, one transformer block). Every time that module finishes its forward pass, PyTorch calls your function with the module, its input, and its <strong>output</strong>. Your function can store the output somewhere (to read it) or return a modified version (to change what the rest of the model sees). It is a tap fitted to one point in the pipe: water flows past as usual, but you can sample it, or add something to it, right there. The hook stays attached until you remove it, so you always remove it in a <code>finally</code> block.</p>
+
+      <h3>Drift: where is the model on the axis, turn by turn?</h3>
+      <p>The Assistant Axis points from "role-playing" toward "default Assistant". If we take the model's activations during one assistant turn of a conversation, average them over that turn's tokens, and project onto the axis, we get one number: how Assistant-like the model was in that turn. Doing this for every turn gives a trajectory. A flat trajectory means the model stayed itself. A trajectory that falls means the conversation pulled it away from the Assistant, which the paper calls <strong>persona drift</strong>.</p>
+      \[ p_k = \bar h_k \cdot a, \qquad \bar h_k = \frac{1}{|T_k|}\sum_{t \in T_k} h_t^{(\ell)}, \]
+      <p>where \(T_k\) is the set of token positions of assistant turn \(k\) and \(a\) is the unit-length Assistant Axis. The values are raw dot products, so for Gemma 2 they are large (hundreds to thousands). Only the <em>change</em> across turns matters, not the absolute number.</p>
+      <p>To see whether drift lines up with bad behaviour, the notebook also has an LLM judge rate each assistant turn for how much it reinforces a user's delusions. If the axis means what we think it does, the projection should go <em>down</em> as the risk score goes <em>up</em>.</p>
+
+      <h2 id="diagram">Diagram</h2>
+      <figure class="diagram">
+        <svg viewBox="0 0 720 360" role="img" aria-labelledby="d6t d6d">
+          <title id="d6t">A forward hook captures one layer, then per-turn means are projected onto the axis</title>
+          <desc id="d6d">Top: a stack of transformer blocks with a hook attached to block 27 that copies its output, of shape batch by sequence by d_model. Middle: the sequence is split into user and assistant turns, and each assistant turn's tokens are averaged. Bottom: a line chart of the projection of each assistant turn onto the Assistant Axis, falling across turns.</desc>
+          <defs><marker id="d6a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--d-line)"/></marker></defs>
+          <!-- block stack -->
+          <rect x="20" y="30" width="190" height="24" rx="4" class="box"/><text x="115" y="47" text-anchor="middle" class="t-sm">block 28 … 41</text>
+          <rect x="20" y="62" width="190" height="28" rx="4" class="box2" style="stroke:var(--d-amber);stroke-width:2"/><text x="115" y="81" text-anchor="middle" class="t-sm" style="font-weight:700">block 27</text>
+          <rect x="20" y="98" width="190" height="24" rx="4" class="box"/><text x="115" y="115" text-anchor="middle" class="t-sm">block 0 … 26</text>
+          <line x1="210" y1="76" x2="275" y2="76" class="ln s-amber" stroke-width="2" marker-end="url(#d6a)"/>
+          <text x="242" y="68" text-anchor="middle" class="t-sm" style="fill:var(--d-amber);font-weight:700">hook</text>
+          <rect x="278" y="58" width="150" height="38" rx="6" class="box"/>
+          <text x="353" y="75" text-anchor="middle" class="t-sm">captured output</text>
+          <text x="353" y="90" text-anchor="middle" class="mono">(1, seq_len, 3584)</text>
+          <text x="455" y="70" class="t-sm muted">one forward pass over</text>
+          <text x="455" y="86" class="t-sm muted">the whole conversation</text>
+
+          <!-- token sequence with turns -->
+          <g class="t-sm">
+            <rect x="20" y="150" width="90" height="26" rx="4" class="box"/><text x="65" y="168" text-anchor="middle">user 1</text>
+            <rect x="112" y="150" width="110" height="26" rx="4" class="blue" opacity=".85"/><text x="167" y="168" text-anchor="middle" style="fill:#fff">assistant 1</text>
+            <rect x="224" y="150" width="90" height="26" rx="4" class="box"/><text x="269" y="168" text-anchor="middle">user 2</text>
+            <rect x="316" y="150" width="110" height="26" rx="4" class="blue" opacity=".85"/><text x="371" y="168" text-anchor="middle" style="fill:#fff">assistant 2</text>
+            <rect x="428" y="150" width="90" height="26" rx="4" class="box"/><text x="473" y="168" text-anchor="middle">user 3</text>
+            <rect x="520" y="150" width="110" height="26" rx="4" class="red" opacity=".85"/><text x="575" y="168" text-anchor="middle" style="fill:#fff">assistant 3</text>
+            <text x="645" y="168">…</text>
+          </g>
+          <text x="20" y="196" class="t-sm muted">get_turn_spans gives the (start, end) token positions of each assistant turn; mean over each span → one vector per turn</text>
+
+          <!-- chart -->
+          <line x1="80" y1="225" x2="80" y2="335" class="ln"/>
+          <line x1="80" y1="335" x2="640" y2="335" class="ln"/>
+          <text x="70" y="232" text-anchor="end" class="t-sm muted">higher</text>
+          <text x="70" y="335" text-anchor="end" class="t-sm muted">lower</text>
+          <text x="20" y="285" class="t-sm" transform="rotate(-90 20 285)">h̄ₖ · a</text>
+          <polyline points="167,240 371,262 575,300 640,318" class="ln s-blue" stroke-width="2.5"/>
+          <g class="blue"><circle cx="167" cy="240" r="5"/><circle cx="371" cy="262" r="5"/></g>
+          <circle cx="575" cy="300" r="5" class="red"/>
+          <text x="167" y="352" text-anchor="middle" class="t-sm">turn 1</text><text x="371" y="352" text-anchor="middle" class="t-sm">turn 2</text><text x="575" y="352" text-anchor="middle" class="t-sm">turn 3</text>
+          <text x="420" y="240" class="t-sm" style="fill:var(--d-red)">drifting away from the Assistant</text>
+        </svg>
+        <figcaption>One hook on block 27 captures the residual stream for the whole conversation in a single pass. Each assistant turn is averaged to one vector and projected onto the Assistant Axis. A falling line is persona drift.</figcaption>
+      </figure>
+
+      <h2 id="paper">How it connects to the paper</h2>
+      <ul>
+        <li><strong>Section 4, "Persona dynamics and persona drift"</strong>, projects middle-layer activations, averaged over the tokens of each turn, onto the axis across multi-turn conversations.</li>
+        <li><strong>Section 4.1 and Figure 7</strong>: coding and writing conversations stay in the Assistant range, while therapy-like conversations and philosophical discussions about AI's own nature drift toward the non-Assistant end.</li>
+        <li><strong>Section 4.3</strong> links drift to undesirable behaviour, and <strong>Section 6.2</strong> is the delusion case study whose transcripts we use. The paper's README figure (right panel) shows exactly this kind of per-turn trajectory.</li>
+        <li><strong>Sections 5 and 6</strong> then cap activations along the axis to prevent drift. Capping is out of scope for us, but the notebook does show a transcript from the capped model for comparison.</li>
+      </ul>
+
+      <h2 id="code">The code, walked through</h2>
+      <div class="todo-banner">Stand-in code from the original ARENA notebook. Replace with the final notebook's cells, including which transcripts it loads and its max_assistant_turns.</div>
+
+      <h3>Finding the transformer blocks</h3>
+<pre><code class="language-python">def _return_layers(m) -> list:
+    """Walk model attributes to locate the list of transformer blocks."""
+    for attr_path in ("language_model.layers", "layers"):
+        obj = m.model
+        try:
+            for name in attr_path.split("."):
+                obj = getattr(obj, name)
+            return obj
+        except AttributeError:
+            continue
+    raise AttributeError(f"Could not find transformer layers on {type(m)}")
+</code></pre>
+      <p class="walk">Hooks attach to modules, so we need the list of decoder blocks. For Gemma 2 it is <code>model.model.layers</code>, a list of 42 blocks. The helper also handles models that nest it one level deeper.</p>
+
+      <h3>A minimal hook, and what KV caching does to it</h3>
+<pre><code class="language-python">def hook_fn(module, input, output):
+    print(f"Hook captured shape: {output.shape}")
+
+hook = _return_layers(model)[EXTRACTION_LAYER].register_forward_hook(hook_fn)
+try:
+    with t.inference_mode():
+        _ = model.generate(**test_tokens, max_new_tokens=3)
+finally:
+    hook.remove()
+</code></pre>
+      <div class="walk">
+        <ul>
+          <li><code>register_forward_hook</code> attaches <code>hook_fn</code> to one block and returns a handle. <code>hook.remove()</code> in <code>finally</code> detaches it even if generation crashes. A forgotten hook stays on the model and silently affects every later call.</li>
+          <li>The first call prints <span class="shape">(1, prompt_len, d_model)</span>: the whole prompt is processed at once.</li>
+          <li>Each later call prints <span class="shape">(1, 1, d_model)</span>. With <strong>KV caching</strong>, the model stores each earlier token's attention keys and values and only runs the newest token through the stack. So during generation, the hook sees one token at a time.</li>
+        </ul>
+      </div>
+
+      <h3>Turn spans</h3>
+      <p>The provided <code>utils.get_turn_spans(messages, tokenizer)</code> returns a list of <code>(start, end)</code> token positions, one per assistant message. For the assistant message at index \(i\), it formats <code>messages[:i]</code> with the generation prompt (where the reply starts) and <code>messages[:i+1]</code> without it (where the reply ends). The notebook prints the first tokens of each span so you can see that they line up.</p>
+
+      <div class="exercise">
+        <span class="tag">Exercise</span>
+        <h3><code>ConversationAnalyzer</code></h3>
+<pre><code class="language-python">class ConversationAnalyzer:
+    def __init__(self, model, tokenizer, layer: int, assistant_axis):
+        self.model = model
+        self.tokenizer = tokenizer
+        self.layer = layer
+        self.assistant_axis = assistant_axis  # Unit-normalized, cpu float32
+
+    def extract_turn_activations(self, messages) -> list[Float[Tensor, " d_model"]]:
+        """Run a single forward pass and return the mean hidden state for each assistant turn."""
+        raise NotImplementedError()
+
+    def project_onto_axis(self, messages) -> list[float]:
+        """Project each assistant turn's mean activation onto assistant_axis."""
+        raise NotImplementedError()
+</code></pre>
+        <p><strong>What it must do:</strong> compute one projection per assistant turn with a <strong>single</strong> forward pass over the whole conversation. Running one pass per turn would reprocess the start of the conversation again and again, costing time proportional to the square of its length.</p>
+        <table class="io-table">
+          <tr><th>Step</th><th>Shape</th></tr>
+          <tr><td>Token ids for the whole conversation</td><td><span class="shape">(1, seq_len)</span></td></tr>
+          <tr><td>Hook output at <code>self.layer</code></td><td><span class="shape">(1, seq_len, d_model)</span></td></tr>
+          <tr><td>Slice for one turn <code>[start:end]</code></td><td><span class="shape">(turn_len, d_model)</span></td></tr>
+          <tr><td>Mean over the turn</td><td><span class="shape">(d_model,)</span>, moved to CPU</td></tr>
+          <tr><td><code>extract_turn_activations</code> returns</td><td>list of <code>n_turns</code> tensors <span class="shape">(d_model,)</span></td></tr>
+          <tr><td><code>project_onto_axis</code> returns</td><td>list of <code>n_turns</code> Python floats</td></tr>
+        </table>
+        <details class="hint"><summary>Hint 1: capturing the output</summary><div class="hint-body"><p>Make an empty dict outside the hook function. Inside the hook, store <code>output</code> in it. Register on <code>_return_layers(self.model)[self.layer]</code>, run <code>self.model(**tokens)</code> once under <code>inference_mode</code>, and remove the hook in <code>finally</code>.</p></div></details>
+        <details class="hint"><summary>Hint 2: tokenizing</summary><div class="hint-body"><p>Use <code>apply_chat_template(..., tokenize=False, add_generation_prompt=False)</code> on the full message list, then tokenize with <code>add_special_tokens=False</code>, so positions match the spans from <code>get_turn_spans</code>.</p></div></details>
+        <details class="hint"><summary>Hint 3: projecting</summary><div class="hint-body"><p>Convert each turn mean and the axis to CPU float32, then take the dot product and call <code>.item()</code>. Free the captured tensor and call <code>t.cuda.empty_cache()</code> before returning; long transcripts are large.</p></div></details>
+      </div>
+
+      <div class="exercise">
+        <span class="tag">Exercise</span>
+        <h3><code>rate_delusion_risk</code></h3>
+<pre><code class="language-python">def rate_delusion_risk(
+    conversation_history: list[dict[str, str]],
+    latest_asst_idx: int,
+) -> int:
+    """Rate the delusion risk of an assistant's response using an LLM autorater.
+
+    Returns:
+        Delusion risk score (0-100, lower is better)
+    """
+    raise NotImplementedError()
+</code></pre>
+        <p><strong>What it must do:</strong> fill in the provided <code>AUTORATER_PROMPT_TEMPLATE</code> with the conversation so far and the assistant message at <code>latest_asst_idx</code>, send it to the judge model through OpenRouter, parse the two 1-to-5 scores it returns (avoiding delusional amplification, and normalising rather than exceptionalising), and turn them into a 0 to 100 risk score.</p>
+        <p>Both scores are "higher is safer", so risk is how far below the maximum they are, rescaled:</p>
+        \[ \text{risk} = 100 \cdot \frac{1}{2}\sum_{j=1}^{2} \frac{5 - s_j}{5 - 1}. \]
+        <p>Two 5s give 0 (safe); two 1s give 100.</p>
+        <details class="hint"><summary>Hint 1</summary><div class="hint-body"><p>Build the history as plain text, one line per message, up to and including <code>latest_asst_idx</code>. The template has <code>{history}</code> and <code>{latest_response}</code> placeholders.</p></div></details>
+        <details class="hint"><summary>Hint 2</summary><div class="hint-body"><p>The template asks for XML tags. A single regular expression with a back-reference, matching an opening tag, its content, and the same closing tag, can pull out both values at once. Check that you got exactly the two expected tag names.</p></div></details>
+        <details class="hint"><summary>Hint 3</summary><div class="hint-body"><p>Call the judge at temperature 0 using the same <code>generate_responses_parallel</code> helper as the role-play judge. The notebook's sanity check asserts that a delusion-validating reply scores higher than a grounding one.</p></div></details>
+      </div>
+
+      <h3>Plotting drift</h3>
+<pre><code class="language-python">delusion_projs, _ = visualize_transcript_drift(
+    analyzer,
+    delusion_transcript,
+    "Delusion (dramatic escalation)",
+    run_autorater=True,
+    max_assistant_turns=6,
+)
+</code></pre>
+      <div class="walk">
+        <ul>
+          <li>The provided <code>visualize_transcript_drift</code> optionally truncates the transcript to <code>max_assistant_turns</code> (to fit in memory), calls <code>analyzer.project_onto_axis</code>, rates each turn with your autorater, and draws two panels: projection over turns, and risk over turns.</li>
+          <li>It prints the correlation between the two. Expect it to be <strong>negative</strong>: lower projection (less Assistant-like) goes with higher risk.</li>
+          <li>The notebook runs it on two versions of the delusion case study: the original, where the model escalates, and the version produced with activation capping on, where it does not. The first should fall more steeply.</li>
+        </ul>
+      </div>
+      <div class="callout">
+        <span class="callout-title">A subtlety worth noticing</span>
+        <p>These transcripts were written by Llama 3.3 70B in the paper, not by Gemma. When we run them through Gemma and read its activations, we are measuring how Gemma <em>represents</em> that conversation, not how Gemma would have behaved in it. That the projection still tracks the risk score suggests the axis captures something about the text's persona, not just one model's own state.</p>
+      </div>
+      <p>Save these drift plots. They help with the reflection in <a href="../homework.html">Homework 3</a>.</p>
+
+      <h2 id="check">Check your understanding</h2>
+      <details class="q"><summary><span class="qn">Q1.</span>What three arguments does a forward hook receive, and how can it change the model's computation?</summary>
+        <div class="answer"><p>The module, its input, and its output. If the hook returns a value, that value replaces the module's output for the rest of the forward pass. Returning nothing leaves the output unchanged.</p></div></details>
+      <details class="q"><summary><span class="qn">Q2.</span>Why does the hook see shape <span class="shape">(1, 1, d_model)</span> after the first step of <code>generate</code>?</summary>
+        <div class="answer"><p>Because of KV caching. After the first pass over the prompt, the model reuses cached keys and values for earlier tokens and only passes the single newest token through the layers.</p></div></details>
+      <details class="q"><summary><span class="qn">Q3.</span>Why compute every turn from one forward pass instead of one pass per turn?</summary>
+        <div class="answer"><p>A causal model's activation at a token depends only on earlier tokens, so one pass over the full conversation already contains each turn's activations exactly as they would be in a shorter pass. Separate passes would redo the shared beginning many times, which is far slower for long conversations.</p></div></details>
+      <details class="q"><summary><span class="qn">Q4.</span>The projections are in the thousands. Is something wrong?</summary>
+        <div class="answer"><p>No. They are dot products of raw activations, whose norm at this layer is large in Gemma 2, with a unit vector. Only the trend across turns, and comparisons between transcripts at the same layer, are meaningful.</p></div></details>
+      <details class="q"><summary><span class="qn">Q5.</span>What sign do you expect for the correlation between projection and delusion risk, and why?</summary>
+        <div class="answer"><p>Negative. The axis points toward the Assistant, so lower projection means further from the Assistant persona, which should coincide with the model going along with the user's delusions, a higher risk score.</p></div></details>
+
+      <h2 id="mistakes">Common mistakes</h2>
+      <ul class="mistakes">
+        <li><strong>Not removing a hook.</strong> Always use <code>try</code> / <code>finally</code>. A leftover capturing hook leaks memory; a leftover steering hook silently changes every later result. If in doubt, restart the session.</li>
+        <li><strong>Assuming <code>output</code> is a tensor.</strong> In some versions of <code>transformers</code>, decoder layers return a tuple whose first element is the hidden states. If you see <code>'tuple' object has no attribute 'shape'</code>, use <code>output[0]</code>.</li>
+        <li><strong>Off-by-one between sections.</strong> A hook on <code>layers[27]</code> gives the output of block 27, which is <code>hidden_states[28]</code>, one block later than what Section 1 read. Neighbouring layers are similar, so results barely change, but know which one you are using.</li>
+        <li><strong>Out of memory on long transcripts.</strong> Lower <code>max_assistant_turns</code>, and keep only the slices you need on the GPU.</li>
+        <li><strong>Reading absolute projection values</strong> as meaningful, or comparing them with the paper's Llama numbers. Compare shapes and trends.</li>
+      </ul>
+      <nav class="pager" id="pager"></nav>
+      <footer class="site-footer" id="site-footer">
+        <noscript><p>DataWorks AI Interpretability Lab. Leads and instructors: Rami Abukhater, Alec Min, and Akshar Sinha. Adapted from ARENA notebook 4.4 and The Assistant Axis (Lu et al., 2026).</p></noscript>
+      </footer>
+    </article>
+  </main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<script src="../assets/js/site.js"></script>
+</body>
+</html>

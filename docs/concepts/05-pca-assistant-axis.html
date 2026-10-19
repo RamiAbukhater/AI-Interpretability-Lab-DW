@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PCA and the Assistant Axis · DataWorks AI Interpretability Lab</title>
+<meta name="description" content="What PCA finds, why the first principal component of persona space lines up with the Assistant Axis, how to read the PCA plot, and how to use the paper's 27B results as a visual comparison.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&amp;family=Source+Sans+3:wght@400;600;700&amp;family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&amp;display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-page="c5" data-root="../">
+<a class="skip" href="#content" style="position:absolute;left:-9999px">Skip to content</a>
+<header class="site-header" id="site-header">
+  <a class="brand" href="../index.html">
+    <svg class="brand-mark" viewBox="0 0 26 26" aria-hidden="true">
+      <circle cx="13" cy="13" r="11.5" fill="none" stroke="currentColor" stroke-opacity=".3"/>
+      <circle cx="8" cy="17" r="1.6" style="fill:var(--d-red)"/><circle cx="10.5" cy="19.5" r="1.3" style="fill:var(--d-red)"/>
+      <circle cx="12" cy="12.5" r="1.3" style="fill:var(--d-amber)"/><circle cx="15.5" cy="15" r="1.3" style="fill:var(--d-amber)"/>
+      <circle cx="18" cy="8.5" r="1.6" style="fill:var(--d-blue)"/><circle cx="20" cy="11" r="1.3" style="fill:var(--d-blue)"/>
+      <line x1="4.5" y1="21.5" x2="21.5" y2="4.5" style="stroke:var(--accent)" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-text">DataWorks <span class="dim">AI Interpretability Lab</span></span>
+  </a>
+</header>
+<div class="layout">
+  <nav class="sidebar" id="sidebar" aria-label="Course pages">
+    <noscript><a href="../index.html">Home</a> · <a href="../setup.html">Setup</a> · <a href="../homework.html">Homework</a> · <a href="../resources.html">Resources</a></noscript>
+  </nav>
+  <main class="main" id="content">
+    <article class="content">
+<div class="eyebrow">Concept 5 of 7 · Notebook Section 1</div>
+      <h1>PCA and the Assistant Axis</h1>
+      <p class="lede">The heatmap hinted that personas split into an Assistant-like group and a fantastical group. Principal component analysis turns that hint into a measurement, and leads us to the paper's central object: a single direction, the Assistant Axis.</p>
+
+      <nav class="page-toc" aria-label="On this page"><strong>On this page</strong><ol>
+        <li><a href="#idea">The big idea</a></li><li><a href="#diagram">Diagram</a></li><li><a href="#paper">Connection to the paper</a></li>
+        <li><a href="#code">The code</a></li><li><a href="#reference">The 27B reference plots</a></li><li><a href="#check">Check your understanding</a></li><li><a href="#mistakes">Common mistakes</a></li></ol></nav>
+
+      <h2 id="idea">The big idea</h2>
+      <p>Each persona is a point in a 3584-dimensional space. We cannot look at 3584 dimensions, but we can ask: <em>along which direction do these points spread out the most?</em> That direction is the <strong>first principal component</strong> (PC1). The direction of greatest spread that is at right angles to PC1 is PC2, and so on. <strong>Principal component analysis (PCA)</strong> finds these directions and tells you what fraction of the total spread (variance) each one accounts for.</p>
+      <p>Think of a swarm of birds seen from below. The swarm is three-dimensional, but if it is long and thin, one direction (its length) explains most of its shape. PCA finds that long direction. If PC1 explains a large share of the variance, the cloud is "long and thin", and one number per persona (its position along PC1) captures most of how personas differ.</p>
+      <p>Separately, we can build a direction by hand that encodes our hypothesis. The <strong>Assistant Axis</strong> is the line from the average role-playing persona to the average default Assistant:</p>
+      \[ a = \frac{\mu_\text{default} - \mu_\text{roles}}{\lVert \mu_\text{default} - \mu_\text{roles} \rVert}, \qquad \mu_\text{default} = \frac{1}{|D|}\sum_{p \in D} v_p,\quad \mu_\text{roles} = \frac{1}{|R|}\sum_{p \in R} v_p, \]
+      <p>where \(D\) is the set of default personas and \(R\) is every other persona. Dividing by the length makes \(a\) a unit vector, a pure direction.</p>
+      <p>The striking finding is that these two directions, one found blindly by PCA and one built from our hypothesis, <strong>nearly coincide</strong>. The single biggest way the model's personas differ from one another is how Assistant-like they are. That is the evidence that the Assistant is not just one character among many, but the anchor of the whole space.</p>
+      <p>Once we have the axis, any vector can be placed on it with a <strong>projection</strong>: the dot product with the unit vector \(a\), which says how far along the axis it sits.</p>
+      \[ \operatorname{proj}_a(x) = x \cdot a. \]
+
+      <h2 id="diagram">Diagram</h2>
+      <figure class="diagram">
+        <svg viewBox="0 0 720 340" role="img" aria-labelledby="d5t d5d">
+          <title id="d5t">Persona space, PC1, and the Assistant Axis</title>
+          <desc id="d5d">A scatter of personas in two dimensions. They spread out mainly along one diagonal line labelled PC1. Default personas cluster at the upper right in blue, fantastical ones at the lower left in red. An arrow from the mean of the role personas to the mean of the default personas, labelled the Assistant Axis, lies almost on top of PC1.</desc>
+          <defs><marker id="d5a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--d-green)"/></marker></defs>
+          <line x1="60" y1="300" x2="680" y2="300" class="ln" opacity=".4"/>
+          <line x1="80" y1="320" x2="80" y2="30" class="ln" opacity=".4"/>
+          <text x="660" y="318" class="t-sm muted">PC1</text>
+          <text x="88" y="40" class="t-sm muted">PC2</text>
+          <!-- PC1 line -->
+          <line x1="110" y1="270" x2="650" y2="70" class="ln" stroke-width="1.5" stroke-dasharray="7 5"/>
+          <g class="t-sm">
+            <line x1="110" y1="52" x2="150" y2="52" class="ln" stroke-width="1.5" stroke-dasharray="7 5"/><text x="158" y="56">PC1: direction of greatest spread</text>
+            <line x1="110" y1="74" x2="150" y2="74" style="stroke:var(--d-green)" stroke-width="3"/><text x="158" y="78">Assistant Axis</text>
+          </g>
+          <!-- points -->
+          <g class="t-sm">
+            <circle cx="150" cy="235" r="7" class="red"/><text x="132" y="258">jester</text>
+            <circle cx="185" cy="270" r="7" class="red"/><text x="196" y="285">ghost</text>
+            <circle cx="210" cy="215" r="7" class="red"/><text x="186" y="200">oracle</text>
+            <circle cx="245" cy="250" r="7" class="red" opacity=".8"/><text x="256" y="262">trickster</text>
+            <circle cx="300" cy="190" r="7" class="amber"/><text x="270" y="176">mystic</text>
+            <circle cx="350" cy="215" r="7" class="amber"/><text x="362" y="230">philosopher</text>
+            <circle cx="390" cy="165" r="7" class="amber"/><text x="360" y="150">storyteller</text>
+            <circle cx="470" cy="150" r="7" class="blue" opacity=".75"/><text x="482" y="164">analyst</text>
+            <circle cx="500" cy="115" r="7" class="blue" opacity=".75"/><text x="430" y="112">consultant</text>
+            <circle cx="585" cy="105" r="7" class="blue"/><circle cx="600" cy="80" r="7" class="blue"/><circle cx="620" cy="110" r="7" class="blue"/><circle cx="575" cy="78" r="7" class="blue"/>
+            <text x="615" y="60" text-anchor="middle" style="font-weight:700">default personas</text>
+          </g>
+          <!-- means -->
+          <g>
+            <circle cx="300" cy="215" r="6" fill="none" class="s-green" stroke-width="2.5" style="stroke:var(--d-green)"/>
+            <text x="230" y="320" class="t-sm" style="fill:var(--d-green)">μ_roles (mean of all non-default)</text>
+            <line x1="300" y1="221" x2="290" y2="306" class="ln s-green" stroke-dasharray="2 3"/>
+            <circle cx="595" cy="94" r="6" fill="none" style="stroke:var(--d-green)" stroke-width="2.5"/>
+            <text x="636" y="132" class="t-sm" style="fill:var(--d-green)">μ_default</text>
+          </g>
+          <line x1="306" y1="212" x2="585" y2="99" style="stroke:var(--d-green)" stroke-width="3" marker-end="url(#d5a)"/>
+          <text x="455" y="205" class="t-md" style="fill:var(--d-green);font-weight:700">Assistant Axis</text>
+          <text x="455" y="222" class="t-sm muted">μ_default − μ_roles, normalised</text>
+        </svg>
+        <figcaption>A sketch of what the PCA plot should look like. PCA finds the dashed line along which personas spread the most. The Assistant Axis (green), built by subtracting the mean of the role personas from the mean of the defaults, points almost the same way. In the notebook's plot, points are coloured by their projection onto the axis.</figcaption>
+      </figure>
+
+      <h3>Reading the PCA plot</h3>
+      <ul>
+        <li><strong>Axis labels carry the key number</strong>: <code>PC1 (xx%)</code> and <code>PC2 (yy%)</code> are the fractions of variance explained. If PC1 is much larger than PC2, persona space is dominated by one direction.</li>
+        <li><strong>Check the scales</strong>, not just the picture. Plotly stretches each axis to fill the frame, so the cloud can look round even when PC1's spread is several times PC2's.</li>
+        <li><strong>The sign of PC1 is arbitrary.</strong> PCA can return a direction or its exact opposite. If the defaults sit on the left instead of the right, nothing is wrong. The colour (projection onto the Assistant Axis, which has a fixed sign) tells you which end is the Assistant.</li>
+        <li><strong>Look at the order along PC1</strong>: defaults and professional roles at one end, fantastical roles at the other, creative roles in between, is the paper's pattern.</li>
+      </ul>
+
+      <h2 id="paper">How it connects to the paper</h2>
+      <ul>
+        <li><strong>Section 2.1.3 and Figure 1 (left)</strong>: role vectors embedded in the top principal components of persona space. <strong>Figure 15</strong> (Appendix B.1) shows variance explained per component; 4 to 19 components explain 70% of the variance depending on the model, so persona space is low-dimensional but not literally one-dimensional.</li>
+        <li><strong>Section 2.3, "Where is the Assistant?"</strong>: the default Assistant sits at an extreme of PC1.</li>
+        <li><strong>Section 3.1</strong> defines the Assistant Axis as the contrast vector, the mean default activation minus the mean of fully role-playing role vectors, computed at every layer. Its cosine similarity with PC1 is above 0.6 at all layers and above 0.71 at the middle layer for all three models studied. The authors recommend the contrast vector over PC1 because PC1 is not guaranteed to line up in every model.</li>
+        <li>The paper's README states the same definition in one line: <code>axis = mean(default_activations) - mean(role_activations)</code>.</li>
+      </ul>
+
+      <h2 id="code">The code, walked through</h2>
+      <div class="todo-banner">Stand-in code from the original ARENA notebook. Replace with the final notebook's cells.</div>
+
+      <div class="exercise">
+        <span class="tag">Exercise</span>
+        <h3><code>pca_decompose_persona_vectors</code></h3>
+<pre><code class="language-python">def pca_decompose_persona_vectors(
+    persona_vectors: dict[str, Float[Tensor, " d_model"]],
+    default_personas: list[str] = DEFAULT_PERSONAS,
+) -> tuple[Float[Tensor, " d_model"], np.ndarray, PCA]:
+    """
+    Returns:
+        - assistant_axis: Normalized direction from role-playing toward default/assistant behavior
+        - pca_coords: 2D PCA coordinates for each persona (n_personas, 2)
+        - pca: Fitted PCA object, via the method `PCA.fit_transform`
+    """
+    raise NotImplementedError()
+</code></pre>
+        <p><strong>What it must do:</strong> two separate things. Build the Assistant Axis from the default and non-default personas, and fit a 2-component PCA to all persona vectors.</p>
+        <table class="io-table">
+          <tr><th>Input</th><td>Centered persona vectors as CPU float32 tensors (the calling code centers them first), and the list of default persona names.</td></tr>
+          <tr><th>Output</th><td><code>assistant_axis</code> <span class="shape">(d_model,)</span> with length 1; <code>pca_coords</code> numpy array <span class="shape">(n_personas, 2)</span> in the dict's order; the fitted <code>sklearn.decomposition.PCA</code> object.</td></tr>
+        </table>
+        <details class="hint"><summary>Hint 1: the axis</summary><div class="hint-body"><p>Stack the vectors whose names are in <code>default_personas</code> and average them (\(\mu_\text{default}\)). Do the same for every name <em>not</em> in that list (\(\mu_\text{roles}\)). Subtract and divide by the norm. Assert that at least one default persona is present.</p></div></details>
+        <details class="hint"><summary>Hint 2: the PCA</summary><div class="hint-body"><p>scikit-learn works on numpy arrays: stack all vectors in name order, call <code>.numpy()</code>, then <code>PCA(n_components=2).fit_transform(...)</code>. It returns the coordinates, and the object keeps <code>explained_variance_ratio_</code> and <code>components_</code>.</p></div></details>
+        <details class="hint"><summary>Hint 3: does centering change the axis?</summary><div class="hint-body"><p>No. Subtracting the same \(\bar v\) from every vector cancels in \(\mu_\text{default} - \mu_\text{roles}\). Centering matters for PCA's coordinates and for the projections used to colour the plot, not for the axis direction.</p></div></details>
+      </div>
+
+      <p>The calling code centers, runs your function, and prints the two numbers to look at first:</p>
+<pre><code class="language-python">mean_vector = t.stack(list(persona_vectors.values())).mean(dim=0)
+persona_vectors_centered = {k: v - mean_vector for k, v in persona_vectors.items()}
+
+assistant_axis, pca_coords, pca = pca_decompose_persona_vectors(
+    {k: v.cpu().float() for k, v in persona_vectors_centered.items()}
+)
+
+print(f"Assistant Axis norm: {assistant_axis.norm().item():.4f}")
+print(f"PCA explained variance: PC1={pca.explained_variance_ratio_[0]:.1%}, "
+      f"PC2={pca.explained_variance_ratio_[1]:.1%}")
+
+vectors = t.stack([persona_vectors_centered[name] for name in persona_names])
+vectors_normalized = vectors / vectors.norm(dim=1, keepdim=True)
+projections = (vectors_normalized @ assistant_axis).float().cpu().numpy()
+</code></pre>
+      <div class="walk">
+        <ul>
+          <li>The axis norm should print <code>1.0000</code>. Anything else means the normalisation was skipped.</li>
+          <li><code>explained_variance_ratio_[0]</code> is the share of persona-space variance along PC1. With about 20 hand-picked personas spanning Assistant to fantastical, expect PC1 to be clearly the largest.</li>
+          <li><code>projections</code>: each centered persona vector is normalised to length 1, then dotted with the axis: <span class="shape">(n, d_model)</span> @ <span class="shape">(d_model,)</span> → <span class="shape">(n,)</span>. Because both are unit length, these are cosine similarities in \([-1, 1]\), and they colour the scatter plot.</li>
+        </ul>
+      </div>
+
+      <h3>Ranking personas along the axis</h3>
+<pre><code class="language-python">def characterize_axis(persona_vectors, assistant_axis) -> dict[str, float]:
+    similarities = {}
+    for name, vec in persona_vectors.items():
+        cos_sim = (vec @ assistant_axis) / (vec.norm() * assistant_axis.norm() + 1e-8)
+        similarities[name] = cos_sim.item()
+    return dict(sorted(similarities.items(), key=lambda x: x[1]))
+</code></pre>
+      <div class="walk">
+        <ul>
+          <li>This provided function sorts personas from most role-playing (lowest cosine with the axis) to most Assistant-like (highest), and the notebook plots them on a single line.</li>
+          <li><code>+ 1e-8</code> guards against dividing by zero.</li>
+          <li>Expect defaults and professional roles at the top, fantastical roles at the bottom, and creative roles like philosopher or storyteller in between. This is the semantic reading of the axis: roughly grounded and professional versus dramatic and fantastical.</li>
+        </ul>
+      </div>
+      <p>Save the PCA plot. It is the second plot you submit in <a href="../homework.html">Homework 2</a>.</p>
+
+      <h2 id="reference">The paper's 27B results, as a visual comparison only</h2>
+      <div class="todo-banner">Describe the exact reference plots the final notebook draws.</div>
+      <p>The paper's authors published their precomputed vectors for Gemma 2 27B on HuggingFace (<a href="https://huggingface.co/datasets/lu-christina/assistant-axis-vectors"><code>lu-christina/assistant-axis-vectors</code></a>): an Assistant Axis for every layer and 240 trait vectors. The notebook downloads these (a public dataset, no token needed) and draws the paper's own plots next to yours.</p>
+      <p>Use them to compare <strong>shapes and orderings</strong>: does the same kind of persona end up at the Assistant end, and does one direction dominate? Do <strong>not</strong> compare them numerically:</p>
+      <ul>
+        <li>Gemma 2 27B has \(d_\text{model} = 4608\); our 9B has 3584. The vectors live in different spaces, so you cannot even take a dot product between them.</li>
+        <li>Even models of the same width learn unrelated coordinate systems. Dimension 17 in one model means nothing in another.</li>
+        <li>The layers differ (the paper's Gemma setting uses layer 22 of 46; we use 27 of 42), and so do the persona sets and amount of data.</li>
+      </ul>
+
+      <h2 id="check">Check your understanding</h2>
+      <details class="q"><summary><span class="qn">Q1.</span>What is the difference between PC1 and the Assistant Axis?</summary>
+        <div class="answer"><p>PC1 is found without labels: it is whatever direction the personas spread along most. The Assistant Axis is built from labels: the mean of the default personas minus the mean of the others. The finding is that they nearly agree, which says the main variation among personas is "how Assistant-like".</p></div></details>
+      <details class="q"><summary><span class="qn">Q2.</span>Your PCA plot has the default personas on the left. Is your code wrong?</summary>
+        <div class="answer"><p>Probably not. The sign of a principal component is arbitrary; PCA can return \(u\) or \(-u\). Check the colour (projection onto the axis) instead, which has a fixed meaning.</p></div></details>
+      <details class="q"><summary><span class="qn">Q3.</span>Why can you not plot your 9B persona vectors on the paper's 27B axis?</summary>
+        <div class="answer"><p>The vectors have different lengths (3584 versus 4608), and even if they matched, two models do not share a coordinate system. Only patterns, like which personas are at which end, can be compared.</p></div></details>
+      <details class="q"><summary><span class="qn">Q4.</span>The paper recommends the contrast vector over PC1 as the definition of the axis. Why?</summary>
+        <div class="answer"><p>PC1 depends on which roles you include and is not guaranteed to align with the Assistant direction in every model or layer. The contrast vector is defined directly by what we care about, default versus role-playing, so it is stable and has a meaningful sign.</p></div></details>
+      <details class="q"><summary><span class="qn">Q5.</span>If PC1 explained 95% of the variance, what would that tell you? What if it explained 20%?</summary>
+        <div class="answer"><p>At 95%, persona space would be essentially one-dimensional: knowing where a persona sits on PC1 tells you almost everything. At 20%, PC1 would be only one of several important directions. The paper finds something in between: a clearly dominant first component, with several more needed for a full description.</p></div></details>
+
+      <h2 id="mistakes">Common mistakes</h2>
+      <ul class="mistakes">
+        <li><strong>Forgetting to normalise the axis</strong>, so later projections and steering strengths are scaled by an arbitrary length.</li>
+        <li><strong>Getting the subtraction backwards</strong> (\(\mu_\text{roles} - \mu_\text{default}\)). The axis then points away from the Assistant, and every later sign (drift, steering) flips.</li>
+        <li><strong>Counting the defaults in \(\mu_\text{roles}\)</strong> by forgetting to exclude them.</li>
+        <li><strong>Passing GPU half-precision tensors to scikit-learn.</strong> Convert with <code>.cpu().float()</code> before <code>.numpy()</code>.</li>
+        <li><strong>Over-reading the picture</strong> without checking the explained-variance percentages on the axis labels.</li>
+        <li><strong>Comparing your numbers to the 27B reference</strong> instead of comparing patterns.</li>
+      </ul>
+      <nav class="pager" id="pager"></nav>
+      <footer class="site-footer" id="site-footer">
+        <noscript><p>DataWorks AI Interpretability Lab. Leads and instructors: Rami Abukhater, Alec Min, and Akshar Sinha. Adapted from ARENA notebook 4.4 and The Assistant Axis (Lu et al., 2026).</p></noscript>
+      </footer>
+    </article>
+  </main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<script src="../assets/js/site.js"></script>
+</body>
+</html>

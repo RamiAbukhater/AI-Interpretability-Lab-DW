@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Persona vectors and cosine similarity · DataWorks AI Interpretability Lab</title>
+<meta name="description" content="Comparing persona vectors with cosine similarity, why mean-centering matters, and how to read the similarity heatmap.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&amp;family=Source+Sans+3:wght@400;600;700&amp;family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&amp;display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-page="c4" data-root="../">
+<a class="skip" href="#content" style="position:absolute;left:-9999px">Skip to content</a>
+<header class="site-header" id="site-header">
+  <a class="brand" href="../index.html">
+    <svg class="brand-mark" viewBox="0 0 26 26" aria-hidden="true">
+      <circle cx="13" cy="13" r="11.5" fill="none" stroke="currentColor" stroke-opacity=".3"/>
+      <circle cx="8" cy="17" r="1.6" style="fill:var(--d-red)"/><circle cx="10.5" cy="19.5" r="1.3" style="fill:var(--d-red)"/>
+      <circle cx="12" cy="12.5" r="1.3" style="fill:var(--d-amber)"/><circle cx="15.5" cy="15" r="1.3" style="fill:var(--d-amber)"/>
+      <circle cx="18" cy="8.5" r="1.6" style="fill:var(--d-blue)"/><circle cx="20" cy="11" r="1.3" style="fill:var(--d-blue)"/>
+      <line x1="4.5" y1="21.5" x2="21.5" y2="4.5" style="stroke:var(--accent)" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-text">DataWorks <span class="dim">AI Interpretability Lab</span></span>
+  </a>
+</header>
+<div class="layout">
+  <nav class="sidebar" id="sidebar" aria-label="Course pages">
+    <noscript><a href="../index.html">Home</a> · <a href="../setup.html">Setup</a> · <a href="../homework.html">Homework</a> · <a href="../resources.html">Resources</a></noscript>
+  </nav>
+  <main class="main" id="content">
+    <article class="content">
+<div class="eyebrow">Concept 4 of 7 · Notebook Section 1</div>
+      <h1>Persona vectors and cosine similarity</h1>
+      <p class="lede">You now have one 3584-dimensional vector per persona. The first question to ask is simple: which personas does the model treat as similar? This page covers the tool for that, cosine similarity, and the one-line fix (mean-centering) without which the answer is useless.</p>
+
+      <nav class="page-toc" aria-label="On this page"><strong>On this page</strong><ol>
+        <li><a href="#idea">The big idea</a></li><li><a href="#diagram">Diagram</a></li><li><a href="#paper">Connection to the paper</a></li>
+        <li><a href="#code">The code</a></li><li><a href="#check">Check your understanding</a></li><li><a href="#mistakes">Common mistakes</a></li></ol></nav>
+
+      <h2 id="idea">The big idea</h2>
+      <p>Two vectors can be compared by the <strong>angle</strong> between them. If they point the same way they are similar, if they are at right angles they share nothing, and if they point in opposite directions they are opposites. <strong>Cosine similarity</strong> is the cosine of that angle:</p>
+      \[ \cos(u, v) = \frac{u \cdot v}{\lVert u \rVert\,\lVert v \rVert} \in [-1, 1]. \]
+      <p>It ignores length and looks only at direction. That suits activations, where the overall size of a vector varies for boring reasons (longer responses, some tokens being louder) but the direction carries meaning.</p>
+      <p>There is a catch, and the notebook makes you hit it on purpose. Every activation in a model contains a large shared component: a "this is a Gemma residual stream at layer 27" offset that is the same no matter what the text is about. Persona vectors are averages of thousands of activations, so that shared part dominates. Compare two of them and you are mostly comparing the shared part with itself, and every pair scores close to 1.0. It is like comparing the heights of people standing on a 100 m tower: everyone is about 101.7 m tall, and the differences you care about are lost.</p>
+      <p>The fix is <strong>mean-centering</strong>: subtract the average of all persona vectors from each one, then compare.</p>
+      \[ \bar v = \frac{1}{P}\sum_{p=1}^{P} v_p, \qquad \tilde v_p = v_p - \bar v. \]
+      <p>Now each \(\tilde v_p\) says how persona \(p\) <em>differs</em> from the typical persona, and cosine similarity between the centered vectors shows real structure: Assistant-like personas point one way, fantastical ones point another.</p>
+
+      <h2 id="diagram">Diagram</h2>
+      <figure class="diagram">
+        <svg viewBox="0 0 720 300" role="img" aria-labelledby="d4t d4d">
+          <title id="d4t">Uncentered versus centered persona vectors</title>
+          <desc id="d4d">Left: persona vectors all start at the origin and point to a tight cluster far away, so the angles between them are tiny. Right: after subtracting the cluster's mean, the vectors start from the mean and spread in different directions, so angles show which personas are alike.</desc>
+          <defs>
+            <marker id="d4b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--d-blue)"/></marker>
+            <marker id="d4r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--d-red)"/></marker>
+            <marker id="d4g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--d-line)"/></marker>
+          </defs>
+          <text x="180" y="24" text-anchor="middle" class="t-lg">Uncentered: everything looks alike</text>
+          <circle cx="40" cy="260" r="4" style="fill:var(--d-line)"/><text x="40" y="282" text-anchor="middle" class="t-sm muted">origin</text>
+          <ellipse cx="275" cy="95" rx="55" ry="38" class="box2" stroke-dasharray="4 3"/>
+          <line x1="40" y1="260" x2="247" y2="80" class="ln s-blue" stroke-width="2" marker-end="url(#d4b)"/>
+          <line x1="40" y1="260" x2="257" y2="110" class="ln s-blue" stroke-width="2" marker-end="url(#d4b)"/>
+          <line x1="40" y1="260" x2="296" y2="72" class="ln s-red" stroke-width="2" marker-end="url(#d4r)"/>
+          <line x1="40" y1="260" x2="306" y2="102" class="ln s-red" stroke-width="2" marker-end="url(#d4r)"/>
+          <text x="275" y="50" text-anchor="middle" class="t-sm">cos ≈ 0.99 for every pair</text>
+          <path d="M95,220 A70,70 0 0 1 103,212" class="ln" stroke-width="1.5"/>
+          <text x="110" y="232" class="t-sm muted">tiny angles</text>
+
+          <line x1="360" y1="40" x2="360" y2="280" class="ln" stroke-dasharray="2 4" opacity=".5"/>
+
+          <text x="545" y="24" text-anchor="middle" class="t-lg">Centered: structure appears</text>
+          <circle cx="545" cy="160" r="5" style="fill:var(--d-line)"/><text x="566" y="192" class="t-sm muted">mean v̄ (new origin)</text>
+          <line x1="545" y1="160" x2="635" y2="75" class="ln s-blue" stroke-width="2.2" marker-end="url(#d4b)"/>
+          <line x1="545" y1="160" x2="655" y2="110" class="ln s-blue" stroke-width="2.2" marker-end="url(#d4b)"/>
+          <line x1="545" y1="160" x2="445" y2="225" class="ln s-red" stroke-width="2.2" marker-end="url(#d4r)"/>
+          <line x1="545" y1="160" x2="440" y2="185" class="ln s-red" stroke-width="2.2" marker-end="url(#d4r)"/>
+          <line x1="545" y1="160" x2="560" y2="255" class="ln" stroke-width="2" marker-end="url(#d4g)"/>
+          <text x="650" y="68" class="t-sm" style="fill:var(--d-blue)">default</text>
+          <text x="662" y="114" class="t-sm" style="fill:var(--d-blue)">analyst</text>
+          <text x="400" y="240" class="t-sm" style="fill:var(--d-red)">ghost</text>
+          <text x="392" y="182" class="t-sm" style="fill:var(--d-red)">jester</text>
+          <text x="568" y="268" class="t-sm">philosopher</text>
+          <text x="545" y="290" text-anchor="middle" class="t-sm">similar personas: cos near +1, opposites: near −1</text>
+        </svg>
+        <figcaption>Left: raw persona vectors share a large common offset, so all the angles between them are tiny. Right: subtracting the mean \(\bar v\) moves the origin to the centre of the cloud, and the directions now separate Assistant-like personas (blue) from fantastical ones (red).</figcaption>
+      </figure>
+
+      <h3>Reading the heatmap</h3>
+      <p>The notebook draws the full matrix of pairwise similarities as a heatmap: personas along both axes, one coloured cell per pair, blue for positive and red for negative, white at zero.</p>
+      <ul>
+        <li>The <strong>diagonal</strong> is always 1: every persona is identical to itself.</li>
+        <li>The matrix is <strong>symmetric</strong>: the cell for (ghost, oracle) equals (oracle, ghost).</li>
+        <li>Look for <strong>blocks</strong>. If the default and Assistant-like personas form a blue square with each other, and the fantastical ones form another blue square, while the cells between the two groups are red, the model separates those groups. That is the first hint of a single dominant direction.</li>
+        <li>The <strong>uncentered</strong> heatmap will look almost entirely one colour (all near 1). That is the problem above, not a result.</li>
+      </ul>
+
+      <h2 id="paper">How it connects to the paper</h2>
+      <ul>
+        <li><strong>Section 2.1.3</strong>: before analysing persona space, the paper standardises role vectors by subtracting the mean vector across roles, which is the same centering step.</li>
+        <li><strong>Section 3.1</strong> and the paper's <code>visualize_axis.ipynb</code> notebook rank roles and traits by cosine similarity with the Assistant Axis. You will do a smaller version of that ranking on the <a href="05-pca-assistant-axis.html">next page</a>.</li>
+        <li>The "everything has cosine near 1" effect is a well-known trap in interpretability. Neel Nanda's <a href="https://www.alignmentforum.org/posts/eLNo7b56kQQerCzp2/mech-interp-puzzle-1-suspiciously-similar-embeddings-in-gpt">Mech Interp Puzzle 1</a> is the same phenomenon in GPT-Neo's embeddings.</li>
+      </ul>
+
+      <h2 id="code">The code, walked through</h2>
+      <div class="todo-banner">Stand-in code from the original ARENA notebook. Replace with the final notebook's cells.</div>
+
+      <div class="exercise">
+        <span class="tag">Exercise</span>
+        <h3><code>compute_cosine_similarity_matrix</code></h3>
+<pre><code class="language-python">def compute_cosine_similarity_matrix(
+    persona_vectors: dict[str, Float[Tensor, " d_model"]],
+) -> tuple[Float[Tensor, "n_personas n_personas"], list[str]]:
+    """Compute pairwise cosine similarity between persona vectors.
+
+    Returns:
+        Tuple of (similarity matrix, list of persona names in order)
+    """
+    raise NotImplementedError()
+</code></pre>
+        <p><strong>What it must do:</strong> compute the cosine similarity between every pair of persona vectors at once, and return the names in the same order as the rows.</p>
+        <table class="io-table">
+          <tr><th>Step</th><th>Shape</th></tr>
+          <tr><td>Stack the vectors into a matrix \(V\)</td><td><span class="shape">(n_personas, d_model)</span></td></tr>
+          <tr><td>Row lengths</td><td><span class="shape">(n_personas, 1)</span></td></tr>
+          <tr><td>Normalise each row to length 1</td><td><span class="shape">(n_personas, d_model)</span></td></tr>
+          <tr><td>Similarity matrix \(\hat V \hat V^{\top}\)</td><td><span class="shape">(n_personas, n_personas)</span></td></tr>
+        </table>
+        <details class="hint"><summary>Hint 1</summary><div class="hint-body"><p>If every row has length 1, the dot product of two rows <em>is</em> their cosine similarity. So normalise once, then one matrix multiplication computes all pairs.</p></div></details>
+        <details class="hint"><summary>Hint 2</summary><div class="hint-body"><p><code>vectors.norm(dim=1, keepdim=True)</code> keeps the shape <span class="shape">(n, 1)</span> so that dividing broadcasts across each row. <code>@</code> and <code>.T</code> do the rest.</p></div></details>
+        <details class="hint"><summary>Hint 3</summary><div class="hint-body"><p>Build the name list first with <code>list(persona_vectors.keys())</code> and stack in that order, so row \(i\) and name \(i\) always match.</p></div></details>
+      </div>
+
+      <p>Run it and plot the result. You should see the "everything is about 1" problem. The notebook then gives you the centered version, which is your function plus one line:</p>
+<pre><code class="language-python">def compute_cosine_similarity_matrix_centered(persona_vectors):
+    names = list(persona_vectors.keys())
+
+    # Stack vectors into matrix and center by subtracting mean
+    vectors = t.stack([persona_vectors[name] for name in names])
+    vectors = vectors - vectors.mean(dim=0)
+
+    # Normalize
+    vectors_norm = vectors / vectors.norm(dim=1, keepdim=True)
+
+    # Compute cosine similarity
+    cos_sim = vectors_norm @ vectors_norm.T
+
+    return cos_sim, names
+
+
+cos_sim_matrix_centered, persona_names = compute_cosine_similarity_matrix_centered(persona_vectors)
+
+px.imshow(
+    cos_sim_matrix_centered.float(),
+    x=persona_names, y=persona_names,
+    title="Persona Cosine Similarity Matrix (Centered)",
+    color_continuous_scale="RdBu",
+    color_continuous_midpoint=0.0,
+).show()
+</code></pre>
+      <div class="walk">
+        <ul>
+          <li><code>t.stack(...)</code>: list of <span class="shape">(d_model,)</span> tensors → <span class="shape">(n, d_model)</span>.</li>
+          <li><code>vectors.mean(dim=0)</code>: average over personas → <span class="shape">(d_model,)</span>, the vector \(\bar v\). Subtracting it broadcasts across all rows. This is the one-line fix.</li>
+          <li>Normalise each row, then <code>vectors_norm @ vectors_norm.T</code>: <span class="shape">(n, d_model)</span> × <span class="shape">(d_model, n)</span> → <span class="shape">(n, n)</span>.</li>
+          <li><code>.float()</code> before plotting: the model's half-precision tensors are converted to 32-bit floats, which plotting libraries expect.</li>
+          <li><code>color_continuous_midpoint=0.0</code> pins white to zero so blue always means similar and red always means opposite.</li>
+        </ul>
+      </div>
+      <p>Save this centered heatmap. It is one of the plots you submit in <a href="../homework.html">Homework 2</a>.</p>
+
+      <h2 id="check">Check your understanding</h2>
+      <details class="q"><summary><span class="qn">Q1.</span>Without centering, why do almost all pairs have cosine similarity close to 1?</summary>
+        <div class="answer"><p>All persona vectors contain a large shared component (the average activation at that layer). When that component is much bigger than the persona-specific differences, every vector points in nearly the same direction, so every angle is small and every cosine is near 1.</p></div></details>
+      <details class="q"><summary><span class="qn">Q2.</span>After centering, can a pair of personas have negative cosine similarity? What does it mean?</summary>
+        <div class="answer"><p>Yes. Centered vectors describe how each persona differs from the average persona. A negative cosine means two personas differ from the average in opposite directions, for example the default Assistant and the jester.</p></div></details>
+      <details class="q"><summary><span class="qn">Q3.</span>Does centering depend on which personas you include?</summary>
+        <div class="answer"><p>Yes. \(\bar v\) is the mean of the personas you have. Add ten more fantastical personas and the mean moves toward them, which changes every centered vector and every similarity. Compare heatmaps only when they use the same persona set.</p></div></details>
+      <details class="q"><summary><span class="qn">Q4.</span>Why use cosine similarity rather than the plain dot product?</summary>
+        <div class="answer"><p>The dot product grows with vector length, and activation lengths vary for reasons unrelated to the persona (for example response length or a few unusually large dimensions). Cosine similarity divides out length and compares direction only.</p></div></details>
+
+      <h2 id="mistakes">Common mistakes</h2>
+      <ul class="mistakes">
+        <li><strong>Interpreting the uncentered heatmap.</strong> It shows the shared offset, not persona structure.</li>
+        <li><strong>Normalising along the wrong dimension</strong> (<code>dim=0</code> instead of <code>dim=1</code>), which normalises each feature across personas instead of each persona vector. The diagonal will not be all ones, which is an easy check.</li>
+        <li><strong>Forgetting <code>keepdim=True</code></strong>, so the division tries to broadcast <span class="shape">(n,)</span> against <span class="shape">(n, d_model)</span> and fails or divides the wrong axis.</li>
+        <li><strong>Losing track of the name order.</strong> Iterating over the dict twice in different ways can mislabel the heatmap. Build the names once and reuse them.</li>
+        <li><strong>Mixing devices or dtypes.</strong> If some vectors are on the GPU in float16 and others on CPU in float32, <code>t.stack</code> fails. Move them all to CPU float32 first.</li>
+      </ul>
+      <nav class="pager" id="pager"></nav>
+      <footer class="site-footer" id="site-footer">
+        <noscript><p>DataWorks AI Interpretability Lab. Leads and instructors: Rami Abukhater, Alec Min, and Akshar Sinha. Adapted from ARENA notebook 4.4 and The Assistant Axis (Lu et al., 2026).</p></noscript>
+      </footer>
+    </article>
+  </main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<script src="../assets/js/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Role-play responses and LLM judges · DataWorks AI Interpretability Lab</title>
+<meta name="description" content="Generating in-character responses for every persona and question, using an LLM judge with the paper's 0 to 3 role-play scale, and filtering out responses that break character.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&amp;family=Source+Sans+3:wght@400;600;700&amp;family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&amp;display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-page="c2" data-root="../">
+<a class="skip" href="#content" style="position:absolute;left:-9999px">Skip to content</a>
+<header class="site-header" id="site-header">
+  <a class="brand" href="../index.html">
+    <svg class="brand-mark" viewBox="0 0 26 26" aria-hidden="true">
+      <circle cx="13" cy="13" r="11.5" fill="none" stroke="currentColor" stroke-opacity=".3"/>
+      <circle cx="8" cy="17" r="1.6" style="fill:var(--d-red)"/><circle cx="10.5" cy="19.5" r="1.3" style="fill:var(--d-red)"/>
+      <circle cx="12" cy="12.5" r="1.3" style="fill:var(--d-amber)"/><circle cx="15.5" cy="15" r="1.3" style="fill:var(--d-amber)"/>
+      <circle cx="18" cy="8.5" r="1.6" style="fill:var(--d-blue)"/><circle cx="20" cy="11" r="1.3" style="fill:var(--d-blue)"/>
+      <line x1="4.5" y1="21.5" x2="21.5" y2="4.5" style="stroke:var(--accent)" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-text">DataWorks <span class="dim">AI Interpretability Lab</span></span>
+  </a>
+</header>
+<div class="layout">
+  <nav class="sidebar" id="sidebar" aria-label="Course pages">
+    <noscript><a href="../index.html">Home</a> · <a href="../setup.html">Setup</a> · <a href="../homework.html">Homework</a> · <a href="../resources.html">Resources</a></noscript>
+  </nav>
+  <main class="main" id="content">
+    <article class="content">
+<div class="eyebrow">Concept 2 of 7 · Notebook Section 1</div>
+      <h1>Role-play responses and LLM judges</h1>
+      <p class="lede">To find where a persona lives inside the model, we first need text of the model actually playing that persona. This page covers how the notebook produces those responses and how it uses a second model, a judge, to check they really are in character.</p>
+
+      <nav class="page-toc" aria-label="On this page"><strong>On this page</strong><ol>
+        <li><a href="#idea">The big idea</a></li><li><a href="#diagram">Diagram</a></li><li><a href="#paper">Connection to the paper</a></li>
+        <li><a href="#code">The code</a></li><li><a href="#check">Check your understanding</a></li><li><a href="#mistakes">Common mistakes</a></li></ol></nav>
+
+      <h2 id="idea">The big idea</h2>
+      <p>The plan is to ask the model to play each persona, record what happens inside it while it does, and compare. That only works if the model <em>did</em> play the persona. Instruction-tuned models often half-refuse: "As an AI, I don't have ghostly memories, but here's some advice…". A response like that is mostly the Assistant talking, and if we averaged it into the "ghost" data we would blur the very difference we are trying to measure.</p>
+      <p>So there are two jobs. First, <strong>generate</strong> a response for every persona and question pair. Second, <strong>judge</strong> each response: did the model fully take on the role? Reading hundreds of responses by hand is slow and inconsistent, so we hand the job to another language model with a clear rubric. This is an <strong>LLM judge</strong> (also called an autorater). It is the same idea as a TA grading with a rubric, except the TA is a model, so it is fast and cheap, and consistent as long as the rubric is clear.</p>
+      <p>Responses that score below "fully in character" are dropped before we compute anything. Fewer, cleaner examples beat more, muddier ones.</p>
+
+      <h3>Where the responses come from</h3>
+      <p>There are two options, and the notebook supports both through the <code>GENERATION_BACKEND</code> flag.</p>
+      <ul>
+        <li><strong>An API</strong> (<code>"openrouter"</code>). The original ARENA notebook sends every persona and question to Gemma 2 27B over OpenRouter. Generating hundreds of long answers token by token on your own GPU is the slowest part of the pipeline. An API runs many requests in parallel on someone else's hardware and returns them in a minute or two, and your GPU is only needed afterwards to read activations.</li>
+        <li><strong>Locally</strong> (<code>"local"</code>, our default). The loaded Gemma 2 9B writes its own responses on Kaggle's GPUs, in batches. This is slower but keeps everything consistent: the text we analyse was written by the very model whose activations we read.</li>
+      </ul>
+      <p>Why does that consistency matter? Activations are recorded by feeding text through our model. If 27B wrote the text, we are measuring how 9B <em>reads</em> a ghost's answer, not how 9B <em>acts</em> as a ghost. That is usually close, but it is not the same experiment, so we default to local generation. The judge, in contrast, always runs through the API, because it needs to be a different and stronger model.</p>
+      <div class="todo-banner">Confirm the default GENERATION_BACKEND and the judge model name in the final notebook.</div>
+
+      <h2 id="diagram">Diagram</h2>
+      <figure class="diagram">
+        <svg viewBox="0 0 720 260" role="img" aria-labelledby="d2t d2d">
+          <title id="d2t">Generate, judge, filter</title>
+          <desc id="d2d">A persona's system prompt and a question go into the generator, which is either local Gemma 2 9B or an API model. The response goes to an LLM judge through OpenRouter, which gives a score from 0 to 3. Only responses scoring 3 continue on to activation extraction.</desc>
+          <defs><marker id="d2a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--d-line)"/></marker></defs>
+          <rect x="10" y="40" width="150" height="80" rx="8" class="box"/>
+          <text x="85" y="66" text-anchor="middle" class="t-md" style="font-weight:650">persona prompt</text>
+          <text x="85" y="84" text-anchor="middle" class="t-sm muted">"You are a ghost…"</text>
+          <text x="85" y="104" text-anchor="middle" class="t-sm">+ question</text>
+
+          <line x1="160" y1="80" x2="200" y2="80" class="ln" stroke-width="1.5" marker-end="url(#d2a)"/>
+          <rect x="202" y="30" width="150" height="100" rx="8" class="box2"/>
+          <text x="277" y="58" text-anchor="middle" class="t-md" style="font-weight:650">generator</text>
+          <text x="277" y="80" text-anchor="middle" class="t-sm">local Gemma 2 9B</text>
+          <text x="277" y="98" text-anchor="middle" class="t-sm muted">or API model</text>
+          <text x="277" y="116" text-anchor="middle" class="t-sm muted">GENERATION_BACKEND</text>
+
+          <line x1="352" y1="80" x2="392" y2="80" class="ln" stroke-width="1.5" marker-end="url(#d2a)"/>
+          <rect x="394" y="30" width="150" height="100" rx="8" class="box2"/>
+          <text x="469" y="58" text-anchor="middle" class="t-md" style="font-weight:650">LLM judge</text>
+          <text x="469" y="80" text-anchor="middle" class="t-sm">via OpenRouter</text>
+          <text x="469" y="98" text-anchor="middle" class="t-sm muted">rubric: 0 to 3</text>
+
+          <line x1="544" y1="80" x2="584" y2="80" class="ln" stroke-width="1.5" marker-end="url(#d2a)"/>
+          <rect x="586" y="40" width="124" height="80" rx="8" class="box"/>
+          <text x="648" y="68" text-anchor="middle" class="t-md" style="font-weight:650">keep if 3</text>
+          <text x="648" y="90" text-anchor="middle" class="t-sm muted">to activation</text>
+          <text x="648" y="106" text-anchor="middle" class="t-sm muted">extraction</text>
+
+          <g class="t-sm">
+            <rect x="120" y="165" width="480" height="80" rx="8" class="box"/>
+            <text x="140" y="188" style="font-weight:650">Role-play scale</text>
+            <circle cx="146" cy="210" r="9" class="red"/><text x="146" y="214" text-anchor="middle" style="fill:#fff;font-weight:700">0</text><text x="160" y="214">refused</text>
+            <circle cx="256" cy="210" r="9" class="red" opacity=".6"/><text x="256" y="214" text-anchor="middle" style="fill:#fff;font-weight:700">1</text><text x="270" y="214">can't be the role, offers help</text>
+            <circle cx="146" cy="232" r="9" class="amber"/><text x="146" y="236" text-anchor="middle" style="fill:#fff;font-weight:700">2</text><text x="160" y="236">says it is an AI, some role traits</text>
+            <circle cx="400" cy="232" r="9" class="green"/><text x="400" y="236" text-anchor="middle" style="fill:#fff;font-weight:700">3</text><text x="414" y="236">fully playing the role</text>
+          </g>
+          <line x1="469" y1="130" x2="469" y2="163" class="ln" stroke-dasharray="3 3"/>
+        </svg>
+        <figcaption>Each persona and question pair produces one response, the judge scores it on the paper's 0 to 3 scale, and only fully in-character responses (score 3) are used to build persona vectors when the filter is on.</figcaption>
+      </figure>
+
+      <h2 id="paper">How it connects to the paper</h2>
+      <ul>
+        <li><strong>Section 2.1.1</strong> describes the paper's data generation. Every response was labelled by an LLM judge (the paper used <code>gpt-4.1-mini</code>) on this same four-level scale: 0, a clear refusal; 1, says it cannot be the role but still helps; 2, identifies as itself but shows some of the role's attributes; 3, fully plays the role.</li>
+        <li>The paper builds role vectors only from responses that sufficiently express the role, and requires a minimum number of such responses per role.</li>
+        <li>The paper's repository keeps per-role judge prompts in <code>data/roles/instructions/</code>; the file for <code>pirate.json</code> is a good example of how detailed a rubric can be.</li>
+      </ul>
+      <p>The notebook keeps the scale but makes the filter optional (<code>RUN_JUDGE_FILTER</code>, off by default) to save API calls and time. With the filter off, every non-empty response is used, which slightly blurs the persona vectors. Turning it on is a good extension.</p>
+
+      <h2 id="code">The code, walked through</h2>
+      <div class="todo-banner">Stand-in code from the original ARENA notebook, which generates through the API. Replace with the final notebook's generation cell (local batching with GEN_BATCH_SIZE) and its judge model constant.</div>
+
+      <h3>Calling models through OpenRouter</h3>
+<pre><code class="language-python">openrouter_client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=OPENROUTER_API_KEY,
+)
+
+def generate_responses_parallel(messages_list, model=OPENROUTER_MODEL,
+                                max_tokens=128, temperature=0.7, max_workers=10):
+    def _single_call(messages):
+        try:
+            time.sleep(0.1)  # Rate limiting
+            response = openrouter_client.chat.completions.create(
+                model=model, messages=messages,
+                max_tokens=max_tokens, temperature=temperature,
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            print(f"API error: {e}")
+            return ""
+    ...  # runs _single_call over messages_list with a ThreadPoolExecutor,
+         # and returns the results in the same order as the input
+</code></pre>
+      <div class="walk">
+        <ul>
+          <li>OpenRouter speaks the same protocol as OpenAI's API, so the notebook uses the ordinary <code>openai</code> Python client and just points <code>base_url</code> at OpenRouter. The <code>model</code> string (for example <code>"google/gemma-2-27b-it"</code>) picks which company's model handles the request.</li>
+          <li>A <strong>conversation</strong> is a list of message dictionaries such as <code>{"role": "user", "content": "..."}</code>. <code>messages_list</code> is a list of conversations, one per request.</li>
+          <li><code>max_workers</code> requests run at the same time in threads. More workers is faster, until you hit a rate limit (HTTP 429). Then lower <code>MAX_WORKERS</code>.</li>
+          <li>Errors are caught and turned into an empty string <code>""</code>, so one failed call does not crash a run of hundreds. That is why later code skips empty responses. It also means a bad key or no credit shows up as a stream of printed <code>API error</code> lines, not as one crash, so read the output.</li>
+          <li><code>temperature=0.7</code> for persona responses (some variety); judges use <code>temperature=0.0</code> so the same response always gets the same score.</li>
+        </ul>
+      </div>
+
+      <div class="exercise">
+        <span class="tag">Exercise</span>
+        <h3><code>generate_all_responses</code></h3>
+<pre><code class="language-python">def generate_all_responses(
+    personas: dict[str, str],
+    questions: list[str],
+    max_tokens: int = 256,
+    max_workers: int = 10,
+) -> dict[tuple[str, int], str]:
+    """Generate responses for all persona-question combinations."""
+    raise NotImplementedError()
+</code></pre>
+        <p><strong>What it must do:</strong> produce one response for every (persona, question) pair and return them in a dictionary.</p>
+        <table class="io-table">
+          <tr><th>Input</th><td><code>personas</code>: name → system prompt. <code>questions</code>: list of strings.</td></tr>
+          <tr><th>Output</th><td>A dict keyed by <code>(persona_name, question_index)</code>, for example <code>("ghost", 3)</code>, with the response text as the value. It should have <code>len(personas) * len(questions)</code> entries.</td></tr>
+        </table>
+        <details class="hint"><summary>Hint 1</summary><div class="hint-body"><p>Loop over personas and over <code>enumerate(questions)</code>. For each pair, build a two-message conversation (a system message with the persona's prompt, then a user message with the question) and remember its key in a separate list in the same order.</p></div></details>
+        <details class="hint"><summary>Hint 2</summary><div class="hint-body"><p>Make one call to <code>generate_responses_parallel</code> with the whole list, not one call per pair. It returns results in input order, so you can pair keys and results back up with <code>zip</code>.</p></div></details>
+      </div>
+
+      <div class="exercise">
+        <span class="tag">Exercise</span>
+        <h3>The judge prompt: <code>JUDGE_PROMPT_TEMPLATE</code> and <code>parse_score</code></h3>
+<pre><code class="language-python">AUTORATER_MODEL = "anthropic/claude-3.5-haiku"   # TODO: this model has been retired on OpenRouter
+
+JUDGE_PROMPT_TEMPLATE = """..."""   # your template
+
+def parse_score(response: str) -> int:
+    """Parse score from judge response."""
+    raise NotImplementedError()
+
+def judge_role_response(question, response, character,
+                        eval_prompt_template=JUDGE_PROMPT_TEMPLATE) -> int:
+    prompt = eval_prompt_template.format(question=question, response=response, character=character)
+    judge_response = generate_responses_parallel(
+        [[{"role": "user", "content": prompt}]],
+        model=AUTORATER_MODEL, temperature=0.0, max_tokens=500,
+    )[0].strip()
+    return parse_score(judge_response)
+</code></pre>
+        <p><strong>What you write:</strong> a prompt template and a parser. <code>judge_role_response</code> is provided and glues them together.</p>
+        <table class="io-table">
+          <tr><th>Template</th><td>A string with the placeholders <code>{question}</code>, <code>{response}</code>, and <code>{character}</code>. It must explain the 0 to 3 scale and ask for the score in a fixed, machine-readable format.</td></tr>
+          <tr><th><code>parse_score</code></th><td>Takes the judge's raw reply (a string) and returns an <code>int</code> from 0 to 3. It should fail loudly if it cannot find a score.</td></tr>
+        </table>
+        <details class="hint"><summary>Hint 1: the format</summary><div class="hint-body"><p>Ask for the score wrapped in tags, such as <code>&lt;score&gt;2&lt;/score&gt;</code>, and include an example of the exact output you want in the prompt. Language models follow examples more reliably than descriptions.</p></div></details>
+        <details class="hint"><summary>Hint 2: the parser</summary><div class="hint-body"><p>A regular expression that only accepts the digits 0 to 3 inside your tags does the job. Use <code>re.search</code>, and raise or assert if there is no match rather than silently returning 0, since a silent 0 would quietly throw data away.</p></div></details>
+        <details class="hint"><summary>Hint 3: the rubric wording</summary><div class="hint-body"><p>Name the character in the prompt ("how well did the model role-play as the character '{character}'?") and spell out all four levels. Vague levels like "pretty good" give inconsistent scores.</p></div></details>
+      </div>
+
+      <h3>Filtering with the scores</h3>
+      <p>When <code>RUN_JUDGE_FILTER</code> is on, every response is scored and the scores go into <code>extract_persona_vectors</code> (<a href="03-residual-stream.html">concept 3</a>) as a <code>scores</code> dictionary with the same <code>(persona, question_index)</code> keys. Any response with a score below <code>score_threshold=3</code> is skipped. The scores are cached in <code>persona_cache/…/judge_scores.json</code>.</p>
+      <p>The default personas are a special case: a 3 means "fully playing the role", and for "You are a helpful assistant" the role <em>is</em> the Assistant, so they normally pass.</p>
+
+      <h2 id="check">Check your understanding</h2>
+      <details class="q"><summary><span class="qn">Q1.</span>Why filter out responses that score 1 or 2 instead of keeping everything?</summary>
+        <div class="answer"><p>Those responses are partly the Assistant talking ("As an AI I can't really…"). Including them pulls each persona's average toward the Assistant and shrinks the differences we want to measure. Keeping only score-3 responses gives a cleaner signal of the role itself.</p></div></details>
+      <details class="q"><summary><span class="qn">Q2.</span>The judge runs at temperature 0. Why?</summary>
+        <div class="answer"><p>Temperature 0 makes the judge (nearly) deterministic, so the same response gets the same score every time. A grader should be consistent; creativity is not wanted here.</p></div></details>
+      <details class="q"><summary><span class="qn">Q3.</span>If responses are generated by Gemma 2 27B through the API but activations are read from Gemma 2 9B, what are we actually measuring?</summary>
+        <div class="answer"><p>How 9B represents text that a different model wrote in character, which is close to but not the same as how 9B represents itself acting in character. That is why the notebook defaults to local generation with the same model.</p></div></details>
+      <details class="q"><summary><span class="qn">Q4.</span>Why should <code>parse_score</code> raise an error instead of returning 0 when it cannot find a score?</summary>
+        <div class="answer"><p>Returning 0 would silently mark the response as a refusal and throw it away. If the judge's output format breaks, you want to find out immediately, not end up with suspiciously empty persona data.</p></div></details>
+
+      <h2 id="mistakes">Common mistakes</h2>
+      <ul class="mistakes">
+        <li><strong>Not noticing printed <code>API error</code> lines.</strong> Failed calls return empty strings. A wrong key (401) or no credit (402) shows up as many errors and many empty responses, not as a crash.</li>
+        <li><strong>Using a retired judge model.</strong> Model names change. If you see "No endpoints found", check <a href="https://openrouter.ai/models">openrouter.ai/models</a>.</li>
+        <li><strong>Mismatched placeholders.</strong> If your template uses <code>{role}</code> but the code calls <code>.format(character=...)</code>, Python raises a <code>KeyError</code>. Any literal curly braces in the template (for example in a JSON example) must be doubled: <code>{{ }}</code>.</li>
+        <li><strong>Setting <code>MAX_WORKERS</code> high to go faster</strong> and getting 429 rate-limit errors. Moderate parallelism is faster overall.</li>
+        <li><strong>Keys that do not line up.</strong> The response dict, the scores dict, and the loop in <code>extract_persona_vectors</code> must all use <code>(persona_name, question_index)</code> with the question's index, not the question text.</li>
+      </ul>
+      <nav class="pager" id="pager"></nav>
+      <footer class="site-footer" id="site-footer">
+        <noscript><p>DataWorks AI Interpretability Lab. Leads and instructors: Rami Abukhater, Alec Min, and Akshar Sinha. Adapted from ARENA notebook 4.4 and The Assistant Axis (Lu et al., 2026).</p></noscript>
+      </footer>
+    </article>
+  </main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<script src="../assets/js/site.js"></script>
+</body>
+</html>

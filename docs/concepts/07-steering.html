@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Steering along the Assistant Axis · DataWorks AI Interpretability Lab</title>
+<meta name="description" content="Adding a scaled Assistant Axis vector to the residual stream during generation, what the coefficient does, and why steering shows the axis is causal rather than only descriptive.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&amp;family=Source+Sans+3:wght@400;600;700&amp;family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&amp;display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-page="c7" data-root="../">
+<a class="skip" href="#content" style="position:absolute;left:-9999px">Skip to content</a>
+<header class="site-header" id="site-header">
+  <a class="brand" href="../index.html">
+    <svg class="brand-mark" viewBox="0 0 26 26" aria-hidden="true">
+      <circle cx="13" cy="13" r="11.5" fill="none" stroke="currentColor" stroke-opacity=".3"/>
+      <circle cx="8" cy="17" r="1.6" style="fill:var(--d-red)"/><circle cx="10.5" cy="19.5" r="1.3" style="fill:var(--d-red)"/>
+      <circle cx="12" cy="12.5" r="1.3" style="fill:var(--d-amber)"/><circle cx="15.5" cy="15" r="1.3" style="fill:var(--d-amber)"/>
+      <circle cx="18" cy="8.5" r="1.6" style="fill:var(--d-blue)"/><circle cx="20" cy="11" r="1.3" style="fill:var(--d-blue)"/>
+      <line x1="4.5" y1="21.5" x2="21.5" y2="4.5" style="stroke:var(--accent)" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-text">DataWorks <span class="dim">AI Interpretability Lab</span></span>
+  </a>
+</header>
+<div class="layout">
+  <nav class="sidebar" id="sidebar" aria-label="Course pages">
+    <noscript><a href="../index.html">Home</a> · <a href="../setup.html">Setup</a> · <a href="../homework.html">Homework</a> · <a href="../resources.html">Resources</a></noscript>
+  </nav>
+  <main class="main" id="content">
+    <article class="content">
+<div class="eyebrow">Concept 7 of 7 · Notebook Section 2</div>
+      <h1>Steering along the Assistant Axis</h1>
+      <p class="lede">So far we have only <em>watched</em> the axis. Now we push on it. By adding the axis vector into the residual stream while the model writes, we can make it more or less Assistant-like, and that is the strongest evidence that the axis is something the model actually uses.</p>
+
+      <nav class="page-toc" aria-label="On this page"><strong>On this page</strong><ol>
+        <li><a href="#idea">The big idea</a></li><li><a href="#diagram">Diagram</a></li><li><a href="#paper">Connection to the paper</a></li>
+        <li><a href="#code">The code</a></li><li><a href="#check">Check your understanding</a></li><li><a href="#mistakes">Common mistakes</a></li></ol></nav>
+
+      <h2 id="idea">The big idea</h2>
+      <p>Everything up to now has been <strong>descriptive</strong>. We found a direction that separates Assistant-like personas from the rest, and showed that it tracks drift in conversations. But a direction can correlate with something without the model using it, the way a thermometer tracks the weather without causing it. To show the direction is <strong>causal</strong>, we intervene: change the model's activations along that direction and see whether its behaviour changes the way we predict.</p>
+      <p><strong>Activation steering</strong> does this with a forward hook (<a href="06-hooks-and-drift.html">concept 6</a>) that, instead of just reading the residual stream at one layer, adds a vector to it at every token position:</p>
+      \[ h^{(\ell)} \;\leftarrow\; h^{(\ell)} + \alpha\, s , \]
+      <p>where \(h^{(\ell)}\) is the hidden state at layer \(\ell\), \(s\) is the steering vector, and \(\alpha\) is a coefficient we choose. Every layer above \(\ell\) then reads the nudged vector, as if the model had "thought" more (or less) Assistant-like thoughts at that point.</p>
+      <p>The sign and size of \(\alpha\) are the experiment:</p>
+      <ul>
+        <li>\(\alpha = 0\): no change, the baseline.</li>
+        <li>\(\alpha &gt; 0\): pushed <strong>toward</strong> the Assistant. Answers become more grounded and professional, and the model resists or drops role-play prompts.</li>
+        <li>\(\alpha &lt; 0\): pushed <strong>away</strong>. The model adopts personas more readily, makes up names and backstories, and at larger magnitudes slides into mystical, theatrical prose.</li>
+        <li>Very large \(|\alpha|\): the vector swamps the original activation and the text falls apart into repetition or nonsense. The useful range is where the effect is clear but the text is still coherent.</li>
+      </ul>
+      <p>To make \(\alpha\) interpretable, the notebook scales the unit axis \(a\) by the <strong>persona gap</strong>: the distance along the axis between the average default persona and the average role persona.</p>
+      \[ \text{AXIS\_SCALE} = \frac{1}{|D|}\sum_{p\in D} v_p\cdot a \;-\; \frac{1}{|R|}\sum_{p\in R} v_p\cdot a, \qquad s = \text{AXIS\_SCALE}\cdot a . \]
+      <p>So \(\alpha = -1\) means "move the activation one full Assistant-to-role gap away from the Assistant". The notebook suggests trying values between ±1 and ±5.</p>
+
+      <h2 id="diagram">Diagram</h2>
+      <figure class="diagram">
+        <svg viewBox="0 0 720 330" role="img" aria-labelledby="d7t d7d">
+          <title id="d7t">Steering adds alpha times the axis to the residual stream</title>
+          <desc id="d7d">Top: a stack of blocks with a steering hook on block 27 that adds alpha times s to its output, so all later blocks read the shifted vector. Bottom: a horizontal scale of alpha from minus five to plus five, with labels for incoherent, mystical and in character, baseline, grounded, and incoherent.</desc>
+          <defs>
+            <marker id="d7a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--d-line)"/></marker>
+            <marker id="d7g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--d-green)"/></marker>
+            <marker id="d7r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--d-red)"/></marker>
+          </defs>
+          <!-- stack -->
+          <rect x="30" y="20" width="200" height="26" rx="4" class="box"/><text x="130" y="37" text-anchor="middle" class="t-sm">blocks 28 … 41 read h + αs</text>
+          <rect x="30" y="56" width="200" height="30" rx="4" class="box2" style="stroke:var(--d-green);stroke-width:2"/><text x="130" y="76" text-anchor="middle" class="t-sm" style="font-weight:700">block 27</text>
+          <rect x="30" y="96" width="200" height="26" rx="4" class="box"/><text x="130" y="113" text-anchor="middle" class="t-sm">blocks 0 … 26</text>
+          <line x1="130" y1="96" x2="130" y2="88" class="ln" marker-end="url(#d7a)"/>
+          <line x1="130" y1="56" x2="130" y2="48" class="ln" marker-end="url(#d7a)"/>
+          <text x="245" y="76" class="t-sm" style="fill:var(--d-green);font-weight:700">steering hook: output += α · s</text>
+          <!-- vector picture -->
+          <circle cx="520" cy="110" r="4" style="fill:var(--d-line)"/>
+          <line x1="520" y1="110" x2="610" y2="40" class="ln" stroke-width="2.5" marker-end="url(#d7a)"/>
+          <text x="618" y="40" class="t-sm">h</text>
+          <line x1="610" y1="40" x2="680" y2="70" style="stroke:var(--d-green)" stroke-width="2.5" marker-end="url(#d7g)"/>
+          <text x="650" y="45" class="t-sm" style="fill:var(--d-green)">+αs (α&gt;0)</text>
+          <line x1="610" y1="40" x2="540" y2="10" style="stroke:var(--d-red)" stroke-width="2.5" stroke-dasharray="5 3" marker-end="url(#d7r)"/>
+          <text x="470" y="18" class="t-sm" style="fill:var(--d-red)">+αs (α&lt;0)</text>
+          <text x="505" y="132" class="t-sm muted">one token's residual vector</text>
+
+          <!-- alpha scale -->
+          <line x1="60" y1="215" x2="660" y2="215" class="ln" stroke-width="2"/>
+          <g class="t-sm" text-anchor="middle">
+            <line x1="60" y1="208" x2="60" y2="222" class="ln"/><text x="60" y="240">−5</text>
+            <line x1="180" y1="208" x2="180" y2="222" class="ln"/><text x="180" y="240">−3</text>
+            <line x1="300" y1="208" x2="300" y2="222" class="ln"/><text x="300" y="240">−1</text>
+            <line x1="360" y1="204" x2="360" y2="226" class="ln" stroke-width="2"/><text x="360" y="240" style="font-weight:700">0</text>
+            <line x1="420" y1="208" x2="420" y2="222" class="ln"/><text x="420" y="240">+1</text>
+            <line x1="540" y1="208" x2="540" y2="222" class="ln"/><text x="540" y="240">+3</text>
+            <line x1="660" y1="208" x2="660" y2="222" class="ln"/><text x="660" y="240">+5</text>
+          </g>
+          <text x="360" y="200" text-anchor="middle" class="t-md" style="font-weight:650">α (in persona-gap units)</text>
+          <rect x="40" y="255" width="110" height="52" rx="6" class="box2"/><text x="95" y="276" text-anchor="middle" class="t-sm">may break down,</text><text x="95" y="294" text-anchor="middle" class="t-sm">repetitive text</text>
+          <rect x="160" y="255" width="150" height="52" rx="6" class="box" style="stroke:var(--d-red)"/><text x="235" y="276" text-anchor="middle" class="t-sm" style="fill:var(--d-red)">in character, mystical,</text><text x="235" y="294" text-anchor="middle" class="t-sm" style="fill:var(--d-red)">invents names</text>
+          <rect x="320" y="255" width="80" height="52" rx="6" class="box"/><text x="360" y="285" text-anchor="middle" class="t-sm">baseline</text>
+          <rect x="410" y="255" width="150" height="52" rx="6" class="box" style="stroke:var(--d-blue)"/><text x="485" y="276" text-anchor="middle" class="t-sm" style="fill:var(--d-blue)">grounded, professional,</text><text x="485" y="294" text-anchor="middle" class="t-sm" style="fill:var(--d-blue)">resists role-play</text>
+          <rect x="570" y="255" width="110" height="52" rx="6" class="box2"/><text x="625" y="276" text-anchor="middle" class="t-sm">may break down,</text><text x="625" y="294" text-anchor="middle" class="t-sm">repetitive text</text>
+        </svg>
+        <figcaption>A steering hook on block 27 shifts every token's residual vector by \(\alpha s\). All later blocks build on the shifted vector. The bottom scale shows what to expect; the exact thresholds vary by prompt and must be found by experiment.</figcaption>
+      </figure>
+
+      <h2 id="paper">How it connects to the paper</h2>
+      <ul>
+        <li><strong>Section 3.2, "Causal effects of the Assistant Axis"</strong>. In <strong>Section 3.2.1</strong> the authors add a vector along the axis at a middle layer, at every token position, with strengths scaled relative to the average residual-stream norm at that layer (our notebook uses the persona gap instead, so our \(\alpha\) values are not the paper's).</li>
+        <li><strong>Figure 4</strong>: as steering moves away from the Assistant, models increasingly adopt non-Assistant personas, and at larger strengths a mystical, theatrical style. The paper notes Gemma tends toward nonhuman portrayals, while Qwen more often invents human personas. Watch for that in your outputs.</li>
+        <li><strong>Figure 5</strong>: steering away from the Assistant also makes persona-based jailbreaks somewhat more successful, and steering toward it makes them less so.</li>
+        <li><strong>Section 3.2.2</strong> does the same experiment on base models, where the axis promotes helpful human archetypes and suppresses spiritual ones.</li>
+        <li><strong>Section 5</strong> turns this into a defence, activation capping, which only intervenes when the projection drops below a threshold. That is ARENA's next exercise and outside our scope.</li>
+      </ul>
+
+      <h2 id="code">The code, walked through</h2>
+      <div class="todo-banner">Stand-in code from the original ARENA notebook. Replace with the final notebook's cells and its suggested alpha values.</div>
+
+      <h3>Scaling the axis into persona-gap units</h3>
+<pre><code class="language-python">assistant_axis = F.normalize(assistant_axis.cpu().float(), dim=0)
+
+_default_projs = (
+    t.stack([persona_vectors[n].cpu().float() for n in DEFAULT_PERSONAS if n in persona_vectors]) @ assistant_axis
+)
+_role_names = [n for n in persona_vectors if n not in DEFAULT_PERSONAS]
+_role_projs = t.stack([persona_vectors[n].cpu().float() for n in _role_names]) @ assistant_axis
+AXIS_SCALE = float((_default_projs.mean() - _role_projs.mean()).item())
+axis_steer = assistant_axis * AXIS_SCALE  # Scaled vector for steering (not unit-norm)
+</code></pre>
+      <div class="walk">
+        <ul>
+          <li><code>F.normalize</code> makes sure the axis has length exactly 1, in CPU float32 for clean arithmetic.</li>
+          <li><code>_default_projs</code>: <span class="shape">(n_default, d_model)</span> @ <span class="shape">(d_model,)</span> → <span class="shape">(n_default,)</span>, the position of each default persona along the axis. Same for <code>_role_projs</code>.</li>
+          <li><code>AXIS_SCALE</code> is the gap between the two group means, a positive number. <code>axis_steer</code> is the axis stretched to that length, so adding <code>1.0 * axis_steer</code> moves a vector by one gap.</li>
+        </ul>
+      </div>
+
+      <div class="exercise">
+        <span class="tag">Exercise</span>
+        <h3><code>generate_with_steering</code></h3>
+<pre><code class="language-python">def generate_with_steering(
+    model,
+    tokenizer,
+    prompt: str,
+    steering_vector: Float[Tensor, " d_model"],
+    steering_layer: int,
+    alpha: float,
+    system_prompt: str | None = None,
+    max_new_tokens: int = 200,
+    temperature: float = 0.7,
+    messages: list[dict[str, str]] | None = None,
+) -> str:
+    """Generate text with simple additive activation steering: h += alpha * steering_vector."""
+    raise NotImplementedError()
+</code></pre>
+        <p><strong>What it must do:</strong> generate a reply to <code>prompt</code> (with an optional persona <code>system_prompt</code>, or a full <code>messages</code> list for multi-turn) while a hook adds <code>alpha * steering_vector</code> to the output of block <code>steering_layer</code> at every position, and return only the newly generated text.</p>
+        <table class="io-table">
+          <tr><th>Step</th><th>Shape</th></tr>
+          <tr><td>Prompt token ids</td><td><span class="shape">(1, prompt_len)</span></td></tr>
+          <tr><td>Hook output during the first (prefill) pass</td><td><span class="shape">(1, prompt_len, d_model)</span></td></tr>
+          <tr><td>Hook output on each later step (KV cache)</td><td><span class="shape">(1, 1, d_model)</span></td></tr>
+          <tr><td><code>alpha * steering_vector</code></td><td><span class="shape">(d_model,)</span>, broadcasts over batch and sequence</td></tr>
+          <tr><td><code>model.generate</code> output</td><td><span class="shape">(1, prompt_len + new_tokens)</span>; keep only <code>[0, prompt_len:]</code></td></tr>
+        </table>
+        <details class="hint"><summary>Hint 1: building the prompt</summary><div class="hint-body"><p>If <code>messages</code> is not given, build it from <code>system_prompt</code> (if any) and <code>prompt</code>. Run it through <code>_normalize_messages</code> (Gemma has no system role), then <code>apply_chat_template(..., add_generation_prompt=True)</code>, and tokenize with <code>add_special_tokens=False</code>. Remember the prompt length.</p></div></details>
+        <details class="hint"><summary>Hint 2: the hook</summary><div class="hint-body"><p>Inside the hook, add <code>alpha * steering_vector</code> to the output, cast to the output's device and dtype (the two GPUs and half precision both matter), and return the result. Because the vector has shape <span class="shape">(d_model,)</span>, broadcasting applies it to every position, during the prefill and every generation step.</p></div></details>
+        <details class="hint"><summary>Hint 3: generating</summary><div class="hint-body"><p>Register the hook on <code>_return_layers(model)[steering_layer]</code>, call <code>model.generate</code> with <code>do_sample=True</code> and your temperature inside <code>try</code>, and remove the hook in <code>finally</code>. Decode only the tokens after the prompt, with <code>skip_special_tokens=True</code>.</p></div></details>
+      </div>
+
+      <h3>Steering experiments</h3>
+      <p>The last exercise is open-ended: there is no function to fill in, you design the comparison. The notebook asks for two experiments.</p>
+      <ol>
+        <li><strong>Symmetric steering.</strong> Choose three personas: one Assistant-like (consultant), one mid-range (philosopher), one fantastical (ghost). Ask each the same question (for example "How can I take steps to add meaning to my life?") at several values of \(\alpha\), such as \(-5, -2, 0, 2, 5\). Lay the outputs side by side.</li>
+        <li><strong>Role adoption.</strong> Use prompts like "You are a secretary. What is your name?" At what \(\alpha\) does the model start inventing a human name and backstory instead of saying it is an AI?</li>
+      </ol>
+      <p>First find a useful range on one prompt: too small and nothing changes, too large and the output is gibberish. Use the same random seed or several samples per setting, since generation is random at temperature 0.7.</p>
+      <p>These outputs are what you submit in <a href="../homework.html">Homework 3</a>.</p>
+
+      <h3>Why this shows the axis is causal</h3>
+      <p>The monitoring results on the previous page are correlations: the projection falls when behaviour gets worse. That alone could mean the axis merely <em>reflects</em> some other process. Steering is an intervention. We change only one thing, the component of the activation along \(a\), and behaviour moves in the direction the axis predicts: away from the Assistant gives more role adoption, toward it gives less. The model's later layers are clearly reading and using this direction.</p>
+      <p>A careful experiment needs a <strong>control</strong>: steer along a random direction scaled to the same length. If a random vector of the same size gives the same changes, the effect is just "adding noise breaks things", not a property of the axis. This is a good extension to propose.</p>
+
+      <h2 id="check">Check your understanding</h2>
+      <details class="q"><summary><span class="qn">Q1.</span>What does \(\alpha = -2\) mean in this notebook?</summary>
+        <div class="answer"><p>Add \(-2 \times\) <code>axis_steer</code> to the residual stream at the steering layer: shift every token's activation two persona gaps away from the Assistant end of the axis.</p></div></details>
+      <details class="q"><summary><span class="qn">Q2.</span>Why steer every position, including the prompt, instead of only newly generated tokens?</summary>
+        <div class="answer"><p>During the first pass the model computes and caches keys and values for every prompt token. Steering those positions changes how the model has "understood" the whole context, including the persona instruction, which gives a much stronger effect than nudging only the new tokens. After the prefill, the cache means each new token is steered as it is produced.</p></div></details>
+      <details class="q"><summary><span class="qn">Q3.</span>Why does monitoring alone not prove the model uses the axis, and how does steering help?</summary>
+        <div class="answer"><p>Monitoring shows correlation: the projection changes along with behaviour. Steering is an intervention: we change the activation along the axis and observe behaviour change in the predicted direction, which shows the model's downstream computation depends on that direction.</p></div></details>
+      <details class="q"><summary><span class="qn">Q4.</span>What control experiment would strengthen the claim, and what result would weaken it?</summary>
+        <div class="answer"><p>Steer along a random direction with the same norm as \(\alpha\,s\). If random directions produce similar persona shifts, the effect is generic disruption rather than something specific to the Assistant Axis.</p></div></details>
+      <details class="q"><summary><span class="qn">Q5.</span>Why might large positive \(\alpha\) also make outputs worse?</summary>
+        <div class="answer"><p>Adding a very large vector pushes activations far outside the range the model ever saw in training. Later layers no longer get inputs they know how to process, so text degrades no matter which direction you push.</p></div></details>
+
+      <h2 id="mistakes">Common mistakes</h2>
+      <ul class="mistakes">
+        <li><strong>Leaving the steering hook attached.</strong> Every later generation is silently steered. Always remove it in <code>finally</code>; if outputs look strange later, restart the session.</li>
+        <li><strong>Device or dtype mismatch</strong>: the model is split over two GPUs and runs in half precision, so <code>steering_vector</code> must be moved to the output's device and dtype inside the hook.</li>
+        <li><strong>Returning the prompt with the reply.</strong> Slice off the first <code>prompt_length</code> tokens before decoding.</li>
+        <li><strong>Using the unit axis instead of <code>axis_steer</code></strong>. A unit vector is tiny compared with the activation norm, so nothing seems to happen at \(\alpha = 5\).</li>
+        <li><strong>Judging from one sample.</strong> Generation is random; compare several samples per \(\alpha\), or fix the seed.</li>
+        <li><strong>Getting the sign backwards</strong>: if positive \(\alpha\) makes the ghost more ghostly, your axis was built the wrong way round (\(\mu_\text{roles} - \mu_\text{default}\)).</li>
+      </ul>
+      <nav class="pager" id="pager"></nav>
+      <footer class="site-footer" id="site-footer">
+        <noscript><p>DataWorks AI Interpretability Lab. Leads and instructors: Rami Abukhater, Alec Min, and Akshar Sinha. Adapted from ARENA notebook 4.4 and The Assistant Axis (Lu et al., 2026).</p></noscript>
+      </footer>
+    </article>
+  </main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<script src="../assets/js/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Personas and the persona selection model · DataWorks AI Interpretability Lab</title>
+<meta name="description" content="Why chat models can play characters, the Assistant Axis paper's core claim, and how the notebook defines personas and evaluation questions.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&amp;family=Source+Sans+3:wght@400;600;700&amp;family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&amp;display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-page="c1" data-root="../">
+<a class="skip" href="#content" style="position:absolute;left:-9999px">Skip to content</a>
+<header class="site-header" id="site-header">
+  <a class="brand" href="../index.html">
+    <svg class="brand-mark" viewBox="0 0 26 26" aria-hidden="true">
+      <circle cx="13" cy="13" r="11.5" fill="none" stroke="currentColor" stroke-opacity=".3"/>
+      <circle cx="8" cy="17" r="1.6" style="fill:var(--d-red)"/><circle cx="10.5" cy="19.5" r="1.3" style="fill:var(--d-red)"/>
+      <circle cx="12" cy="12.5" r="1.3" style="fill:var(--d-amber)"/><circle cx="15.5" cy="15" r="1.3" style="fill:var(--d-amber)"/>
+      <circle cx="18" cy="8.5" r="1.6" style="fill:var(--d-blue)"/><circle cx="20" cy="11" r="1.3" style="fill:var(--d-blue)"/>
+      <line x1="4.5" y1="21.5" x2="21.5" y2="4.5" style="stroke:var(--accent)" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-text">DataWorks <span class="dim">AI Interpretability Lab</span></span>
+  </a>
+</header>
+<div class="layout">
+  <nav class="sidebar" id="sidebar" aria-label="Course pages">
+    <noscript><a href="../index.html">Home</a> · <a href="../setup.html">Setup</a> · <a href="../homework.html">Homework</a> · <a href="../resources.html">Resources</a></noscript>
+  </nav>
+  <main class="main" id="content">
+    <article class="content">
+<div class="eyebrow">Concept 1 of 7 · Notebook Section 1</div>
+      <h1>Personas and the persona selection model</h1>
+      <p class="lede">Before measuring anything inside the model, we need to be clear about what we are measuring. This page explains what a persona is, why a chat model has a default one, and how the notebook turns "be a ghost" into data.</p>
+
+      <nav class="page-toc" aria-label="On this page"><strong>On this page</strong><ol>
+        <li><a href="#idea">The big idea</a></li><li><a href="#diagram">Diagram</a></li><li><a href="#paper">Connection to the paper</a></li>
+        <li><a href="#code">The code</a></li><li><a href="#check">Check your understanding</a></li><li><a href="#mistakes">Common mistakes</a></li></ol></nav>
+
+      <h2 id="idea">The big idea</h2>
+      <p>A base language model is trained to predict the next word of text written by millions of different people. To do that well it has to model who is writing: a scientist writes differently from a teenager on a forum, and a villain in a novel talks differently from the hero. A useful way to think about the trained model is as a <strong>simulator</strong> that can produce text in the voice of a huge cast of characters, rather than as a single agent with one personality.</p>
+      <p>Post-training (instruction tuning and reinforcement learning from feedback) then rewards one particular voice: the helpful, honest Assistant. Sam Marks calls this view the <strong>persona selection model</strong>. Post-training does not build a new mind from scratch. It <em>selects and refines</em> one character from the cast the model already knew, and makes it the default. The other characters are still in there. Ask the model to "be a pirate" and it can still be one.</p>
+      <p>An analogy: a repertory actor knows hundreds of roles. A theatre hires them to play one role every night, and audiences come to think of the actor as that character. But hand them a different script and they can still play the others. Most of the time this is harmless and even useful (role-play, fiction, tutoring in a character's voice). The worry is when the actor slips into a different role without anyone asking, for example during a long, emotional conversation.</p>
+      <p>In this project a <strong>persona</strong> is simply a character the model is asked to play, given by a short system prompt such as "You are a ghost, a spectral presence from beyond the veil…". If the persona selection model is right, the model should represent which character it is currently playing somewhere in its internal activations, and the Assistant should occupy a special place among them. Section 1 of the notebook tests exactly that.</p>
+
+      <h2 id="diagram">Diagram</h2>
+      <figure class="diagram">
+        <svg viewBox="0 0 720 300" role="img" aria-labelledby="d1t d1d">
+          <title id="d1t">From many simulated characters to one default Assistant</title>
+          <desc id="d1d">Left: a pre-trained model as a cloud of characters with no default. Middle arrow labelled post-training. Right: the same cloud, with the Assistant highlighted as the default, and a system prompt arrow pulling the model toward the ghost character.</desc>
+          <defs>
+            <marker id="d1a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--d-line)"/></marker>
+            <marker id="d1b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--d-red)"/></marker>
+          </defs>
+          <text x="150" y="26" text-anchor="middle" class="t-lg">Pre-trained (base) model</text>
+          <rect x="20" y="40" width="260" height="210" rx="12" class="box2"/>
+          <g class="t-sm">
+            <circle cx="70" cy="85" r="6" class="amber"/><text x="80" y="89">teacher</text>
+            <circle cx="170" cy="75" r="6" class="amber"/><text x="180" y="79">pirate</text>
+            <circle cx="55" cy="140" r="6" class="red"/><text x="65" y="144">ghost</text>
+            <circle cx="140" cy="125" r="6" class="blue"/><text x="150" y="129">consultant</text>
+            <circle cx="215" cy="150" r="6" class="red"/><text x="200" y="170" text-anchor="middle">oracle</text>
+            <circle cx="90" cy="195" r="6" class="amber"/><text x="100" y="199">philosopher</text>
+            <circle cx="190" cy="210" r="6" class="red"/><text x="200" y="214">jester</text>
+            <circle cx="125" cy="165" r="6" class="blue"/><text x="135" y="169">analyst</text>
+          </g>
+          <text x="150" y="272" text-anchor="middle" class="t-sm muted">can simulate many voices; no default</text>
+
+          <line x1="295" y1="145" x2="415" y2="145" class="ln" stroke-width="2" marker-end="url(#d1a)"/>
+          <text x="355" y="133" text-anchor="middle" class="t-md">post-training</text>
+          <text x="355" y="165" text-anchor="middle" class="t-sm muted">selects one</text>
+
+          <text x="570" y="26" text-anchor="middle" class="t-lg">Instruction-tuned (-it) model</text>
+          <rect x="440" y="40" width="260" height="210" rx="12" class="box2"/>
+          <g class="t-sm">
+            <circle cx="490" cy="85" r="6" class="amber" opacity=".55"/><text x="500" y="89" opacity=".7">teacher</text>
+            <circle cx="590" cy="75" r="6" class="amber" opacity=".55"/><text x="600" y="79" opacity=".7">pirate</text>
+            <circle cx="492" cy="140" r="6" class="red"/><text x="483" y="144" text-anchor="end">ghost</text>
+            <circle cx="610" cy="125" r="13" class="blue"/><text x="610" y="105" text-anchor="middle" style="font-weight:700">Assistant (default)</text>
+            <circle cx="635" cy="160" r="6" class="red" opacity=".55"/><text x="645" y="164" opacity=".7">oracle</text>
+            <circle cx="510" cy="195" r="6" class="amber" opacity=".55"/><text x="520" y="199" opacity=".7">philosopher</text>
+            <circle cx="610" cy="210" r="6" class="red" opacity=".55"/><text x="620" y="214" opacity=".7">jester</text>
+          </g>
+          <path d="M597,130 C565,152 535,152 503,143" class="ln s-red" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#d1b)"/>
+          <text x="545" y="172" text-anchor="middle" class="t-sm" style="fill:var(--d-red)">"You are a ghost…"</text>
+          <text x="570" y="272" text-anchor="middle" class="t-sm muted">a system prompt can still pull it elsewhere</text>
+        </svg>
+        <figcaption>The persona selection model in one picture. Post-training does not delete the other characters. It makes one of them the place the model starts from. Blue marks Assistant-like personas, red marks the fantastical ones that end up furthest from it.</figcaption>
+      </figure>
+
+      <h2 id="paper">How it connects to the paper</h2>
+      <ul>
+        <li><strong>Section 1 (Introduction)</strong> of <a href="https://arxiv.org/abs/2601.10387">The Assistant Axis</a> sets out the framing: pre-training teaches a model many characters, post-training makes the Assistant the default, and that default can drift.</li>
+        <li><strong>Section 2.1 (Mapping out persona space)</strong> describes the data. The authors use 275 roles, five system prompts per role, and 240 shared extraction questions, and compare against a default Assistant baseline (no system prompt or a few prompts that just say to behave normally).</li>
+        <li><strong>Figure 1 (left)</strong> shows the result we are working toward: role vectors laid out in persona space, with the Assistant at one end of the main direction.</li>
+        <li>The persona selection model itself comes from Sam Marks' essay <a href="https://www.lesswrong.com/posts/dfoty34sT7CSKeJNn/the-persona-selection-model">The Persona Selection Model</a>, which cites this paper as evidence. Janus's <a href="https://www.lesswrong.com/posts/vJFdjigzmcXMhNTsx/simulators">Simulators</a> is the older version of the idea.</li>
+      </ul>
+      <p>Our notebook keeps the method but shrinks the data so it fits a free GPU in an afternoon: about 20 hand-picked personas with one system prompt each, and 15 questions (10 personas and 2 questions in smoke-test mode).</p>
+
+      <h2 id="code">The code, walked through</h2>
+      <div class="todo-banner">Stand-in code from the original ARENA notebook. Replace with the cells from the final student notebook, including how SMOKE_TEST and USE_FULL_PERSONA_LIST choose the persona set.</div>
+
+      <h3>Defining personas</h3>
+<pre><code class="language-python">PERSONAS = {
+    # Default (neutral system prompts)
+    "default": "",  # No system prompt
+    "default_assistant": "You are an AI assistant",
+    "default_llm": "You are a large language model",
+    "default_helpful": "You are a helpful assistant",
+    #
+    # Assistant-like (professional, helpful)
+    "consultant": "You are a professional consultant who provides expert advice ...",
+    "analyst": "You are a data analyst who examines information methodically ...",
+    #
+    # Mid-range
+    "philosopher": "You are a philosopher who ponders deep questions ...",
+    #
+    # Anti-Assistant (fantastical, un-helpful)
+    "ghost": "You are a ghost, a spectral presence from beyond the veil ...",
+    "oracle": "You are an oracle who speaks in cryptic prophecies ...",
+    # ... (prompts shortened here; see the notebook for the full list)
+}
+
+DEFAULT_PERSONAS = ["default", "default_assistant", "default_llm", "default_helpful"]
+</code></pre>
+      <div class="walk">
+        <ul>
+          <li><code>PERSONAS</code> maps a short name to a <strong>system prompt</strong>, the instruction the model sees before the user's question. The whole definition of a persona is this one string.</li>
+          <li>The first four entries are not really characters. They are four slightly different ways of getting the model's normal behaviour: no system prompt at all, and three bland ones. Averaging over several wordings gives a steadier picture of "the default Assistant" than any one prompt would.</li>
+          <li><code>DEFAULT_PERSONAS</code> records which names count as the default. Later, the Assistant Axis is built as "the average default minus the average of everything else", so this list matters (<a href="05-pca-assistant-axis.html">concept 5</a>).</li>
+          <li>The other personas are chosen to span a range, using the paper's appendix as a guide: Assistant-like professionals (consultant, analyst), mid-range creative roles (philosopher, storyteller), and fantastical roles that end up far from the Assistant (ghost, oracle, jester).</li>
+        </ul>
+      </div>
+
+      <h3>Evaluation questions</h3>
+<pre><code class="language-python">EVAL_QUESTIONS = [
+    "What advice would you give to someone starting a new chapter in their life?",
+    "How do you view the relationship between knowledge and wisdom?",
+    "What do you think about the nature of truth?",
+    "How should someone approach making difficult decisions?",
+    # ... 15 questions in total
+]
+</code></pre>
+      <div class="walk">
+        <ul>
+          <li>Each persona answers each question, giving <code>len(PERSONAS) × len(EVAL_QUESTIONS)</code> responses (roughly 20 × 15 = 300 in the full run, 10 × 2 = 20 in the smoke test).</li>
+          <li>The questions are deliberately <strong>open-ended and opinion-seeking</strong>. "What is the capital of France?" would get the same answer from a consultant and a ghost, which tells us nothing. "How do you think about the passage of time?" gives a ghost room to sound like a ghost.</li>
+          <li>They are also <strong>not tied to any one persona</strong>, so every character can answer them in its own way. If the questions were about spreadsheets, the analyst would have an unfair advantage.</li>
+        </ul>
+      </div>
+
+      <div class="callout">
+        <span class="callout-title">Gemma 2 has no "system" role</span>
+        <p>Gemma 2's chat template rejects messages with the role <code>"system"</code>. The notebook handles this with a small helper, <code>_normalize_messages</code>, that glues the system prompt onto the front of the first user message. So for Gemma, "persona" really means "an instruction at the start of the user's first turn". You will see this helper in <a href="03-residual-stream.html">concept 3</a>.</p>
+      </div>
+
+      <h2 id="check">Check your understanding</h2>
+      <details class="q"><summary><span class="qn">Q1.</span>Why does the notebook use four different "default" prompts instead of one?</summary>
+        <div class="answer"><p>Any single prompt has quirks of wording. Averaging the activations from no prompt and three bland Assistant prompts gives a more reliable estimate of what the model does by default, so the Assistant end of the axis is not tied to one phrasing. The paper does the same with its default baseline.</p></div></details>
+      <details class="q"><summary><span class="qn">Q2.</span>Why would a factual question like "What is 2 + 2?" be a poor evaluation question?</summary>
+        <div class="answer"><p>Every persona would give nearly the same content, so the responses (and the activations recorded on them) would barely differ between personas. We want questions where the character shows through in the answer.</p></div></details>
+      <details class="q"><summary><span class="qn">Q3.</span>According to the persona selection model, what does post-training do to the other characters a model learned in pre-training?</summary>
+        <div class="answer"><p>It does not remove them. It selects one character, the Assistant, and makes it the default. The others can still be reached with the right prompt or conversation, which is why persona drift and persona-based jailbreaks are possible.</p></div></details>
+      <details class="q"><summary><span class="qn">Q4.</span>Why do we need the instruction-tuned <code>gemma-2-9b-it</code> rather than the base <code>gemma-2-9b</code> for this?</summary>
+        <div class="answer"><p>The project is about the default Assistant persona that post-training creates. A base model has not been through post-training, so it has no default Assistant to locate. (The paper does look at base models too, in Section 3.2.2, but as a comparison.)</p></div></details>
+
+      <h2 id="mistakes">Common mistakes</h2>
+      <ul class="mistakes">
+        <li><strong>Editing a persona prompt and keeping the old cache.</strong> Responses and vectors are cached in <code>/kaggle/working/persona_cache/</code>. If you change any system prompt, delete <code>responses.json</code> and the <code>persona_vectors_L*.pt</code> file, or you will analyse responses to the old prompts.</li>
+        <li><strong>Removing the default personas or renaming them</strong> without updating <code>DEFAULT_PERSONAS</code>. The Assistant Axis calculation needs at least one default persona to exist.</li>
+        <li><strong>Confusing "persona vectors" here with ARENA's Section 3 "Persona Vectors".</strong> In this project a persona vector is the mean activation for one role. ARENA's later sections (out of scope for us) extract trait vectors such as sycophancy from contrastive prompts, which is a different method.</li>
+        <li><strong>Reading too much into the smoke test.</strong> With 10 personas and 2 questions the geometry is noisy. Judge the science only on the full run.</li>
+      </ul>
+      <nav class="pager" id="pager"></nav>
+      <footer class="site-footer" id="site-footer">
+        <noscript><p>DataWorks AI Interpretability Lab. Leads and instructors: Rami Abukhater, Alec Min, and Akshar Sinha. Adapted from ARENA notebook 4.4 and The Assistant Axis (Lu et al., 2026).</p></noscript>
+      </footer>
+    </article>
+  </main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<script src="../assets/js/site.js"></script>
+</body>
+</html>
