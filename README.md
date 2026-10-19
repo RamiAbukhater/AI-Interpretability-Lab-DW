@@ -9,7 +9,7 @@ In person we only cover the high-level ideas. Setup, reading, and the notebook a
 - **Setup on Kaggle**: account, phone verification, OpenRouter key, the Gemma 2 license, GPU T4 x2, model inputs, secrets, the smoke test, quota, saving, and troubleshooting.
 - **Seven concept pages**, in the order the notebook uses them, each with intuition, a diagram, the link to the paper, a code walkthrough with tensor shapes, click-to-reveal questions, and common mistakes.
 - **Homework 0**: a short introduction post in the general research chat on Discord, due Friday, October 23. Homework 1 is due Wednesday, October 28 (a screenshot of the PCA plot with the student's projected personas, posted in the homework submissions channel on Discord), and Homework 2 is due Friday, October 30 (a reply and reaction to Rami's message in that channel).
-- **Calendar**: meetings every Wednesday and Thursday, 7 to 8 pm, three workshops, homework deadlines, the final paper (Nov 27), the lab dinner (Dec 3), and the tentative showcase (Dec 4–5).
+- **Calendar**: meetings every Wednesday and Thursday, 7 to 8 pm, three workshops, homework deadlines, the final paper (Sun Nov 29), the lab dinner (Dec 3), and the tentative showcase (Dec 4–5).
 - **Homework 1** (setup, smoke test, Sections 1 and 2) and **Homework 2** (choose and propose a research extension from a menu of six ideas), each on its own page.
 - **Resources**: sources, a glossary, and introductory interpretability reading.
 
