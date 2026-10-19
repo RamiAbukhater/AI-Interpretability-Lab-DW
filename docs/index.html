@@ -69,7 +69,7 @@
 
       <div class="callout">
         <span class="callout-title">How long will this take?</span>
-        <p>Plan about an hour for setup, most of it waiting for Kaggle and the model license. Each concept page takes 20 to 40 minutes to read alongside the matching part of the notebook. The full 9B run uses roughly 30 to 45 minutes of GPU time, and you have a weekly allowance (see <a href="setup.html#step-quota">GPU quota</a>).</p>
+        <p>Plan about an hour for setup, most of it waiting for Kaggle and the model license. Each concept page takes 20 to 40 minutes to read alongside the matching part of the notebook. The full 9B run is estimated at 20 to 30 minutes of GPU time, and you have a weekly allowance (see <a href="setup.html#step-quota">GPU quota</a>).</p>
       </div>
 
       <h2>What you need to know already</h2>
@@ -80,6 +80,9 @@
       </ul>
       <p>You do not need any interpretability background. Every technical term is defined in the <a href="resources.html#glossary">glossary</a>.</p>
 
+      <h2>The notebook</h2>
+      <p>Everything you run is in one Kaggle notebook: <a href="notebooks/persona_axis_kaggle_exercises.ipynb" download>persona_axis_kaggle_exercises.ipynb</a>. Download it now, and <a href="setup.html#step-import">setup step 5</a> shows how to import it into Kaggle.</p>
+
       <h2>The sources</h2>
       <div class="link-row">
         <a href="https://arxiv.org/abs/2601.10387">The Assistant Axis paper (arXiv 2601.10387)</a>
@@ -88,7 +91,7 @@
         <a href="https://github.com/ARENA-education/ARENA_materials">ARENA materials</a>
         <a href="https://github.com/ARENA-education/ARENA_materials/blob/main/chapter4_alignment_science/exercises/part4_persona_vectors/4.4_LLM_Psychology_%26_Persona_Vectors_exercises.ipynb">ARENA notebook 4.4</a>
       </div>
-      <p class="small">Our notebook is an adaptation of ARENA's notebook 4.4, <em>LLM Psychology &amp; Persona Vectors</em>, cut down to Section 1 (Mapping Persona Space) and Section 2 up to steering, and changed to run on Kaggle's free GPUs with Gemma 2 9B instead of Gemma 2 27B. Activation capping and the Persona Vectors half of the ARENA notebook are out of scope for now.</p>
+      <p class="small">Our notebook is an adaptation of ARENA's notebook 4.4, <em>LLM Psychology &amp; Persona Vectors</em>, cut down to Section 1 (Mapping Persona Space) and Section 2 up to steering, and changed to run on Kaggle's free GPUs with Gemma 2 9B instead of Gemma 2 27B. It also generates persona responses with the same local model, adds 33 roles from the paper's own list, and uses a current Claude Haiku as the judge. Activation capping and the Persona Vectors half of the ARENA notebook are out of scope for now.</p>
       <nav class="pager" id="pager"></nav>
       <footer class="site-footer" id="site-footer">
         <noscript><p>DataWorks AI Interpretability Lab. Leads and instructors: Rami Abukhater, Alec Min, and Akshar Sinha. Adapted from ARENA notebook 4.4 and The Assistant Axis (Lu et al., 2026).</p></noscript>

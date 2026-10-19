@@ -1,11 +1,8 @@
 # ==============================================================================
 # LEADERS ONLY: save the shared PCA basis for the class persona map
-# Paste into the leader solutions notebook right after the Section 1 PCA cell,
-# and run it on gemma-2-9b-it (SMOKE_TEST = False).
-#
-# TODO, sync with final notebook: the names used here (persona_vectors,
-# mean_vector, pca, DEFAULT_PERSONAS, EXTRACTION_LAYER, MODEL_NAME) follow
-# ARENA notebook 4.4. Rename them if the final notebook differs.
+# This cell sits in persona_axis_kaggle_solutions.ipynb right after the
+# Section 1 PCA check. Run it on gemma-2-9b-it (SMOKE_TEST = False) with the
+# default persona list (USE_FULL_PERSONA_LIST = False).
 #
 # It writes /kaggle/working/shared_pca.json containing the shared mean, the
 # first two principal components, the Assistant vector, and the shared
@@ -46,7 +43,7 @@ _mean, _comps, _assistant = (np.round(a, 6) for a in (_mean, _comps, _assistant)
 _coords = (_V - _mean) @ _comps.T                                 # (n_personas, 2)
 
 shared = {
-    "model": globals().get("MODEL_NAME", "gemma-2-9b-it"),
+    "model": MODEL_VARIANT,
     "layer": int(EXTRACTION_LAYER),
     "d_model": int(_V.shape[1]),
     "basis_id": basis_id(_mean, _comps),
@@ -61,7 +58,6 @@ shared = {
     ],
 }
 
-_out = Path("/kaggle/working") if Path("/kaggle/working").exists() else Path(".")
-(_out / "shared_pca.json").write_text(json.dumps(shared))
-print(f"Saved {_out / 'shared_pca.json'}: {len(_names)} shared personas, layer {shared['layer']}, "
+(WORK_DIR / "shared_pca.json").write_text(json.dumps(shared))
+print(f"Saved {WORK_DIR / 'shared_pca.json'}: {len(_names)} shared personas, layer {shared['layer']}, "
       f"d_model {shared['d_model']}, basis {shared['basis_id']}")

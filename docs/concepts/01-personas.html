@@ -98,10 +98,10 @@
         <li><strong>Figure 1 (left)</strong> shows the result we are working toward: role vectors laid out in persona space, with the Assistant at one end of the main direction.</li>
         <li>The persona selection model itself comes from Sam Marks' essay <a href="https://www.lesswrong.com/posts/dfoty34sT7CSKeJNn/the-persona-selection-model">The Persona Selection Model</a>, which cites this paper as evidence. Janus's <a href="https://www.lesswrong.com/posts/vJFdjigzmcXMhNTsx/simulators">Simulators</a> is the older version of the idea.</li>
       </ul>
-      <p>Our notebook keeps the method but shrinks the data so it fits a free GPU in an afternoon: about 20 hand-picked personas with one system prompt each, and 15 questions (10 personas and 2 questions in smoke-test mode).</p>
+      <p>Our notebook keeps the method but shrinks the data so it fits a free GPU in an afternoon. It uses ARENA's 20 hand-picked personas plus 33 roles from the paper's own role list, one system prompt each (53 personas), and the first 5 of ARENA's 15 questions. In smoke-test mode that drops to 10 personas and 2 questions.</p>
 
       <h2 id="code">The code, walked through</h2>
-      <div class="todo-banner">Stand-in code from the original ARENA notebook. Replace with the cells from the final student notebook, including how SMOKE_TEST and USE_FULL_PERSONA_LIST choose the persona set.</div>
+      <p>These cells are from the Section 1 part of <a href="../notebooks/persona_axis_kaggle_exercises.ipynb">the lab notebook</a> ("Defining personas" and "Evaluation questions").</p>
 
       <h3>Defining personas</h3>
 <pre><code class="language-python">PERSONAS = {
@@ -112,26 +112,67 @@
     "default_helpful": "You are a helpful assistant",
     #
     # Assistant-like (professional, helpful)
-    "consultant": "You are a professional consultant who provides expert advice ...",
-    "analyst": "You are a data analyst who examines information methodically ...",
+    "consultant": "You are a professional consultant who provides expert advice and strategic recommendations, ...",
+    "assistant": "You are a helpful AI assistant who provides clear, accurate, and reliable information ...",
+    "analyst": "You are a data analyst who examines information methodically, ...",
+    # ... evaluator, generalist
     #
     # Mid-range
-    "philosopher": "You are a philosopher who ponders deep questions ...",
+    "storyteller": "You are a creative storyteller who weaves engaging narratives ...",
+    "philosopher": "You are a philosopher who ponders deep questions about existence, ...",
+    # ... artist, rebel, mystic
     #
     # Anti-Assistant (fantastical, un-helpful)
     "ghost": "You are a ghost, a spectral presence from beyond the veil ...",
-    "oracle": "You are an oracle who speaks in cryptic prophecies ...",
-    # ... (prompts shortened here; see the notebook for the full list)
+    # ... bohemian, bard, trickster, jester, oracle
 }
 
 DEFAULT_PERSONAS = ["default", "default_assistant", "default_llm", "default_helpful"]
 </code></pre>
       <div class="walk">
         <ul>
-          <li><code>PERSONAS</code> maps a short name to a <strong>system prompt</strong>, the instruction the model sees before the user's question. The whole definition of a persona is this one string.</li>
+          <li><code>PERSONAS</code> maps a short name to a <strong>system prompt</strong>, the instruction the model sees before the user's question. The whole definition of a persona is this one string. (Prompts are shortened here; the notebook has them in full.)</li>
           <li>The first four entries are not really characters. They are four slightly different ways of getting the model's normal behaviour: no system prompt at all, and three bland ones. Averaging over several wordings gives a steadier picture of "the default Assistant" than any one prompt would.</li>
           <li><code>DEFAULT_PERSONAS</code> records which names count as the default. Later, the Assistant Axis is built as "the average default minus the average of everything else", so this list matters (<a href="05-pca-assistant-axis.html">concept 5</a>).</li>
-          <li>The other personas are chosen to span a range, using the paper's appendix as a guide: Assistant-like professionals (consultant, analyst), mid-range creative roles (philosopher, storyteller), and fantastical roles that end up far from the Assistant (ghost, oracle, jester).</li>
+          <li>These 20 personas are ARENA's, chosen to span a range using the paper's appendix as a guide: Assistant-like professionals (consultant, analyst), mid-range creative roles (philosopher, storyteller), and fantastical roles that end up far from the Assistant (ghost, oracle, jester).</li>
+        </ul>
+      </div>
+
+      <h3>Adding roles from the paper, and choosing the run size</h3>
+<pre><code class="language-python"># Extra roles from the paper repo, grouped so the workshop list spans persona space
+EXTRA_ROLES = {
+    "assistant-like": ["tutor", "translator", "researcher", "programmer", "librarian", "accountant", "proofreader", "summarizer"],
+    "human profession": ["doctor", "lawyer", "chef", "journalist", "detective", "teacher", "historian", "soldier", "bartender"],
+    "fictional": ["pirate", "vampire", "witch", "demon", "angel", "prophet", "shaman", "sage"],
+    "non-human": ["robot", "alien", "tree", "whale", "swarm", "void", "virus", "leviathan"],
+}
+ROLE_DIR = assistant_axis_path / "data" / "roles" / "instructions"
+
+
+def load_role_prompt(role: str) -> str:
+    """First system prompt the paper wrote for this role."""
+    return json.loads((ROLE_DIR / f"{role}.json").read_text())["instruction"][0]["pos"]
+
+
+if SMOKE_TEST:
+    PERSONAS = {
+        k: PERSONAS[k]
+        for k in ["default", "default_assistant", "default_helpful", "assistant", "consultant", "philosopher", "ghost", "jester", "oracle"]
+    } | {"pirate": load_role_prompt("pirate")}
+elif USE_FULL_PERSONA_LIST:
+    all_roles = sorted(p.stem for p in ROLE_DIR.glob("*.json") if p.stem not in ("default", "assistant"))
+    PERSONAS = PERSONAS | {r: load_role_prompt(r) for r in all_roles if r not in PERSONAS}
+else:
+    PERSONAS = PERSONAS | {r: load_role_prompt(r) for roles in EXTRA_ROLES.values() for r in roles if r not in PERSONAS}
+
+print(f"Using {len(PERSONAS)} personas")
+</code></pre>
+      <div class="walk">
+        <ul>
+          <li>The paper's repository (cloned during setup to <code>assistant_axis_path</code>) has a JSON file for each of its 275 roles, with five system prompts each. <code>load_role_prompt</code> reads the first one.</li>
+          <li><code>EXTRA_ROLES</code> adds 33 of them in four groups: more Assistant-like jobs, ordinary human professions, fictional characters, and non-human entities. Spreading roles across groups covers persona space more evenly than ARENA's 20 alone. Any name already in <code>PERSONAS</code> is skipped.</li>
+          <li>The three run modes pick the persona list: <strong>smoke test</strong> keeps 10 (three defaults, two Assistant-like, one mid-range, three fantastical, and the pirate); the <strong>workshop run</strong> (both flags off) uses all 53; <strong>full mode</strong> adds every role in the repository, 275 in all, which takes hours.</li>
+          <li><code>dict | dict</code> merges two dictionaries (Python 3.9 and later), keeping existing keys.</li>
         </ul>
       </div>
 
@@ -141,14 +182,28 @@ DEFAULT_PERSONAS = ["default", "default_assistant", "default_llm", "default_help
     "How do you view the relationship between knowledge and wisdom?",
     "What do you think about the nature of truth?",
     "How should someone approach making difficult decisions?",
+    "What role does creativity play in problem-solving?",
     # ... 15 questions in total
 ]
+
+# The workshop uses a subset of the questions to fit the time budget (each question is one response per persona)
+N_QUESTIONS = 2 if SMOKE_TEST else len(EVAL_QUESTIONS) if USE_FULL_PERSONA_LIST else 5
+EVAL_QUESTIONS = EVAL_QUESTIONS[:N_QUESTIONS]
+
+# Max tokens per persona response (the original uses 256; 128 is plenty for a mean activation and halves generation time)
+RESPONSE_MAX_TOKENS = 256 if USE_FULL_PERSONA_LIST else 128
+
+# Results are cached here, one folder per model and persona-list mode
+RUN_TAG = f"{MODEL_VARIANT}_{'smoke' if SMOKE_TEST else 'full' if USE_FULL_PERSONA_LIST else 'workshop'}"
+CACHE_DIR = WORK_DIR / "persona_cache" / RUN_TAG
 </code></pre>
       <div class="walk">
         <ul>
-          <li>Each persona answers each question, giving <code>len(PERSONAS) × len(EVAL_QUESTIONS)</code> responses (roughly 20 × 15 = 300 in the full run, 10 × 2 = 20 in the smoke test).</li>
+          <li>Each persona answers each question, giving <code>len(PERSONAS) × len(EVAL_QUESTIONS)</code> responses: 53 × 5 = 265 in the workshop run, 10 × 2 = 20 in the smoke test.</li>
           <li>The questions are deliberately <strong>open-ended and opinion-seeking</strong>. "What is the capital of France?" would get the same answer from a consultant and a ghost, which tells us nothing. "How do you think about the passage of time?" gives a ghost room to sound like a ghost.</li>
           <li>They are also <strong>not tied to any one persona</strong>, so every character can answer them in its own way. If the questions were about spreadsheets, the analyst would have an unfair advantage.</li>
+          <li><code>RESPONSE_MAX_TOKENS = 128</code> keeps responses short. A mean activation needs enough tokens to average over, not a long essay, and shorter responses halve generation time.</li>
+          <li><code>CACHE_DIR</code> is where responses, judge scores and persona vectors are saved, for example <code>/kaggle/working/persona_cache/gemma-2-9b-it_workshop/</code>. Each model and mode gets its own folder, so a smoke-test cache never mixes with the real run.</li>
         </ul>
       </div>
 
@@ -169,10 +224,10 @@ DEFAULT_PERSONAS = ["default", "default_assistant", "default_llm", "default_help
 
       <h2 id="mistakes">Common mistakes</h2>
       <ul class="mistakes">
-        <li><strong>Editing a persona prompt and keeping the old cache.</strong> Responses and vectors are cached in <code>/kaggle/working/persona_cache/</code>. If you change any system prompt, delete <code>responses.json</code> and the <code>persona_vectors_L*.pt</code> file, or you will analyse responses to the old prompts.</li>
+        <li><strong>Editing a persona prompt and keeping the old cache.</strong> Responses and vectors are cached in <code>CACHE_DIR</code> (under <code>/kaggle/working/persona_cache/</code>), and the notebook only regenerates personas that are missing. If you change a system prompt, delete <code>responses.json</code> and the <code>persona_vectors_L*.pt</code> file in that folder, or you will analyse responses to the old prompt.</li>
         <li><strong>Removing the default personas or renaming them</strong> without updating <code>DEFAULT_PERSONAS</code>. The Assistant Axis calculation needs at least one default persona to exist.</li>
         <li><strong>Confusing "persona vectors" here with ARENA's Section 3 "Persona Vectors".</strong> In this project a persona vector is the mean activation for one role. ARENA's later sections (out of scope for us) extract trait vectors such as sycophancy from contrastive prompts, which is a different method.</li>
-        <li><strong>Reading too much into the smoke test.</strong> With 10 personas and 2 questions the geometry is noisy. Judge the science only on the full run.</li>
+        <li><strong>Reading too much into the smoke test.</strong> With 10 personas and 2 questions the geometry is noisy. Judge the science only on the 9B workshop run.</li>
       </ul>
       <nav class="pager" id="pager"></nav>
       <footer class="site-footer" id="site-footer">

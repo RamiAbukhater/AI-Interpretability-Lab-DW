@@ -48,11 +48,10 @@
       <h3>Where the responses come from</h3>
       <p>There are two options, and the notebook supports both through the <code>GENERATION_BACKEND</code> flag.</p>
       <ul>
-        <li><strong>An API</strong> (<code>"openrouter"</code>). The original ARENA notebook sends every persona and question to Gemma 2 27B over OpenRouter. Generating hundreds of long answers token by token on your own GPU is the slowest part of the pipeline. An API runs many requests in parallel on someone else's hardware and returns them in a minute or two, and your GPU is only needed afterwards to read activations.</li>
+        <li><strong>An API</strong> (<code>"openrouter"</code>). The original ARENA notebook sends every persona and question to Gemma 2 27B over OpenRouter. Generating hundreds of answers token by token on your own GPU is the slowest part of the pipeline. An API runs many requests in parallel on someone else's hardware, and your GPU is only needed afterwards to read activations. But OpenRouter no longer serves Gemma 2 9B or 2B, so in our notebook this option means 27B writes the text.</li>
         <li><strong>Locally</strong> (<code>"local"</code>, our default). The loaded Gemma 2 9B writes its own responses on Kaggle's GPUs, in batches. This is slower but keeps everything consistent: the text we analyse was written by the very model whose activations we read.</li>
       </ul>
-      <p>Why does that consistency matter? Activations are recorded by feeding text through our model. If 27B wrote the text, we are measuring how 9B <em>reads</em> a ghost's answer, not how 9B <em>acts</em> as a ghost. That is usually close, but it is not the same experiment, so we default to local generation. The judge, in contrast, always runs through the API, because it needs to be a different and stronger model.</p>
-      <div class="todo-banner">Confirm the default GENERATION_BACKEND and the judge model name in the final notebook.</div>
+      <p>Why does that consistency matter? Activations are recorded by feeding text through our model. If 27B wrote the text, we are measuring how 9B <em>reads</em> a ghost's answer, not how 9B <em>acts</em> as a ghost. That is usually close, but it is not the same experiment, so the notebook defaults to <code>GENERATION_BACKEND = "local"</code>. With 9B on Kaggle's T4s the 265 workshop responses take a few minutes. The judge, in contrast, always runs through the API (Claude Haiku, <code>anthropic/claude-haiku-5.5</code>), because it needs to be a different and stronger model.</p>
 
       <h2 id="diagram">Diagram</h2>
       <figure class="diagram">
@@ -106,22 +105,63 @@
       <p>The notebook keeps the scale but makes the filter optional (<code>RUN_JUDGE_FILTER</code>, off by default) to save API calls and time. With the filter off, every non-empty response is used, which slightly blurs the persona vectors. Turning it on is a good extension.</p>
 
       <h2 id="code">The code, walked through</h2>
-      <div class="todo-banner">Stand-in code from the original ARENA notebook, which generates through the API. Replace with the final notebook's generation cell (local batching with GEN_BATCH_SIZE) and its judge model constant.</div>
+      <p>These cells are from the "Generating responses" and "Judging role-playing responses" parts of Section 1 in <a href="../notebooks/persona_axis_kaggle_exercises.ipynb">the lab notebook</a>.</p>
 
-      <h3>Calling models through OpenRouter</h3>
-<pre><code class="language-python">openrouter_client = OpenAI(
+      <h3>The OpenRouter client</h3>
+<pre><code class="language-python">OPENROUTER_API_KEY = None
+try:
+    from kaggle_secrets import UserSecretsClient
+
+    OPENROUTER_API_KEY = UserSecretsClient().get_secret("OPENROUTER_API_KEY")
+except Exception as e:  # not on Kaggle, or the secret is not attached to this notebook
+    print(f"Could not read the Kaggle secret ({type(e).__name__}), falling back to the environment variable")
+    OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
+
+assert OPENROUTER_API_KEY, "Add a Kaggle Secret called OPENROUTER_API_KEY (Add-ons -> Secrets) and attach it to this notebook"
+
+openrouter_client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
     api_key=OPENROUTER_API_KEY,
 )
+</code></pre>
+      <div class="walk">
+        <ul>
+          <li>The key comes from the Kaggle Secret you set up in <a href="../setup.html#step-secret">setup step 8</a>; it never appears in the notebook.</li>
+          <li>OpenRouter speaks the same protocol as OpenAI's API, so the notebook uses the ordinary <code>openai</code> Python client and points <code>base_url</code> at OpenRouter. The <code>model</code> string on each request (for example <code>"anthropic/claude-haiku-5.5"</code>) picks which company's model handles it.</li>
+        </ul>
+      </div>
 
-def generate_responses_parallel(messages_list, model=OPENROUTER_MODEL,
-                                max_tokens=128, temperature=0.7, max_workers=10):
+      <h3>Generating locally or through the API</h3>
+<pre><code class="language-python">LOCAL = "local"
+OPENROUTER_GEN_MODEL = "google/gemma-2-27b-it"  # the only Gemma 2 still on OpenRouter (checked October 2026)
+OPENROUTER_MODEL = LOCAL if GENERATION_BACKEND == "local" else OPENROUTER_GEN_MODEL
+MAX_WORKERS = 4  # parallel API calls (lower this if you hit OpenRouter rate limits)
+GEN_BATCH_SIZE = 8 if SMOKE_TEST else 32  # prompts per local generate() call (lower this if you hit CUDA OOM)
+
+
+def generate_responses_local(messages_list, max_tokens=128, temperature=0.7, batch_size=GEN_BATCH_SIZE):
+    """Generate responses with the loaded model, in left-padded batches sorted by prompt length."""
+    prompts = [
+        tokenizer.apply_chat_template(_normalize_messages(msgs), tokenize=False, add_generation_prompt=True)
+        for msgs in messages_list
+    ]
+    order = sorted(range(len(prompts)), key=lambda i: len(prompts[i]))
+    end_of_turn = tokenizer.convert_tokens_to_ids("&lt;end_of_turn&gt;")
+    ...  # for each batch: tokenize with left padding, model.generate(..., eos_token_id=[eos, end_of_turn]),
+         # decode only the new tokens, and put each result back in its original position
+    return results
+
+
+def generate_responses_parallel(messages_list, model=OPENROUTER_MODEL, max_tokens=128,
+                                temperature=0.7, max_workers=MAX_WORKERS):
+    if model == LOCAL:
+        return generate_responses_local(messages_list, max_tokens=max_tokens, temperature=temperature)
+
     def _single_call(messages):
         try:
             time.sleep(0.1)  # Rate limiting
             response = openrouter_client.chat.completions.create(
-                model=model, messages=messages,
-                max_tokens=max_tokens, temperature=temperature,
+                model=model, messages=messages, max_tokens=max_tokens, temperature=temperature,
             )
             return response.choices[0].message.content
         except Exception as e:
@@ -132,11 +172,12 @@ def generate_responses_parallel(messages_list, model=OPENROUTER_MODEL,
 </code></pre>
       <div class="walk">
         <ul>
-          <li>OpenRouter speaks the same protocol as OpenAI's API, so the notebook uses the ordinary <code>openai</code> Python client and just points <code>base_url</code> at OpenRouter. The <code>model</code> string (for example <code>"google/gemma-2-27b-it"</code>) picks which company's model handles the request.</li>
-          <li>A <strong>conversation</strong> is a list of message dictionaries such as <code>{"role": "user", "content": "..."}</code>. <code>messages_list</code> is a list of conversations, one per request.</li>
-          <li><code>max_workers</code> requests run at the same time in threads. More workers is faster, until you hit a rate limit (HTTP 429). Then lower <code>MAX_WORKERS</code>.</li>
-          <li>Errors are caught and turned into an empty string <code>""</code>, so one failed call does not crash a run of hundreds. That is why later code skips empty responses. It also means a bad key or no credit shows up as a stream of printed <code>API error</code> lines, not as one crash, so read the output.</li>
-          <li><code>temperature=0.7</code> for persona responses (some variety); judges use <code>temperature=0.0</code> so the same response always gets the same score.</li>
+          <li>One function, two routes. <code>generate_responses_parallel</code> checks its <code>model</code> argument: the special value <code>"local"</code> sends the conversations to the loaded Gemma, and anything else is treated as an OpenRouter model name. Persona generation uses the default (<code>OPENROUTER_MODEL</code>, which is <code>"local"</code> unless you change <code>GENERATION_BACKEND</code>); the judges pass their own model name.</li>
+          <li>A <strong>conversation</strong> is a list of message dictionaries such as <code>{"role": "user", "content": "..."}</code>. <code>messages_list</code> is a list of conversations, one per response.</li>
+          <li><strong>Local batching.</strong> Prompts are sorted by length and generated <code>GEN_BATCH_SIZE</code> at a time (32 on 9B). Padding goes on the <em>left</em> so every prompt ends right where generation starts. Generation stops at Gemma's <code>&lt;end_of_turn&gt;</code> token. If you run out of GPU memory here, lower <code>GEN_BATCH_SIZE</code>.</li>
+          <li><strong>API calls</strong> run <code>MAX_WORKERS</code> at a time (4) in threads. More workers is faster until you hit a rate limit (HTTP 429); then lower it.</li>
+          <li>API errors are caught and turned into an empty string <code>""</code>, so one failed call does not crash a run. That is why later code skips empty responses. It also means a bad key or no credit shows up as a stream of printed <code>API error</code> lines, not as one crash, so read the output.</li>
+          <li><code>temperature=0.7</code> for persona responses (some variety); the judges use <code>temperature=0.0</code> so the same response always gets the same score.</li>
         </ul>
       </div>
 
@@ -164,7 +205,9 @@ def generate_responses_parallel(messages_list, model=OPENROUTER_MODEL,
       <div class="exercise">
         <span class="tag">Exercise</span>
         <h3>The judge prompt: <code>JUDGE_PROMPT_TEMPLATE</code> and <code>parse_score</code></h3>
-<pre><code class="language-python">AUTORATER_MODEL = "anthropic/claude-3.5-haiku"   # TODO: this model has been retired on OpenRouter
+<pre><code class="language-python"># Judge models on OpenRouter. claude-3.5-haiku (used in the original notebook) has been retired,
+# so we use the current Haiku (checked October 2026).
+AUTORATER_MODEL = "anthropic/claude-haiku-5.5"
 
 JUDGE_PROMPT_TEMPLATE = """..."""   # your template
 
@@ -192,8 +235,35 @@ def judge_role_response(question, response, character,
       </div>
 
       <h3>Filtering with the scores</h3>
-      <p>When <code>RUN_JUDGE_FILTER</code> is on, every response is scored and the scores go into <code>extract_persona_vectors</code> (<a href="03-residual-stream.html">concept 3</a>) as a <code>scores</code> dictionary with the same <code>(persona, question_index)</code> keys. Any response with a score below <code>score_threshold=3</code> is skipped. The scores are cached in <code>persona_cache/…/judge_scores.json</code>.</p>
-      <p>The default personas are a special case: a 3 means "fully playing the role", and for "You are a helpful assistant" the role <em>is</em> the Assistant, so they normally pass.</p>
+      <p>Your generation function from the exercise above is then run on every persona and question. Responses are saved to <code>CACHE_DIR/responses.json</code>, and only personas missing from that file get generated, so re-running is cheap. Next, if you set <code>RUN_JUDGE_FILTER = True</code> at the top of the notebook, the provided cell below scores every response with your judge before activations are extracted:</p>
+<pre><code class="language-python">scores: dict[tuple[str, int], int] | None = None
+if RUN_JUDGE_FILTER:
+    SCORES_PATH = CACHE_DIR / "judge_scores.json"
+    scores = {(p, q): s for p, q, s in json.loads(SCORES_PATH.read_text())} if SCORES_PATH.exists() else {}
+    to_score = [k for k, r in responses.items() if r and k not in scores and k[0] not in DEFAULT_PERSONAS]
+
+    def _score(key):
+        try:
+            return key, judge_role_response(question=EVAL_QUESTIONS[key[1]], response=responses[key], character=key[0])
+        except Exception as e:  # unparseable judge output counts as a fail
+            print(f"Judge failed for {key}: {e}")
+            return key, 0
+
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        for key, score in tqdm(executor.map(_score, to_score), total=len(to_score)):
+            scores[key] = score
+    SCORES_PATH.write_text(json.dumps([[p, q, s] for (p, q), s in scores.items()]))
+    scores |= {(p, q): 3 for p in DEFAULT_PERSONAS for q in range(len(EVAL_QUESTIONS))}  # never filter defaults
+</code></pre>
+      <div class="walk">
+        <ul>
+          <li>The keys are <code>(persona, question_index)</code> pairs, the same keys as <code>responses</code>. Already-scored responses are loaded from <code>judge_scores.json</code>, so the API is only called for new ones.</li>
+          <li>Responses are judged in parallel, <code>MAX_WORKERS</code> at a time. A judge reply that cannot be parsed counts as 0, so it is filtered out rather than crashing the run.</li>
+          <li>The <strong>default personas are never filtered</strong>: they get a 3 automatically. They have no role to play, so a judge asking "did it play the role?" would be meaningless for them.</li>
+          <li>The <code>scores</code> dictionary then goes into <code>extract_persona_vectors</code> (<a href="03-residual-stream.html">concept 3</a>), which skips any response below <code>score_threshold=3</code>. A persona with no surviving responses is skipped entirely, with a message.</li>
+        </ul>
+      </div>
+      <p>With the filter off (the default) <code>scores</code> stays <code>None</code> and every non-empty response is used. For the 265 workshop responses, the filter costs a few minutes and well under a dollar of OpenRouter credit.</p>
 
       <h2 id="check">Check your understanding</h2>
       <details class="q"><summary><span class="qn">Q1.</span>Why filter out responses that score 1 or 2 instead of keeping everything?</summary>

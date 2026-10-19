@@ -114,7 +114,7 @@
       </ul>
 
       <h2 id="code">The code, walked through</h2>
-      <div class="todo-banner">Stand-in code from the original ARENA notebook. Replace with the final notebook's cells and its suggested alpha values.</div>
+      <p>These cells are from "Setup" and "Steering with the Assistant Axis" in Section 2 of <a href="../notebooks/persona_axis_kaggle_exercises.ipynb">the lab notebook</a>.</p>
 
       <h3>Scaling the axis into persona-gap units</h3>
 <pre><code class="language-python">assistant_axis = F.normalize(assistant_axis.cpu().float(), dim=0)
@@ -163,8 +163,8 @@ axis_steer = assistant_axis * AXIS_SCALE  # Scaled vector for steering (not unit
           <tr><td><code>model.generate</code> output</td><td><span class="shape">(1, prompt_len + new_tokens)</span>; keep only <code>[0, prompt_len:]</code></td></tr>
         </table>
         <details class="hint"><summary>Hint 1: building the prompt</summary><div class="hint-body"><p>If <code>messages</code> is not given, build it from <code>system_prompt</code> (if any) and <code>prompt</code>. Run it through <code>_normalize_messages</code> (Gemma has no system role), then <code>apply_chat_template(..., add_generation_prompt=True)</code>, and tokenize with <code>add_special_tokens=False</code>. Remember the prompt length.</p></div></details>
-        <details class="hint"><summary>Hint 2: the hook</summary><div class="hint-body"><p>Inside the hook, add <code>alpha * steering_vector</code> to the output, cast to the output's device and dtype (the two GPUs and half precision both matter), and return the result. Because the vector has shape <span class="shape">(d_model,)</span>, broadcasting applies it to every position, during the prefill and every generation step.</p></div></details>
-        <details class="hint"><summary>Hint 3: generating</summary><div class="hint-body"><p>Register the hook on <code>_return_layers(model)[steering_layer]</code>, call <code>model.generate</code> with <code>do_sample=True</code> and your temperature inside <code>try</code>, and remove the hook in <code>finally</code>. Decode only the tokens after the prompt, with <code>skip_special_tokens=True</code>.</p></div></details>
+        <details class="hint"><summary>Hint 2: the hook</summary><div class="hint-body"><p>Inside the hook, get the hidden states with <code>_get_hidden(output)</code> and add <code>alpha * steering_vector</code> to them <em>in place</em> (<code>+=</code>), cast to their device and dtype (the two GPUs and float16 both matter). Then return <code>output</code>. Because you changed the tensor in place, returning <code>output</code> works whether it was a tensor or a tuple. The vector has shape <span class="shape">(d_model,)</span>, so broadcasting applies it to every position, during the prefill and every generation step.</p></div></details>
+        <details class="hint"><summary>Hint 3: generating</summary><div class="hint-body"><p>Register the hook on <code>_return_layers(model)[steering_layer]</code>, call <code>model.generate</code> with <code>do_sample=True</code> and your temperature inside <code>try</code>, and remove the hook in <code>finally</code>. Stop at Gemma's end of turn by passing <code>eos_token_id=[tokenizer.eos_token_id, tokenizer.convert_tokens_to_ids("&lt;end_of_turn&gt;")]</code>, and use <code>pad_token_id=tokenizer.pad_token_id</code>. Decode only the tokens after the prompt, with <code>skip_special_tokens=True</code>.</p></div></details>
       </div>
 
       <h3>Steering experiments</h3>
@@ -195,8 +195,10 @@ axis_steer = assistant_axis * AXIS_SCALE  # Scaled vector for steering (not unit
       <h2 id="mistakes">Common mistakes</h2>
       <ul class="mistakes">
         <li><strong>Leaving the steering hook attached.</strong> Every later generation is silently steered. Always remove it in <code>finally</code>; if outputs look strange later, restart the session.</li>
-        <li><strong>Device or dtype mismatch</strong>: the model is split over two GPUs and runs in half precision, so <code>steering_vector</code> must be moved to the output's device and dtype inside the hook.</li>
+        <li><strong>Device or dtype mismatch</strong>: the model is split over two GPUs and runs in float16, while <code>axis_steer</code> is a CPU float32 tensor. Move it to the hidden states' device and dtype inside the hook.</li>
+        <li><strong>Replacing a tuple with a tensor.</strong> If your hook returns the bare hidden-states tensor when the block's output was a tuple, older <code>transformers</code> versions break further up the model. Modify the tensor in place and return <code>output</code>.</li>
         <li><strong>Returning the prompt with the reply.</strong> Slice off the first <code>prompt_length</code> tokens before decoding.</li>
+        <li><strong>Generating past the end of the turn.</strong> Without <code>&lt;end_of_turn&gt;</code> in <code>eos_token_id</code>, Gemma can keep writing a fake next user turn.</li>
         <li><strong>Using the unit axis instead of <code>axis_steer</code></strong>. A unit vector is tiny compared with the activation norm, so nothing seems to happen at \(\alpha = 5\).</li>
         <li><strong>Judging from one sample.</strong> Generation is random; compare several samples per \(\alpha\), or fix the seed.</li>
         <li><strong>Getting the sign backwards</strong>: if positive \(\alpha\) makes the ghost more ghostly, your axis was built the wrong way round (\(\mu_\text{roles} - \mu_\text{default}\)).</li>

@@ -730,3 +730,8 @@ table.meetings tr.ws td { font-weight: 600; }
 table.keydates td:first-child { white-space: nowrap; font-family: var(--font-ui); font-weight: 600; }
 @media (max-width: 560px) { table.keydates td:first-child { white-space: normal; } }
 .tentative { font-family: var(--font-ui); font-size: 0.88em; font-style: italic; color: var(--ink-soft); }
+@media (max-width: 560px) {
+  .io-table .shape { white-space: normal; overflow-wrap: anywhere; }
+  table.cal td { overflow-wrap: anywhere; }
+}
+.content a { overflow-wrap: anywhere; }

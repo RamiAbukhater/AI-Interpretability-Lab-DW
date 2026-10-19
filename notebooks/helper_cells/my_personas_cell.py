@@ -1,12 +1,8 @@
 # ==============================================================================
 # REQUIRED FOR HOMEWORK 1, PART C: YOUR TWO PERSONAS
-# Paste this cell right after the Section 1 PCA exercise.
-#
-# TODO, sync with final notebook: the notebook names used below (PERSONAS,
-# DEFAULT_PERSONAS, EVAL_QUESTIONS, EXTRACTION_LAYER, persona_vectors,
-# mean_vector, pca, generate_all_responses, judge_role_response,
-# extract_persona_vectors, model, tokenizer) follow ARENA notebook 4.4.
-# Rename them if the final notebook differs.
+# This cell sits right after the Section 1 PCA check in
+# persona_axis_kaggle_exercises.ipynb. It needs your finished Section 1
+# exercises (judge prompt, generate_all_responses, extract_persona_vectors).
 #
 # What it does:
 #   1. generates, judges, and extracts activations for YOUR two personas, using
@@ -15,6 +11,7 @@
 #   3. prints their PC1 and PC2 coordinates and cosine similarity to the Assistant;
 #   4. saves my_personas_plot.png and my_personas.json in /kaggle/working.
 # Re-running it is cheap: responses, scores, and vectors are cached.
+# In smoke-test mode it runs on 2B against your own PCA; for Homework 1 run it on 9B.
 # ==============================================================================
 import hashlib
 import json
@@ -35,8 +32,7 @@ MY_PERSONAS = {
 }
 # -----------------------------------------------------------------------------
 
-WORK_DIR = Path("/kaggle/working") if Path("/kaggle/working").exists() else Path(".")
-MY_DIR = WORK_DIR / "persona_cache" / "my_personas"
+MY_DIR = CACHE_DIR / "my_personas"  # next to the shared run's cache, so it is per model and mode
 MY_DIR.mkdir(parents=True, exist_ok=True)
 SCORE_THRESHOLD = 3  # same role-play filter as the paper: keep only fully in-character responses
 
@@ -78,7 +74,7 @@ for _name, _prompt in MY_PERSONAS.items():
     _k = _key(_name, _prompt)
     if _k not in _responses_cache:
         print(f"Generating {len(EVAL_QUESTIONS)} responses for '{_name}' ...")
-        _gen = generate_all_responses({_name: _prompt}, EVAL_QUESTIONS)
+        _gen = generate_all_responses({_name: _prompt}, EVAL_QUESTIONS, max_tokens=RESPONSE_MAX_TOKENS)
         _responses_cache[_k] = [_gen.get((_name, i), "") for i in range(len(EVAL_QUESTIONS))]
         _resp_path.write_text(json.dumps(_responses_cache))
 my_responses = {
@@ -137,7 +133,7 @@ for _name, _prompt in MY_PERSONAS.items():
     my_vectors[_name] = _np(_vec_cache[_k])
 
 # ---- 5. the shared basis: the leads' file if attached, else your own shared fit
-_shared_files = sorted(Path("/kaggle/input").glob("**/shared_pca.json")) if Path("/kaggle/input").exists() else []
+_shared_files = sorted(KAGGLE_INPUT.glob("**/shared_pca.json")) if KAGGLE_INPUT.exists() else []
 _d_model = len(next(iter(persona_vectors.values())))
 basis = None
 if _shared_files:
@@ -213,7 +209,7 @@ ax.axhline(0, color="#dddddd", lw=0.8, zorder=1)
 ax.axvline(0, color="#dddddd", lw=0.8, zorder=1)
 ax.set_xlabel(f"PC1 ({basis['evr'][0]:.1%} of shared variance)")
 ax.set_ylabel(f"PC2 ({basis['evr'][1]:.1%} of shared variance)")
-ax.set_title(f"{STUDENT_NAME}: my personas projected onto the shared PCA (layer {EXTRACTION_LAYER})")
+ax.set_title(f"{STUDENT_NAME}: my personas on the shared PCA ({MODEL_VARIANT}, layer {EXTRACTION_LAYER})")
 ax.legend(loc="best", fontsize=9)
 fig.tight_layout()
 _png = WORK_DIR / "my_personas_plot.png"
@@ -223,7 +219,7 @@ plt.show()
 # ---- 8. save coordinates for the class map ----------------------------------
 _record = {
     "student": STUDENT_NAME,
-    "model": globals().get("MODEL_NAME", ""),
+    "model": MODEL_VARIANT,
     "layer": int(EXTRACTION_LAYER),
     "basis_source": basis["source"],
     "basis_id": basis["id"],

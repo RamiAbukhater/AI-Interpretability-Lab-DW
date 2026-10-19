@@ -1,13 +1,13 @@
 # Notebooks
 
-> **TODO:** the final notebook files have not been added yet. Update this file when they are.
+Leader notes on how the notebook differs from ARENA's original, and what has and hasn't been tested, are in [KAGGLE_NOTEBOOK_NOTES.md](KAGGLE_NOTEBOOK_NOTES.md).
 
 ## Which notebook to import
 
 | File | Who it is for | In this repo? |
 |---|---|---|
-| `persona_axis_kaggle_exercises.ipynb` | Students. Exercise functions are stubs to fill in. | Yes, once provided |
-| `persona_axis_kaggle_solutions.ipynb` | Leaders only. Every exercise filled in. | **No.** Kept in a private repo or shared drive, because the notebook is graded homework. |
+| `persona_axis_kaggle_exercises.ipynb` | Students. Exercise functions are stubs to fill in. | Yes |
+| `persona_axis_kaggle_solutions.ipynb` | Leaders only. Every exercise filled in. | **No.** It is gitignored, so a local copy can sit in this folder, but it is never committed, because the notebook is graded homework. |
 
 Students import **only** `persona_axis_kaggle_exercises.ipynb`.
 
@@ -26,9 +26,11 @@ Results are cached under `/kaggle/working/persona_cache/`. They are lost when th
 
 ## Helper cells
 
-`helper_cells/` holds cells to paste into the notebooks until the final versions include them. See "Unique personas in Homework 1" in the main README.
+`helper_cells/` holds plain-Python copies of the Homework 1, Part C cells. Both are already in the notebooks, right after the Section 1 PC1 check; the `.py` files are the source, so edit both if you change one. See "Unique personas in Homework 1" in the main README.
 
-| File | Paste into | Where |
-|---|---|---|
-| `my_personas_cell.py` | Student and leader notebooks | Right after the Section 1 PCA exercise |
-| `leader_save_shared_pca.py` | Leader solutions notebook only | Right after the Section 1 PCA cell, on the 9B run |
+| File | In which notebook |
+|---|---|
+| `my_personas_cell.py` | Student notebook (with `EXAMPLE_` placeholders) and leader notebook (with a worked example) |
+| `leader_save_shared_pca.py` | Leader solutions notebook only |
+
+The course site links to a copy of the student notebook in `docs/notebooks/`. After editing `persona_axis_kaggle_exercises.ipynb`, copy it there: `cp notebooks/persona_axis_kaggle_exercises.ipynb docs/notebooks/`.

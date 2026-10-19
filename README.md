@@ -36,12 +36,16 @@ README.md               this file
 LICENSE                 MIT for code, CC BY 4.0 for written content
 .gitignore
 notebooks/
-  README.md             which notebook to import into Kaggle and how
-  helper_cells/         cells to paste into the notebooks (Homework 1 Part C personas; leaders' shared PCA)
+  persona_axis_kaggle_exercises.ipynb   the student notebook (the one students import)
+  persona_axis_kaggle_solutions.ipynb   leaders only; gitignored, never committed
+  KAGGLE_NOTEBOOK_NOTES.md              leader notes: what changed from ARENA, run modes, testing status
+  README.md                             which notebook to import into Kaggle and how
+  smoke_test_pca_2b.png                 PCA plot from the leader's CPU smoke test
+  helper_cells/                         the Homework 1 Part C cells, as plain .py (also inside the notebooks)
 scripts/
   class_persona_map.py  leads: combine students' personas into one class-wide map
-  (student notebook goes here)
 docs/                   the website (GitHub Pages serves this folder)
+  notebooks/            a copy of the student notebook, so the site can link to it as a download
   index.html            home
   setup.html            setup on Kaggle (the most important page)
   concepts/             01-personas.html … 07-steering.html
@@ -64,16 +68,19 @@ docs/                   the website (GitHub Pages serves this folder)
 - Code blocks are `<pre><code class="language-python">…</code></pre>`. Highlighting and the copy button are added automatically. Escape `<` and `&` inside code as `&lt;` and `&amp;`.
 - Click-to-reveal answers and hints are native `<details>` elements, so they work without JavaScript.
 
-## Adding the notebooks
+## The notebooks
 
-The final notebooks have not been added yet. When they are ready:
+The student notebook is [`notebooks/persona_axis_kaggle_exercises.ipynb`](notebooks/persona_axis_kaggle_exercises.ipynb). Leader notes on how it differs from ARENA's original, its run modes, and what has and has not been tested are in [`notebooks/KAGGLE_NOTEBOOK_NOTES.md`](notebooks/KAGGLE_NOTEBOOK_NOTES.md).
 
-1. Put the **student** notebook in `notebooks/` (the adaptation's README names it `persona_axis_kaggle_exercises.ipynb`).
-2. In `docs/setup.html`, step 5, replace `NOTEBOOK_IMPORT_LINK` with the GitHub link to the file and remove that step's TODO banner.
-3. Go through every block marked **"TODO, sync with final notebook"** (search the HTML for `todo-banner`) and replace the ARENA stand-in code with the real cells. Function names, variable names, flags, layer choices, and file paths on the site must match the notebook exactly.
-4. Update `notebooks/README.md` if the file names or settings differ.
+**The site links to a copy.** GitHub Pages only serves `docs/`, so the site's download links point to `docs/notebooks/persona_axis_kaggle_exercises.ipynb`. After editing the student notebook, copy it over so the two stay identical:
 
-> **Do not put the solutions notebook in this repository if it is public.** The notebook is graded homework. Leaders keep `persona_axis_kaggle_solutions.ipynb` in a private repository or a shared drive. `.gitignore` also ignores `*solutions*.ipynb` as a safety net.
+```bash
+cp notebooks/persona_axis_kaggle_exercises.ipynb docs/notebooks/
+```
+
+**Keep the site in sync.** The code on the concept pages and the setup page is quoted from the student notebook (function names, variables, flags, layer choices, cache paths, error messages). If you change one of those in the notebook, search the HTML for it and update the matching page.
+
+> **Never commit the solutions notebook.** `persona_axis_kaggle_solutions.ipynb` can sit in `notebooks/` locally because `.gitignore` ignores `*solutions*.ipynb`, but keep the shared copy in a private repository or shared drive. (Like ARENA's, the student notebook does include collapsible reference solutions under each exercise. Homework 1's unique personas are what show a student did the work.)
 
 ## Unique personas in Homework 1 (checking individual work)
 
@@ -84,11 +91,11 @@ The notebook scaffolding and ARENA's published solutions mean finished code alon
 ### Leads: setup before Homework 1 opens
 
 1. **Sign-up sheet.** Make a Google Sheet with columns **Name, Persona 1, Persona 2, Prediction for Persona 1, Prediction for Persona 2, Substitutes**. Paste the shared persona list (the keys of `PERSONAS`) into a second tab so students can check for duplicates. Put the link in `docs/homework-1.html` (`PERSONA_SIGNUP_SHEET`).
-2. **Shared PCA.** In the leader solutions notebook, run Section 1 on `gemma-2-9b-it` and paste [`notebooks/helper_cells/leader_save_shared_pca.py`](notebooks/helper_cells/leader_save_shared_pca.py) right after the PCA cell. It writes `/kaggle/working/shared_pca.json` (shared mean, first two components, Assistant vector, shared coordinates, and a `basis_id` fingerprint). Publish that file as a public Kaggle Dataset and put its name in `docs/homework-1.html` (`SHARED_PCA_DATASET`). Do not regenerate it mid-quarter; a new file means a new `basis_id`, and the map script only combines files that match.
-3. **Student cell.** Paste [`notebooks/helper_cells/my_personas_cell.py`](notebooks/helper_cells/my_personas_cell.py) into the student notebook right after the Section 1 PCA exercise, and into the leader notebook too. Both cells use ARENA's names; rename them if the final notebook differs.
+2. **Shared PCA.** Run the leader solutions notebook on `gemma-2-9b-it` (`SMOKE_TEST = False`, default persona list). The cell under "Leaders: save the shared PCA", right after the Section 1 PC1 check, writes `/kaggle/working/shared_pca.json` (shared mean, first two components, Assistant vector, shared coordinates, and a `basis_id` fingerprint). Publish that file as a public Kaggle Dataset and put its name in `docs/homework-1.html` (`SHARED_PCA_DATASET`). Do not regenerate it mid-quarter; a new file means a new `basis_id`, and the map script only combines files that match.
+3. **Student cell.** The "Your two personas (Homework 1, Part C)" cell is already in the student notebook right after the PC1 check. The leader notebook has the same cell with a worked example filled in (`tax_auditor` and `stage_magician`), so a full leader run tests it end to end. The plain-Python copies in [`notebooks/helper_cells/`](notebooks/helper_cells/) are the source; if you edit a cell, edit both the `.py` file and the notebooks.
 4. **Kaggle usernames** of the leads, for students to share their notebooks with (`LEAD_KAGGLE_USERNAMES`).
 
-What the student cell does: generates, judges (always, even when `RUN_JUDGE_FILTER` is off), and extracts activations for the two personas at `EXTRACTION_LAYER`, reusing cached results in `/kaggle/working/persona_cache/my_personas/`. It warns if fewer than half of a persona's responses survive judging, then projects onto the attached `shared_pca.json`. If the file is missing, or was made for a different model size or layer (for example the 2B smoke test), it falls back to the student's own fit and marks the result `basis_source: "own"`. It then prints PC1, PC2 and cosine to the Assistant next to the shared PC1 range, and saves `my_personas_plot.png` and `my_personas.json`.
+What the student cell does: generates, judges (always, even when `RUN_JUDGE_FILTER` is off), and extracts activations for the two personas at `EXTRACTION_LAYER`, reusing cached results in `CACHE_DIR/my_personas/` (under `/kaggle/working/persona_cache/`). It warns if fewer than half of a persona's responses survive judging, then projects onto the attached `shared_pca.json`. If the file is missing, or was made for a different model size or layer (for example the 2B smoke test), it falls back to the student's own fit and marks the result `basis_source: "own"`. It then prints PC1, PC2 and cosine to the Assistant next to the shared PC1 range, and saves `my_personas_plot.png` and `my_personas.json`.
 
 ### Leads: making the class map
 
@@ -100,33 +107,31 @@ python scripts/class_persona_map.py --shared shared_pca.json --students submissi
 
 It plots the shared personas in grey, the Assistant as a star, and every student persona coloured by student and labelled. It also writes a CSV sorted by PC1. Files made against a student's own fit, or with no surviving responses, are skipped and listed with the reason. It needs `numpy` and `matplotlib`.
 
-**How this was tested:** the notebooks are not in the repository yet, so both cells and the script were run on CPU against a stand-in notebook (fake persona vectors with a known Assistant direction, and stub generation, judge and extraction functions). The checks covered:
-- smoke-test mode with no shared file attached;
-- a persona the judge filters out entirely;
-- re-running from cache;
-- a shared file from the wrong model size;
-- two students on the shared basis, whose near and far personas landed on the predicted sides;
-- the class map with 2 and 14 students, skipping a file made against a student's own fit.
+**How this was tested** (on a Mac CPU, without Kaggle, a GPU, or the real OpenRouter judge):
 
-The cells have **not** run inside a real Kaggle session with Gemma yet. Run them once in the leader notebook (smoke test, then 9B) before Homework 1 opens.
+- **Inside the real notebook.** The leader solutions notebook was run top to bottom in smoke-test mode with the two Part C cells in place. It used `transformers` 4.46 and a tiny random Gemma 2 test model (`hf-internal-testing/tiny-random-Gemma2ForCausalLM`, 4 layers) in a fake `/kaggle/input`, plus a fake OpenRouter client that scores one test persona 1 and everything else 3. The leader cell wrote `shared_pca.json`. The student cell then:
+  - generated and judged both personas with the notebook's own functions;
+  - warned about the persona the judge filtered out and skipped it;
+  - projected the other onto the published shared PCA;
+  - saved the plot and JSON.
+
+  The random model means the geometry is meaningless; this checks that names, shapes and files line up. The only failing cells were ARENA's judge and autorater checks, which the fake judge cannot pass by design.
+- **Against a stand-in notebook.** Both cells and the map script also passed 16 checks against fake persona vectors with a known Assistant direction:
+  - no shared file attached;
+  - a fully filtered persona;
+  - re-running from cache;
+  - a shared file from the wrong model size;
+  - two students whose near and far personas landed on the predicted sides;
+  - the class map with 2 and 14 students.
+
+Run the leader notebook once on Kaggle (smoke test, then 9B) before Homework 1 opens.
 
 ## Still waiting on the leads
 
-- [ ] **Final notebook files**: the student notebook in `notebooks/`, and the solutions notebook kept privately.
-- [ ] **Notebook import link**: `NOTEBOOK_IMPORT_LINK` in `docs/setup.html` (step 5).
-- [ ] **Code blocks marked TODO**: 14 banners, which are:
-  - `docs/setup.html`: 4 (import link, secret-loading cell, run-mode flags, troubleshooting error text)
-  - `docs/concepts/01-personas.html`: 1 (persona and question definitions, including how `SMOKE_TEST` and `USE_FULL_PERSONA_LIST` choose them)
-  - `docs/concepts/02-responses-and-judging.html`: 2 (default `GENERATION_BACKEND` and judge model; local generation cell with `GEN_BATCH_SIZE`)
-  - `docs/concepts/03-residual-stream.html`: 1 (model loading from `/kaggle/input`, float16 or 8-bit fallback, extraction functions)
-  - `docs/concepts/04-cosine-similarity.html`: 1
-  - `docs/concepts/05-pca-assistant-axis.html`: 2 (PCA code; which 27B reference plots are drawn)
-  - `docs/concepts/06-hooks-and-drift.html`: 1 (transcripts loaded, `max_assistant_turns`)
-  - `docs/concepts/07-steering.html`: 1 (suggested alpha values)
-  - `docs/homework-1.html`: 1 (the personas cell lives in `notebooks/helper_cells/` until it is in the notebook)
-- [ ] **Judge model name.** ARENA's `AUTORATER_MODEL = "anthropic/claude-3.5-haiku"` **is no longer listed on OpenRouter** (checked 2026-10-19), so any judge or autorater call using it will fail. Currently listed options include `anthropic/claude-haiku-4.5` and `openai/gpt-4.1-mini` (the judge the paper used). Make sure the final notebook uses one that exists, and update `concepts/02-responses-and-judging.html` to match.
+- [ ] **Run the leader notebook on Kaggle** once with `SMOKE_TEST = True` and once with `SMOKE_TEST = False`, before Homework 1 opens. Nothing has run on Kaggle hardware or against the real OpenRouter judge yet (see the testing notes in `notebooks/KAGGLE_NOTEBOOK_NOTES.md`). The 9B run times on the site are estimates until then.
+- [ ] **Publish the shared PCA** from that 9B run as a Kaggle Dataset (see above).
 - [ ] **Calendar details**: meeting locations and the lab dinner's time and place are marked tentative in `docs/calendar.html`. When they are confirmed, replace the "Location tentative" and "Time and location tentative" text. To change dates, edit the Key dates table, the month tables, and the All meetings table in that file.
-- [ ] **Homework 1, Part C setup**: the persona sign-up sheet (`PERSONA_SIGNUP_SHEET`), the published shared PCA dataset (`SHARED_PCA_DATASET`), and `LEAD_KAGGLE_USERNAMES`, all in `docs/homework-1.html`. Paste the two helper cells into the notebooks, and run them once on Kaggle (see above).
+- [ ] **Homework 1, Part C setup**: the persona sign-up sheet (`PERSONA_SIGNUP_SHEET`), the published shared PCA dataset (`SHARED_PCA_DATASET`), and `LEAD_KAGGLE_USERNAMES`, all in `docs/homework-1.html`. The cells themselves are already in the notebooks.
 - [ ] **Screenshots**: 12 placeholders, listed below.
 
 ### Screenshot placeholders
@@ -160,7 +165,7 @@ Things that change over time were checked on the live sites on **19 October 2026
 | Gemma 2 on Kaggle requires "Request Access"; Transformers variations `gemma-2-9b-it`, `gemma-2-2b-it` (version 2) exist, alongside PyTorch, Flax, GGUF, Gemma C++, and TFLite | Setup steps 4, 7 | [Kaggle model page](https://www.kaggle.com/models/google/gemma-2) and its public API |
 | OpenRouter pages: `openrouter.ai/settings/credits`, `openrouter.ai/settings/keys` (`/keys` redirects there); keys can have a credit limit and are shown once | Setup step 3 | openrouter.ai |
 | OpenRouter error codes 401 (invalid key), 402 (insufficient credits), 429 (rate limited) | Troubleshooting | [OpenRouter errors docs](https://openrouter.ai/docs/api_reference/errors-and-debugging) |
-| Judge models: `anthropic/claude-3.5-haiku` **not available**; `anthropic/claude-haiku-4.5`, `openai/gpt-4.1-mini`, `google/gemma-2-27b-it` available | Concept 2, troubleshooting | OpenRouter `/api/v1/models` |
+| Judge models: `anthropic/claude-3.5-haiku` **not available**; the notebook's `anthropic/claude-haiku-5.5` ($0.10 / $0.50 per million input / output tokens) and `google/gemma-2-27b-it` available | Concept 2, troubleshooting | OpenRouter `/api/v1/models` |
 | Paper claims (sections, figures, 275 roles, 5 prompts per role, 240 questions, 0–3 judge scale with gpt-4.1-mini, PC1 cosine > 0.71 at the middle layer, Section 2.3 "one extreme of PC1", Figure 4 and Figure 7 findings) | Concept pages | [arXiv 2601.10387 (HTML)](https://arxiv.org/html/2601.10387) |
 | Model sizes: Gemma 2 9B has 42 layers and d_model 3584; 2B has 26 and 2304; 27B has 46 and 4608 | Concepts 3 and 5 | `config.json` from public mirrors of the 9B and 2B models (Google's own are gated); 27B shape stated in the ARENA notebook |
 | JailbreakBench (JBB-Behaviors) and HarmBench are public and MIT-licensed | Homework 2, idea 2 | GitHub and Hugging Face |

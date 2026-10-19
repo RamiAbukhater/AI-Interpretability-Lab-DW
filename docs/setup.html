@@ -71,7 +71,7 @@
             <li>Access to Google's <strong>Gemma 2</strong> models on Kaggle.</li>
             <li>Your own copy of the lab notebook, attached to two GPUs and the Gemma 2 model files, which has completed one successful smoke-test run.</li>
           </ul>
-          <p><strong>Time:</strong> about 45 to 60 minutes of your attention, plus any waiting for verification. The smoke test itself takes about 5 minutes of GPU time. The full 9B run takes roughly 30 to 45 minutes.</p>
+          <p><strong>Time:</strong> about 45 to 60 minutes of your attention, plus any waiting for verification. The smoke test itself takes about 10 minutes of GPU time. The full 9B run is estimated at 20 to 30 minutes (it has not yet been timed on Kaggle).</p>
           <p><strong>Cost:</strong> Kaggle is free. OpenRouter needs a small amount of prepaid credit (a few dollars is plenty for the whole project; see <a href="#step-openrouter">step 3</a>).</p>
           <div class="step-why">
             <p>Gemma 2 9B has about 9 billion parameters. Just holding them in memory takes around 18 GB, which is more than a laptop GPU or a single free cloud GPU has. Kaggle offers two 16 GB GPUs for free, which is enough if the model is split across both. That is why we use Kaggle and why several steps below are about getting those GPUs.</p>
@@ -156,13 +156,12 @@
         <!-- 5 -->
         <li class="step" id="step-import">
           <h2>Import the notebook into Kaggle</h2>
-          <div class="todo-banner">The final notebook file and its import link have not been published yet. Leaders will replace the placeholder below.</div>
-          <p><strong>Notebook to import:</strong> <code>notebooks/persona_axis_kaggle_exercises.ipynb</code> from this repository. <span class="todo-inline">NOTEBOOK_IMPORT_LINK</span> (the direct GitHub link goes here).</p>
+          <p><strong>Notebook to import:</strong> <a href="notebooks/persona_axis_kaggle_exercises.ipynb" download>persona_axis_kaggle_exercises.ipynb</a> (the student version, with exercise stubs to fill in).</p>
           <ol>
-            <li>Get the notebook file. Either download it from the link above (on GitHub, open the file and use the <span class="ui">Download raw file</span> button), or copy the link to it if you will import from a URL.</li>
+            <li>Download the notebook file from the link above and save it somewhere you can find it. If your browser opens it as text instead of downloading, right-click the link and choose <span class="ui">Save Link As…</span>, and keep the <code>.ipynb</code> ending.</li>
             <li>On Kaggle, click <span class="ui">Code</span> in the left menu, then <span class="ui">New Notebook</span>. An empty notebook opens in the editor.</li>
             <li>In the editor's top menu, choose <span class="ui">File</span> → <span class="ui">Import Notebook</span>.</li>
-            <li>Upload the <code>.ipynb</code> file you downloaded (or paste the GitHub link if the dialog offers a link option), then confirm. The empty notebook is replaced with the lab notebook.</li>
+            <li>Upload the <code>.ipynb</code> file you downloaded, then confirm. The empty notebook is replaced with the lab notebook.</li>
             <li>Rename it something you will find again, like <code>assistant-axis-yourname</code>, by clicking the title at the top left.</li>
           </ol>
           <figure class="shot" data-img="assets/img/setup/05-import-notebook.png">
@@ -170,7 +169,7 @@
             <figcaption>File → Import Notebook in the Kaggle editor.</figcaption>
           </figure>
           <div class="step-why">
-            <p>Importing gives you your own private copy that you can edit and run. Do not use the solutions notebook if you happen to come across it; the exercises are graded homework.</p>
+            <p>Importing gives you your own private copy that you can edit and run. Like ARENA's original, each exercise has a collapsible reference solution underneath it. Try the exercise yourself first; that is where the learning happens, and <a href="homework-1.html#part-c">Homework 1</a> asks you to run the pipeline on personas of your own.</p>
           </div>
           <div class="step-check">
             <p>The notebook shows the lab's title cell and a first code cell with configuration flags such as <code>SMOKE_TEST</code>. Nothing has run yet.</p>
@@ -244,11 +243,17 @@
             <div class="shot-placeholder"><span class="ph-title">Screenshot placeholder</span><span class="ph-desc">Add-ons → Secrets dialog with a secret labelled OPENROUTER_API_KEY, value hidden, and its checkbox ticked</span><code>assets/img/setup/09-add-secret.png</code></div>
             <figcaption>The secret label must be exactly OPENROUTER_API_KEY, and the box must be ticked.</figcaption>
           </figure>
-          <p>Inside the notebook, a cell reads the secret by its label. It looks like this:</p>
-          <div class="todo-banner">Replace with the notebook's actual secret-loading cell.</div>
-<pre><code class="language-python">from kaggle_secrets import UserSecretsClient
+          <p>Inside the notebook, a cell reads the secret by its label:</p>
+<pre><code class="language-python">OPENROUTER_API_KEY = None
+try:
+    from kaggle_secrets import UserSecretsClient
 
-OPENROUTER_API_KEY = UserSecretsClient().get_secret("OPENROUTER_API_KEY")
+    OPENROUTER_API_KEY = UserSecretsClient().get_secret("OPENROUTER_API_KEY")
+except Exception as e:  # not on Kaggle, or the secret is not attached to this notebook
+    print(f"Could not read the Kaggle secret ({type(e).__name__}), falling back to the environment variable")
+    OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
+
+assert OPENROUTER_API_KEY, "Add a Kaggle Secret called OPENROUTER_API_KEY (Add-ons -> Secrets) and attach it to this notebook"
 </code></pre>
           <div class="step-why">
             <p>Kaggle Secrets keep the key out of the notebook itself. The value is stored by Kaggle and only handed to your running session, so it never appears in a cell, an output, or a saved version.</p>
@@ -266,11 +271,10 @@ OPENROUTER_API_KEY = UserSecretsClient().get_secret("OPENROUTER_API_KEY")
         <li class="step" id="step-smoke">
           <h2>Run the smoke test first, then the full 9B run</h2>
           <p>A <strong>smoke test</strong> is a short, cheap run whose only job is to show that everything is wired up correctly before you spend real time and GPU quota. In our notebook it uses Gemma 2 2B with a handful of personas and questions.</p>
-          <div class="todo-banner">Flag names and defaults are from the adaptation's README. Confirm against the final notebook.</div>
           <ol>
             <li>In the first code cell, make sure <code>SMOKE_TEST = True</code>. Leave the other flags at their defaults.</li>
             <li>Click <span class="ui">Run All</span> (or run cells one at a time with <kbd>Shift</kbd>+<kbd>Enter</kbd> to watch each step).</li>
-            <li>Wait. The setup cell installs packages and downloads helper code (about a minute), then the 2B model loads (about a minute), then Section 1 and Section 2 run (a few more minutes).</li>
+            <li>Wait. The setup cell installs a few packages, downloads ARENA's helper code, and clones the paper's repository (about a minute). Then the 2B model loads (about a minute), and Section 1 and Section 2 run (several more minutes).</li>
           </ol>
           <p>The configuration cell has these flags:</p>
           <div class="table-scroll">
@@ -278,9 +282,9 @@ OPENROUTER_API_KEY = UserSecretsClient().get_secret("OPENROUTER_API_KEY")
               <thead><tr><th>Flag</th><th>Default</th><th>What it does</th></tr></thead>
               <tbody>
                 <tr><td><code>SMOKE_TEST</code></td><td><code>True</code></td><td>Gemma 2 2B, 10 personas, 2 questions. Set to <code>False</code> for the real run with 9B.</td></tr>
-                <tr><td><code>USE_FULL_PERSONA_LIST</code></td><td><code>False</code></td><td>All 275 roles from the paper and longer responses. Takes hours; not for homework.</td></tr>
+                <tr><td><code>USE_FULL_PERSONA_LIST</code></td><td><code>False</code></td><td>All 275 roles from the paper, all 15 questions, and 256-token responses. Takes hours; not for homework.</td></tr>
                 <tr><td><code>GENERATION_BACKEND</code></td><td><code>"local"</code></td><td>Where persona responses come from. <code>"local"</code> uses the loaded Gemma. <code>"openrouter"</code> asks Gemma 2 27B through the API instead.</td></tr>
-                <tr><td><code>RUN_JUDGE_FILTER</code></td><td><code>False</code></td><td>Scores every persona response with an LLM judge and keeps only fully in-character ones, as the paper does. Adds a little API cost and a few minutes.</td></tr>
+                <tr><td><code>RUN_JUDGE_FILTER</code></td><td><code>False</code></td><td>Scores every persona response with the Claude Haiku judge and keeps only fully in-character ones, as the paper does. Adds a little API cost and a few minutes.</td></tr>
               </tbody>
             </table>
           </div>
@@ -289,13 +293,14 @@ OPENROUTER_API_KEY = UserSecretsClient().get_secret("OPENROUTER_API_KEY")
             <figcaption>A successful smoke test: the model loads and prints its first in-character responses.</figcaption>
           </figure>
           <div class="step-check">
-            <p>The model-loading cell finishes without errors and reports the model it loaded. The first generation cell prints short responses from a few personas (a ghost should sound like a ghost). Further down you get a cosine-similarity heatmap, a PCA scatter plot, the paper's 27B reference plots, drift plots, and steering outputs. With only 10 personas and 2 questions the plots will be noisy. That is expected; the smoke test is checking the plumbing, not the science.</p>
+            <p>The model-loading cell prints <code>Loading gemma-2-2b-it from /kaggle/input/…</code>, then <code>NUM_LAYERS=26, D_MODEL=2304, EXTRACTION_LAYER=17</code>. The float16 check prints "No NaN or inf in logits or hidden states." The persona cell prints "Using 10 personas", and the generation cell prints short answers to "What is your name?" from the ghost, the jester and the assistant (the ghost should sound like a ghost). That output is your smoke test passing.</p>
+            <p><strong>Run All then stops at the first exercise</strong>, the judge prompt, with <code>NotImplementedError</code>. That is expected: the rest of the notebook needs your answers to the exercises. Once you have done them, running further gives a cosine-similarity heatmap, a PCA scatter plot, the paper's 27B reference plots, drift plots, and steering outputs. With only 10 personas and 2 questions the smoke-test plots are noisy; it checks the plumbing, not the science.</p>
           </div>
           <h3>Switching to the full 9B run</h3>
           <ol>
             <li>Set <code>SMOKE_TEST = False</code> in the first cell.</li>
             <li>Restart the session so the 2B model is cleared from GPU memory: <span class="ui">Run</span> → <span class="ui">Restart &amp; clear cell outputs</span> (or the restart button in the toolbar).</li>
-            <li>Run all cells again. Loading 9B takes 3 to 5 minutes, and the whole notebook roughly 30 to 45 minutes.</li>
+            <li>Run all cells again. Loading 9B takes 3 to 5 minutes. Section 1 then takes about 10 minutes (generating the 265 responses is most of it), and Section 2 another 5 to 10. These are estimates; the 9B run has not been timed on Kaggle yet.</li>
           </ol>
           <p>Results are cached in <code>/kaggle/working/persona_cache/</code>, so if a later cell fails you can fix it and re-run without regenerating everything that already finished.</p>
         </li>
@@ -340,7 +345,6 @@ OPENROUTER_API_KEY = UserSecretsClient().get_secret("OPENROUTER_API_KEY")
 
       <h2 id="troubleshooting">Troubleshooting</h2>
       <p>Find the message closest to what you see. If nothing here helps, post the full error (with any key blurred) in the group channel.</p>
-      <div class="todo-banner">Error text for the notebook's own checks (secret loading, model path search, 8-bit fallback) should be copied from the final notebook.</div>
       <dl class="trouble">
         <dt>torch.OutOfMemoryError: CUDA out of memory</dt>
         <dd>
@@ -349,20 +353,25 @@ OPENROUTER_API_KEY = UserSecretsClient().get_secret("OPENROUTER_API_KEY")
             <li>The accelerator is <span class="ui">GPU T4 x2</span>, not P100 (<a href="#step-session">step 6</a>).</li>
             <li>You restarted the session after switching from the 2B smoke test to 9B. Two models loaded at once will not fit.</li>
             <li>If it happens during response generation, lower <code>GEN_BATCH_SIZE</code> in the generation cell (try halving it).</li>
-            <li>If it happens while analysing a long transcript in Section 2, lower <code>max_assistant_turns</code> so fewer turns go through the model at once.</li>
+            <li>If it happens while analysing a transcript in Section 2, lower <code>MAX_DRIFT_TURNS</code> (6 by default) so fewer turns go through the model at once.</li>
           </ol>
           <p>After an out-of-memory error, restart the session before trying again; the memory often stays fragmented.</p>
         </dd>
 
-        <dt>Outputs are NaN, empty strings, or repeated &lt;pad&gt; tokens</dt>
+        <dt>AssertionError: Non-finite values in [...] with dtype=torch.float16. Gemma 2 overflowed in float16. (or NaN outputs, empty strings, repeated &lt;pad&gt; tokens)</dt>
         <dd>
           <p>T4 GPUs do not support <code>bfloat16</code> natively, so on Kaggle the model runs in <code>float16</code>. That format has a much smaller range, and Gemma 2's activations can grow large enough to overflow it, which turns numbers into <code>inf</code> and then <code>NaN</code>. The symptom is a heatmap full of blanks, a PCA error about NaN, or generations that are empty or garbage.</p>
-          <p>The notebook can fall back to loading the model in 8-bit (with the <code>bitsandbytes</code> library), which keeps the numbers in a safe range at some cost in speed. If you see NaNs, use that fallback as the notebook describes, restart, and re-run. 8-bit also uses about half the memory.</p>
+          <p>The cell right after loading, <code>check_fp16_numerics</code>, catches this before anything else runs, and stops with the message above. The fix is to load the model in 8-bit with the <code>bitsandbytes</code> library, which keeps the numbers in a safe range at some cost in speed and uses about half the memory:</p>
+          <ol>
+            <li>In a new cell, run <code>%pip install -q bitsandbytes</code>.</li>
+            <li>In the model-loading cell, replace the <code>model = AutoModelForCausalLM.from_pretrained(...)</code> call with the commented-out 8-bit version just below it (uncomment those lines).</li>
+            <li>Restart the session and run from the top.</li>
+          </ol>
         </dd>
 
-        <dt>Secret not found / SecretNotFoundError / OPENROUTER_API_KEY is None</dt>
+        <dt>AssertionError: Add a Kaggle Secret called OPENROUTER_API_KEY (Add-ons -&gt; Secrets) and attach it to this notebook</dt>
         <dd>
-          <p>The notebook could not read your key. Usually one of:</p>
+          <p>The notebook could not read your key; just above the error it prints "Could not read the Kaggle secret". Usually one of:</p>
           <ul>
             <li>The label is not exactly <code>OPENROUTER_API_KEY</code> (check for a lowercase letter, a space, or a typo).</li>
             <li>The secret exists but its box is not ticked for this notebook. Open <span class="ui">Add-ons</span> → <span class="ui">Secrets</span> and tick it.</li>
@@ -371,9 +380,9 @@ OPENROUTER_API_KEY = UserSecretsClient().get_secret("OPENROUTER_API_KEY")
           <p>After fixing it, re-run the cell that loads the secret.</p>
         </dd>
 
-        <dt>Model path not found / OSError: … is not a valid model identifier / no folder under /kaggle/input</dt>
+        <dt>FileNotFoundError: No gemma-2-9b-it model found under /kaggle/input. Add the Kaggle Model 'Gemma 2' (framework Transformers, variant gemma-2-9b-it) as an input.</dt>
         <dd>
-          <p>The model files are not attached, or the wrong format was attached.</p>
+          <p>The model files are not attached, or the wrong format was attached. The error ends with the list of model folders that <em>are</em> attached, which usually shows the problem straight away.</p>
           <ul>
             <li>Check the Input panel: you need Gemma 2, framework <strong>Transformers</strong>, variation <code>gemma-2-9b-it</code> (and <code>gemma-2-2b-it</code> for the smoke test). If you picked PyTorch, Flax, or GGUF, remove it and add the Transformers one.</li>
             <li>If the smoke test is on, the 2B variation must be attached; with it off, 9B must be.</li>

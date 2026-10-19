@@ -112,7 +112,7 @@
       </ul>
 
       <h2 id="code">The code, walked through</h2>
-      <div class="todo-banner">Stand-in code from the original ARENA notebook. Replace with the final notebook's cells.</div>
+      <p>These cells are from "Exercise - PCA analysis and Assistant Axis" and the cells after it in Section 1 of <a href="../notebooks/persona_axis_kaggle_exercises.ipynb">the lab notebook</a>.</p>
 
       <div class="exercise">
         <span class="tag">Exercise</span>
@@ -140,26 +140,55 @@
       </div>
 
       <p>The calling code centers, runs your function, and prints the two numbers to look at first:</p>
-<pre><code class="language-python">mean_vector = t.stack(list(persona_vectors.values())).mean(dim=0)
+<pre><code class="language-python"># Everything here stays on CPU in float32 (PCA uses numpy internally).
+persona_vectors = {k: v.cpu().float() for k, v in persona_vectors.items()}
+mean_vector = t.stack(list(persona_vectors.values())).mean(dim=0)
 persona_vectors_centered = {k: v - mean_vector for k, v in persona_vectors.items()}
 
-assistant_axis, pca_coords, pca = pca_decompose_persona_vectors(
-    {k: v.cpu().float() for k, v in persona_vectors_centered.items()}
-)
+# Perform PCA decomposition on space
+assistant_axis, pca_coords, pca = pca_decompose_persona_vectors(persona_vectors_centered)
 
 print(f"Assistant Axis norm: {assistant_axis.norm().item():.4f}")
-print(f"PCA explained variance: PC1={pca.explained_variance_ratio_[0]:.1%}, "
-      f"PC2={pca.explained_variance_ratio_[1]:.1%}")
+print(
+    f"PCA explained variance: PC1={pca.explained_variance_ratio_[0]:.1%}, PC2={pca.explained_variance_ratio_[1]:.1%}"
+)
 
+# Compute projection onto assistant axis for coloring
 vectors = t.stack([persona_vectors_centered[name] for name in persona_names])
+# Normalize vectors before projecting (so projections are in [-1, 1] range)
 vectors_normalized = vectors / vectors.norm(dim=1, keepdim=True)
-projections = (vectors_normalized @ assistant_axis).float().cpu().numpy()
+projections = (vectors_normalized @ assistant_axis).numpy()
+
+# 2D scatter plot
+fig = px.scatter(x=pca_coords[:, 0], y=pca_coords[:, 1], text=persona_names, color=projections, ...)
 </code></pre>
       <div class="walk">
         <ul>
           <li>The axis norm should print <code>1.0000</code>. Anything else means the normalisation was skipped.</li>
-          <li><code>explained_variance_ratio_[0]</code> is the share of persona-space variance along PC1. With about 20 hand-picked personas spanning Assistant to fantastical, expect PC1 to be clearly the largest.</li>
+          <li><code>explained_variance_ratio_[0]</code> is the share of persona-space variance along PC1. With 53 personas spanning Assistant-like jobs to non-human entities, expect PC1 to be clearly the largest.</li>
+          <li><code>mean_vector</code> and <code>pca</code> are kept: the "Your two personas" cell in <a href="../homework-1.html#part-c">Homework 1, Part C</a> uses exactly this centering and this fitted PCA to place your personas.</li>
           <li><code>projections</code>: each centered persona vector is normalised to length 1, then dotted with the axis: <span class="shape">(n, d_model)</span> @ <span class="shape">(d_model,)</span> → <span class="shape">(n,)</span>. Because both are unit length, these are cosine similarities in \([-1, 1]\), and they colour the scatter plot.</li>
+        </ul>
+      </div>
+
+      <h3>Checking the result in numbers</h3>
+<pre><code class="language-python">pc1 = pca_coords[:, 0]
+pc1_axis_corr = np.corrcoef(pc1, projections)[0, 1]
+order = np.argsort(pc1)
+rank = {persona_names[i]: r for r, i in enumerate(order)}  # 0 = lowest PC1
+print(f"Correlation between PC1 and Assistant Axis projection = {pc1_axis_corr:+.2f}")
+for name in ["assistant", *DEFAULT_PERSONAS]:
+    if name in rank:
+        pct = rank[name] / (len(persona_names) - 1)
+        print(f"  {name:>18}: PC1 rank {rank[name] + 1}/{len(persona_names)} (percentile {pct:.0%})")
+print(f"PC1 low end: {[persona_names[i] for i in order[:5]]}")
+print(f"PC1 high end: {[persona_names[i] for i in order[-5:]]}")
+</code></pre>
+      <div class="walk">
+        <ul>
+          <li>This provided cell turns "PC1 looks like the Assistant Axis" into two numbers. <code>pc1_axis_corr</code> is the correlation between each persona's PC1 coordinate and its projection on the axis. A value near +1 or −1 means the two directions agree; the sign only says which way PCA happened to point PC1.</li>
+          <li>It then prints where the <code>assistant</code> and default personas rank along PC1. If they all sit at one extreme (near 0% or near 100%), the paper's pattern holds.</li>
+          <li>In the leader's 2B smoke test, the default and assistant personas took the top four positions on PC1, and the correlation was +0.99.</li>
         </ul>
       </div>
 
@@ -192,8 +221,11 @@ projections = (vectors_normalized @ assistant_axis).float().cpu().numpy()
       <p>Projecting is why a whole class can share one map. If everyone projects onto the same fitted axes, every student's personas land in one common coordinate system and can be plotted together. If everyone refitted with their own personas included, each student would have slightly different axes and the points could not be compared. This is what you do in <a href="../homework-1.html#part-c">Homework 1, Part C</a>, using the class's shared PCA.</p>
 
       <h2 id="reference">The paper's 27B results, as a visual comparison only</h2>
-      <div class="todo-banner">Describe the exact reference plots the final notebook draws.</div>
-      <p>The paper's authors published their precomputed vectors for Gemma 2 27B on HuggingFace (<a href="https://huggingface.co/datasets/lu-christina/assistant-axis-vectors"><code>lu-christina/assistant-axis-vectors</code></a>): an Assistant Axis for every layer and 240 trait vectors. The notebook downloads these (a public dataset, no token needed) and draws the paper's own plots next to yours.</p>
+      <p>The paper's authors published their precomputed vectors for Gemma 2 27B on HuggingFace (<a href="https://huggingface.co/datasets/lu-christina/assistant-axis-vectors"><code>lu-christina/assistant-axis-vectors</code></a>): an Assistant Axis for every layer, 275 role vectors, and 240 trait vectors. The notebook downloads them (a public dataset, no token needed) and draws two reference plots, both at the paper's layer 22:</p>
+      <ol>
+        <li><strong>A PCA of the paper's 27B role vectors for the same personas you used</strong>, where they exist, coloured by projection onto the paper's 27B axis. The paper has a single default vector, so the plot shows one "default" point instead of our four default prompts. The title starts with "REFERENCE" and reminds you to compare shapes, not numbers.</li>
+        <li><strong>The 240 trait vectors against the 27B Assistant Axis</strong>, as a line of cosine similarities with the most and least Assistant-like traits labelled, as in the original ARENA notebook.</li>
+      </ol>
       <p>Use them to compare <strong>shapes and orderings</strong>: does the same kind of persona end up at the Assistant end, and does one direction dominate? Do <strong>not</strong> compare them numerically:</p>
       <ul>
         <li>Gemma 2 27B has \(d_\text{model} = 4608\); our 9B has 3584. The vectors live in different spaces, so you cannot even take a dot product between them.</li>

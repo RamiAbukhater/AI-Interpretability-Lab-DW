@@ -47,7 +47,7 @@
 
       <h2 id="idea">The big idea</h2>
       <h3>Hooks: a tap on the pipe</h3>
-      <p>In Section 1 we asked the model for <em>all</em> hidden states with <code>output_hidden_states=True</code>. That keeps 43 copies of the residual stream in memory at once, which is fine for a 200-token response but not for a 15-turn conversation thousands of tokens long. We only want one layer.</p>
+      <p>The simplest way to see inside the model is to ask for <em>all</em> hidden states with <code>output_hidden_states=True</code>. That keeps 43 copies of the residual stream in memory at once (the embeddings plus one per block), which is fine for a short response but wasteful for a conversation thousands of tokens long on a 15 GB T4. We only want one layer. That is why the notebook uses hooks everywhere, starting with Section 1's <code>extract_response_activations</code>.</p>
       <p>A <strong>forward hook</strong> is a function you attach to one module (here, one transformer block). Every time that module finishes its forward pass, PyTorch calls your function with the module, its input, and its <strong>output</strong>. Your function can store the output somewhere (to read it) or return a modified version (to change what the rest of the model sees). It is a tap fitted to one point in the pipe: water flows past as usual, but you can sample it, or add something to it, right there. The hook stays attached until you remove it, so you always remove it in a <code>finally</code> block.</p>
 
       <h3>Drift: where is the model on the axis, turn by turn?</h3>
@@ -110,7 +110,7 @@
       </ul>
 
       <h2 id="code">The code, walked through</h2>
-      <div class="todo-banner">Stand-in code from the original ARENA notebook. Replace with the final notebook's cells, including which transcripts it loads and its max_assistant_turns.</div>
+      <p>These cells are from the "Setup" and "Monitoring persona drift" parts of Section 2 in <a href="../notebooks/persona_axis_kaggle_exercises.ipynb">the lab notebook</a>. <code>_return_layers</code> and <code>_get_hidden</code> were defined back in Section 1 (<a href="03-residual-stream.html">concept 3</a>).</p>
 
       <h3>Finding the transformer blocks</h3>
 <pre><code class="language-python">def _return_layers(m) -> list:
@@ -128,8 +128,11 @@
       <p class="walk">Hooks attach to modules, so we need the list of decoder blocks. For Gemma 2 it is <code>model.model.layers</code>, a list of 42 blocks. The helper also handles models that nest it one level deeper.</p>
 
       <h3>A minimal hook, and what KV caching does to it</h3>
-<pre><code class="language-python">def hook_fn(module, input, output):
-    print(f"Hook captured shape: {output.shape}")
+<pre><code class="language-python">test_prompt = "The quick brown fox"
+test_tokens = tokenizer(test_prompt, return_tensors="pt").to(model.device)
+
+def hook_fn(module, input, output):
+    print(f"Hook captured shape: {_get_hidden(output).shape}")
 
 hook = _return_layers(model)[EXTRACTION_LAYER].register_forward_hook(hook_fn)
 try:
@@ -140,6 +143,7 @@ finally:
 </code></pre>
       <div class="walk">
         <ul>
+          <li><code>_get_hidden(output)</code> unwraps the block's output, which is a tensor in recent <code>transformers</code> versions and a tuple in older ones.</li>
           <li><code>register_forward_hook</code> attaches <code>hook_fn</code> to one block and returns a handle. <code>hook.remove()</code> in <code>finally</code> detaches it even if generation crashes. A forgotten hook stays on the model and silently affects every later call.</li>
           <li>The first call prints <span class="shape">(1, prompt_len, d_model)</span>: the whole prompt is processed at once.</li>
           <li>Each later call prints <span class="shape">(1, 1, d_model)</span>. With <strong>KV caching</strong>, the model stores each earlier token's attention keys and values and only runs the newest token through the stack. So during generation, the hook sees one token at a time.</li>
@@ -206,17 +210,26 @@ finally:
       </div>
 
       <h3>Plotting drift</h3>
-<pre><code class="language-python">delusion_projs, _ = visualize_transcript_drift(
-    analyzer,
-    delusion_transcript,
-    "Delusion (dramatic escalation)",
-    run_autorater=True,
-    max_assistant_turns=6,
+<pre><code class="language-python">RISK_CACHE_PATH = CACHE_DIR / "delusion_risk_scores.json"
+RISK_CACHE: dict[str, int] = json.loads(RISK_CACHE_PATH.read_text()) if RISK_CACHE_PATH.exists() else {}
+# Assistant turns per transcript for drift monitoring (one forward pass over the whole truncated transcript)
+MAX_DRIFT_TURNS = 6
+
+# ... visualize_transcript_drift(...) is defined here ...
+
+delusion_projs_capped, _ = visualize_transcript_drift(
+    analyzer, delusion_transcript_capped, "Delusion (capped, no escalation)",
+    run_autorater=True, max_assistant_turns=MAX_DRIFT_TURNS,
+)
+delusion_projs, _ = visualize_transcript_drift(
+    analyzer, delusion_transcript, "Delusion (dramatic escalation)",
+    run_autorater=True, max_assistant_turns=MAX_DRIFT_TURNS,
 )
 </code></pre>
       <div class="walk">
         <ul>
-          <li>The provided <code>visualize_transcript_drift</code> optionally truncates the transcript to <code>max_assistant_turns</code> (to fit in memory), calls <code>analyzer.project_onto_axis</code>, rates each turn with your autorater, and draws two panels: projection over turns, and risk over turns.</li>
+          <li>The provided <code>visualize_transcript_drift</code> truncates the transcript to <code>MAX_DRIFT_TURNS</code> assistant turns (6, to fit in memory), calls <code>analyzer.project_onto_axis</code>, rates each turn with your autorater, and draws two panels: projection over turns, and risk over turns.</li>
+          <li>Autorater scores are cached in <code>CACHE_DIR/delusion_risk_scores.json</code>, keyed by transcript and turn, so re-running the cell does not repeat the API calls.</li>
           <li>It prints the correlation between the two. Expect it to be <strong>negative</strong>: lower projection (less Assistant-like) goes with higher risk.</li>
           <li>The notebook runs it on two versions of the delusion case study: the original, where the model escalates, and the version produced with activation capping on, where it does not. The first should fall more steeply.</li>
         </ul>
@@ -242,9 +255,9 @@ finally:
       <h2 id="mistakes">Common mistakes</h2>
       <ul class="mistakes">
         <li><strong>Not removing a hook.</strong> Always use <code>try</code> / <code>finally</code>. A leftover capturing hook leaks memory; a leftover steering hook silently changes every later result. If in doubt, restart the session.</li>
-        <li><strong>Assuming <code>output</code> is a tensor.</strong> In some versions of <code>transformers</code>, decoder layers return a tuple whose first element is the hidden states. If you see <code>'tuple' object has no attribute 'shape'</code>, use <code>output[0]</code>.</li>
-        <li><strong>Off-by-one between sections.</strong> A hook on <code>layers[27]</code> gives the output of block 27, which is <code>hidden_states[28]</code>, one block later than what Section 1 read. Neighbouring layers are similar, so results barely change, but know which one you are using.</li>
-        <li><strong>Out of memory on long transcripts.</strong> Lower <code>max_assistant_turns</code>, and keep only the slices you need on the GPU.</li>
+        <li><strong>Skipping <code>_get_hidden</code>.</strong> In some versions of <code>transformers</code>, decoder layers return a tuple whose first element is the hidden states. If you see <code>'tuple' object has no attribute 'shape'</code>, you used <code>output</code> directly; wrap it in <code>_get_hidden(output)</code>.</li>
+        <li><strong>Hooking a different layer from Section 1.</strong> The analyzer must use <code>EXTRACTION_LAYER</code>, the same block the axis was built from. Projecting block-20 activations onto a block-27 axis mixes two different coordinate systems.</li>
+        <li><strong>Out of memory on long transcripts.</strong> Lower <code>MAX_DRIFT_TURNS</code>, and keep only the slices you need on the GPU.</li>
         <li><strong>Reading absolute projection values</strong> as meaningful, or comparing them with the paper's Llama numbers. Compare shapes and trends.</li>
       </ul>
       <nav class="pager" id="pager"></nav>

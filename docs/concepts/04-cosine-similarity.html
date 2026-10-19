@@ -106,7 +106,7 @@
       </ul>
 
       <h2 id="code">The code, walked through</h2>
-      <div class="todo-banner">Stand-in code from the original ARENA notebook. Replace with the final notebook's cells.</div>
+      <p>These cells are from "Analyzing persona space geometry" in Section 1 of <a href="../notebooks/persona_axis_kaggle_exercises.ipynb">the lab notebook</a>.</p>
 
       <div class="exercise">
         <span class="tag">Exercise</span>
@@ -159,6 +159,7 @@ px.imshow(
     title="Persona Cosine Similarity Matrix (Centered)",
     color_continuous_scale="RdBu",
     color_continuous_midpoint=0.0,
+    height=800,
 ).show()
 </code></pre>
       <div class="walk">
@@ -167,7 +168,7 @@ px.imshow(
           <li><code>vectors.mean(dim=0)</code>: average over personas → <span class="shape">(d_model,)</span>, the vector \(\bar v\). Subtracting it broadcasts across all rows. This is the one-line fix.</li>
           <li>Normalise each row, then <code>vectors_norm @ vectors_norm.T</code>: <span class="shape">(n, d_model)</span> × <span class="shape">(d_model, n)</span> → <span class="shape">(n, n)</span>.</li>
           <li><code>.float()</code> before plotting: the model's half-precision tensors are converted to 32-bit floats, which plotting libraries expect.</li>
-          <li><code>color_continuous_midpoint=0.0</code> pins white to zero so blue always means similar and red always means opposite.</li>
+          <li><code>color_continuous_midpoint=0.0</code> pins white to zero so blue always means similar and red always means opposite. <code>height=800</code> leaves room for all 53 persona labels.</li>
         </ul>
       </div>
       <p>Keep this centered heatmap. It helps when you interpret where your own two personas land in <a href="../homework-1.html#part-c">Homework 1, Part C</a>.</p>
