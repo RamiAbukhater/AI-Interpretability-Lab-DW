@@ -125,7 +125,7 @@ The cells have **not** run inside a real Kaggle session with Gemma yet. Run them
   - `docs/concepts/07-steering.html`: 1 (suggested alpha values)
   - `docs/homework-1.html`: 1 (the personas cell lives in `notebooks/helper_cells/` until it is in the notebook)
 - [ ] **Judge model name.** ARENA's `AUTORATER_MODEL = "anthropic/claude-3.5-haiku"` **is no longer listed on OpenRouter** (checked 2026-10-19), so any judge or autorater call using it will fail. Currently listed options include `anthropic/claude-haiku-4.5` and `openai/gpt-4.1-mini` (the judge the paper used). Make sure the final notebook uses one that exists, and update `concepts/02-responses-and-judging.html` to match.
-- [ ] **Calendar details**: `LOCATION` placeholders and the lab dinner's `DINNER_TIME_AND_PLACE` in `docs/calendar.html`. To change dates, edit the Key dates table, the month tables, and the All meetings table in that file.
+- [ ] **Calendar details**: meeting locations and the lab dinner's time and place are marked tentative in `docs/calendar.html`. When they are confirmed, replace the "Location tentative" and "Time and location tentative" text. To change dates, edit the Key dates table, the month tables, and the All meetings table in that file.
 - [ ] **Homework 1, Part C setup**: the persona sign-up sheet (`PERSONA_SIGNUP_SHEET`), the published shared PCA dataset (`SHARED_PCA_DATASET`), and `LEAD_KAGGLE_USERNAMES`, all in `docs/homework-1.html`. Paste the two helper cells into the notebooks, and run them once on Kaggle (see above).
 - [ ] **Screenshots**: 12 placeholders, listed below.
 
