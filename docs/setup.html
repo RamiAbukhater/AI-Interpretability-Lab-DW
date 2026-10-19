@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Setup on Kaggle · DataWorks AI Interpretability Lab</title>
+<meta name="description" content="Step-by-step setup for the Assistant Axis notebook on Kaggle: account, phone verification, OpenRouter key, Gemma 2 license, GPU T4 x2, model inputs, secrets, smoke test, quota, and troubleshooting.">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&amp;family=Source+Sans+3:wght@400;600;700&amp;family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&amp;display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="setup" data-root="">
+<a class="skip" href="#content" style="position:absolute;left:-9999px">Skip to content</a>
+<header class="site-header" id="site-header">
+  <a class="brand" href="index.html">
+    <svg class="brand-mark" viewBox="0 0 26 26" aria-hidden="true">
+      <circle cx="13" cy="13" r="11.5" fill="none" stroke="currentColor" stroke-opacity=".3"/>
+      <circle cx="8" cy="17" r="1.6" style="fill:var(--d-red)"/><circle cx="10.5" cy="19.5" r="1.3" style="fill:var(--d-red)"/>
+      <circle cx="12" cy="12.5" r="1.3" style="fill:var(--d-amber)"/><circle cx="15.5" cy="15" r="1.3" style="fill:var(--d-amber)"/>
+      <circle cx="18" cy="8.5" r="1.6" style="fill:var(--d-blue)"/><circle cx="20" cy="11" r="1.3" style="fill:var(--d-blue)"/>
+      <line x1="4.5" y1="21.5" x2="21.5" y2="4.5" style="stroke:var(--accent)" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-text">DataWorks <span class="dim">AI Interpretability Lab</span></span>
+  </a>
+</header>
+<div class="layout">
+  <nav class="sidebar" id="sidebar" aria-label="Course pages">
+    <noscript><a href="index.html">Home</a> · <a href="setup.html">Setup</a> · <a href="homework.html">Homework</a> · <a href="resources.html">Resources</a></noscript>
+  </nav>
+  <main class="main" id="content">
+    <article class="content">
+<div class="eyebrow">Step 0 · Before the concepts</div>
+      <h1>Setup on Kaggle</h1>
+      <p class="lede">This page takes you from no accounts at all to a notebook that runs Gemma 2 on Kaggle's free GPUs. Follow the steps in order. Each one says what it does, why it is needed, and what you should see when it worked.</p>
+
+      <nav class="page-toc" aria-label="On this page">
+        <strong>On this page</strong>
+        <ol>
+          <li><a href="#step-overview">What you will end up with</a></li>
+          <li><a href="#step-kaggle">Kaggle account and phone</a></li>
+          <li><a href="#step-openrouter">OpenRouter API key</a></li>
+          <li><a href="#step-license">Gemma 2 license</a></li>
+          <li><a href="#step-import">Import the notebook</a></li>
+          <li><a href="#step-session">Session options</a></li>
+          <li><a href="#step-model">Add the model</a></li>
+          <li><a href="#step-secret">Add the secret</a></li>
+          <li><a href="#step-smoke">Smoke test, then 9B</a></li>
+          <li><a href="#step-quota">GPU quota</a></li>
+          <li><a href="#step-save">Saving your work</a></li>
+          <li><a href="#troubleshooting">Troubleshooting</a></li>
+        </ol>
+      </nav>
+
+      <div class="callout warn">
+        <span class="callout-title">Start early</span>
+        <p>Two steps involve waiting on someone else: Kaggle's phone verification, and the Gemma license approval. Both are usually quick, but do steps 2 and 4 the day the homework is assigned, not the night before.</p>
+      </div>
+
+      <ol class="steps-list">
+
+        <!-- 1 -->
+        <li class="step" id="step-overview">
+          <h2>What you will end up with</h2>
+          <p>By the end of this page you will have:</p>
+          <ul>
+            <li>A <strong>Kaggle</strong> account with phone verification, which unlocks free GPUs and Internet access inside notebooks.</li>
+            <li>An <strong>OpenRouter</strong> API key with a few dollars of credit and a spending limit, stored safely as a Kaggle Secret.</li>
+            <li>Access to Google's <strong>Gemma 2</strong> models on Kaggle.</li>
+            <li>Your own copy of the lab notebook, attached to two GPUs and the Gemma 2 model files, which has completed one successful smoke-test run.</li>
+          </ul>
+          <p><strong>Time:</strong> about 45 to 60 minutes of your attention, plus any waiting for verification. The smoke test itself takes about 5 minutes of GPU time. The full 9B run takes roughly 30 to 45 minutes.</p>
+          <p><strong>Cost:</strong> Kaggle is free. OpenRouter needs a small amount of prepaid credit (a few dollars is plenty for the whole project; see <a href="#step-openrouter">step 3</a>).</p>
+          <div class="step-why">
+            <p>Gemma 2 9B has about 9 billion parameters. Just holding them in memory takes around 18 GB, which is more than a laptop GPU or a single free cloud GPU has. Kaggle offers two 16 GB GPUs for free, which is enough if the model is split across both. That is why we use Kaggle and why several steps below are about getting those GPUs.</p>
+          </div>
+        </li>
+
+        <!-- 2 -->
+        <li class="step" id="step-kaggle">
+          <h2>Create a Kaggle account and verify your phone</h2>
+          <ol>
+            <li>Go to <a href="https://www.kaggle.com">kaggle.com</a> and click <span class="ui">Register</span>. Signing up with your Google account is fastest; email also works.</li>
+            <li>Once you are signed in, click your profile picture (top right), then <span class="ui">Settings</span>.</li>
+            <li>Find the <span class="ui">Phone verification</span> section and follow the prompts: enter your phone number, receive a code by text message, and type it in.</li>
+          </ol>
+          <figure class="shot" data-img="assets/img/setup/01-kaggle-phone-verification.png">
+            <div class="shot-placeholder"><span class="ph-title">Screenshot placeholder</span><span class="ph-desc">Kaggle Settings page with the Phone verification section visible, showing a verified status</span><code>assets/img/setup/01-kaggle-phone-verification.png</code></div>
+            <figcaption>Kaggle account Settings, Phone verification section.</figcaption>
+          </figure>
+          <div class="step-why">
+            <p>Kaggle gives away GPU time, so it uses phone verification to stop people from creating many accounts to collect more. Until your phone is verified, the GPU accelerators and the Internet switch stay locked in every notebook. The lab notebook needs both: the GPUs to run Gemma, and the Internet to install a few packages and call OpenRouter.</p>
+          </div>
+          <div class="step-check">
+            <p>Your Settings page shows your phone as verified. Later, in a notebook's <span class="ui">Session options</span>, the <span class="ui">Accelerator</span> menu lists GPU options and the <span class="ui">Internet</span> switch can be turned on. If you instead see a message such as "Get phone verified", the verification has not gone through yet.</p>
+          </div>
+        </li>
+
+        <!-- 3 -->
+        <li class="step" id="step-openrouter">
+          <h2>Get an OpenRouter API key</h2>
+          <h3>First, what is an API key?</h3>
+          <p>An <strong>API</strong> (application programming interface) lets one program ask another program, usually on another company's servers, to do something. Our notebook sends text to models run by other companies and gets their replies back. An <strong>API key</strong> is a long secret string, like <code>sk-or-v1-…</code>, that the notebook sends along with each request to prove it is you. The service then charges the request to your account.</p>
+          <div class="callout danger">
+            <span class="callout-title">Treat your key like a password that is attached to your credit</span>
+            <p>Anyone who has your key can spend your credit. <strong>Never paste the key into a notebook cell</strong>, a chat message, a screenshot, or a GitHub file. Notebooks get shared and saved with their contents, and bots scan public GitHub for keys within minutes. The only place your key should live is the Kaggle Secret you create in <a href="#step-secret">step 8</a>. If you ever think a key has leaked, delete it on OpenRouter and make a new one.</p>
+          </div>
+          <h3>Why OpenRouter?</h3>
+          <p><a href="https://openrouter.ai">OpenRouter</a> is a single account and API that reaches models from many companies (Anthropic, OpenAI, Google, and others). The notebook uses it to call <strong>judge models</strong>: other language models that read Gemma's responses and score them (see <a href="concepts/02-responses-and-judging.html">concept 2</a>). These judge models are paid, but very cheap; a full run of the notebook costs cents, not dollars.</p>
+          <h3>Steps</h3>
+          <ol>
+            <li>Go to <a href="https://openrouter.ai">openrouter.ai</a> and click <span class="ui">Sign in</span>. You can use a Google or GitHub account.</li>
+            <li><strong>Add credit.</strong> Open <a href="https://openrouter.ai/settings/credits">openrouter.ai/settings/credits</a> and buy the smallest amount it offers (around US$5 at the time of writing). The paid judge models refuse requests from an account with no credit, so this step is required.</li>
+            <li><strong>Create a key.</strong> Open <a href="https://openrouter.ai/settings/keys">openrouter.ai/settings/keys</a> (<a href="https://openrouter.ai/keys">openrouter.ai/keys</a> redirects there) and click <span class="ui">Create API Key</span>. Give it a name you will recognise, such as <code>dataworks-kaggle</code>.</li>
+            <li><strong>Set a credit limit</strong> on the key, for example US$2. A limit caps how much this one key can ever spend, so a leaked or buggy key cannot drain your balance.</li>
+            <li><strong>Copy the key immediately</strong> and keep it somewhere private for the next few minutes (a password manager is ideal). OpenRouter shows the full key only once. If you lose it, delete that key and create a new one; that is normal and costs nothing.</li>
+          </ol>
+          <figure class="shot" data-img="assets/img/setup/02-openrouter-credits.png">
+            <div class="shot-placeholder"><span class="ph-title">Screenshot placeholder</span><span class="ph-desc">OpenRouter Credits page showing a small positive balance after adding credit</span><code>assets/img/setup/02-openrouter-credits.png</code></div>
+            <figcaption>OpenRouter Credits page after adding credit.</figcaption>
+          </figure>
+          <figure class="shot" data-img="assets/img/setup/03-openrouter-create-key.png">
+            <div class="shot-placeholder"><span class="ph-title">Screenshot placeholder</span><span class="ph-desc">OpenRouter Create API Key dialog with a name filled in and a credit limit set, key value blurred</span><code>assets/img/setup/03-openrouter-create-key.png</code></div>
+            <figcaption>Creating a key with a name and a credit limit. Blur the key in any screenshot.</figcaption>
+          </figure>
+          <div class="step-why">
+            <p>The notebook needs a way to reach judge models without you running them yourself. Credit is needed because the judges are paid models. The credit limit is a safety net, and copying the key straight away matters because there is no way to view it again later.</p>
+          </div>
+          <div class="step-check">
+            <p>Your key list on OpenRouter shows the new key with its limit, your credit balance is above zero, and you have a string beginning with <code>sk-or-v1-</code> saved privately.</p>
+          </div>
+        </li>
+
+        <!-- 4 -->
+        <li class="step" id="step-license">
+          <h2>Accept the Gemma 2 license on Kaggle</h2>
+          <ol>
+            <li>Open the Gemma 2 model page: <a href="https://www.kaggle.com/models/google/gemma-2">kaggle.com/models/google/gemma-2</a>.</li>
+            <li>Near the top you will see a box saying you need to request access to Gemma 2. Click <span class="ui">Request Access</span>.</li>
+            <li>Read the Gemma terms of use, fill in the short form, and accept.</li>
+          </ol>
+          <figure class="shot" data-img="assets/img/setup/04-gemma-license.png">
+            <div class="shot-placeholder"><span class="ph-title">Screenshot placeholder</span><span class="ph-desc">Gemma 2 model page on Kaggle with the "Access Gemma 2 on Kaggle" box and its Request Access button</span><code>assets/img/setup/04-gemma-license.png</code></div>
+            <figcaption>The license box on the Gemma 2 model page, before access is granted.</figcaption>
+          </figure>
+          <div class="step-why">
+            <p>Gemma's weights are free to download, but Google releases them under its own license with usage terms. A <strong>license gate</strong> means the platform will not let your account load the files until you have accepted those terms. Acceptance is tied to your Kaggle account, so you do it once, and it covers every Gemma 2 size (2B, 9B, 27B). Our notebook does not need a HuggingFace account or token, because it loads Gemma from Kaggle's copy.</p>
+          </div>
+          <div class="step-check">
+            <p>The request-access box is gone from the model page. Approval is usually immediate. If the box is still there after a refresh, wait a few minutes and try again.</p>
+          </div>
+        </li>
+
+        <!-- 5 -->
+        <li class="step" id="step-import">
+          <h2>Import the notebook into Kaggle</h2>
+          <div class="todo-banner">The final notebook file and its import link have not been published yet. Leaders will replace the placeholder below.</div>
+          <p><strong>Notebook to import:</strong> <code>notebooks/persona_axis_kaggle_exercises.ipynb</code> from this repository. <span class="todo-inline">NOTEBOOK_IMPORT_LINK</span> (the direct GitHub link goes here).</p>
+          <ol>
+            <li>Get the notebook file. Either download it from the link above (on GitHub, open the file and use the <span class="ui">Download raw file</span> button), or copy the link to it if you will import from a URL.</li>
+            <li>On Kaggle, click <span class="ui">Code</span> in the left menu, then <span class="ui">New Notebook</span>. An empty notebook opens in the editor.</li>
+            <li>In the editor's top menu, choose <span class="ui">File</span> → <span class="ui">Import Notebook</span>.</li>
+            <li>Upload the <code>.ipynb</code> file you downloaded (or paste the GitHub link if the dialog offers a link option), then confirm. The empty notebook is replaced with the lab notebook.</li>
+            <li>Rename it something you will find again, like <code>assistant-axis-yourname</code>, by clicking the title at the top left.</li>
+          </ol>
+          <figure class="shot" data-img="assets/img/setup/05-import-notebook.png">
+            <div class="shot-placeholder"><span class="ph-title">Screenshot placeholder</span><span class="ph-desc">Kaggle notebook editor with the File menu open and Import Notebook highlighted, plus the import dialog</span><code>assets/img/setup/05-import-notebook.png</code></div>
+            <figcaption>File → Import Notebook in the Kaggle editor.</figcaption>
+          </figure>
+          <div class="step-why">
+            <p>Importing gives you your own private copy that you can edit and run. Do not use the solutions notebook if you happen to come across it; the exercises are graded homework.</p>
+          </div>
+          <div class="step-check">
+            <p>The notebook shows the lab's title cell and a first code cell with configuration flags such as <code>SMOKE_TEST</code>. Nothing has run yet.</p>
+          </div>
+        </li>
+
+        <!-- 6 -->
+        <li class="step" id="step-session">
+          <h2>Set the session options: GPU T4 x2 and Internet on</h2>
+          <ol>
+            <li>Open the right-hand settings panel in the editor (if it is hidden, click the panel icon at the top right).</li>
+            <li>Under <span class="ui">Session options</span>, set <span class="ui">Accelerator</span> to <span class="ui">GPU T4 x2</span>. Kaggle may warn that this uses your GPU quota; confirm.</li>
+            <li>In the same section, turn <span class="ui">Internet</span> on.</li>
+            <li>Leave the other options (language Python, the default environment) as they are.</li>
+          </ol>
+          <figure class="shot" data-img="assets/img/setup/06-session-options.png">
+            <div class="shot-placeholder"><span class="ph-title">Screenshot placeholder</span><span class="ph-desc">Session options panel with Accelerator set to GPU T4 x2 and the Internet switch on</span><code>assets/img/setup/06-session-options.png</code></div>
+            <figcaption>Session options with Accelerator set to GPU T4 x2 and Internet on.</figcaption>
+          </figure>
+          <div class="step-why">
+            <p><strong>Why two GPUs.</strong> Each NVIDIA T4 has 16 GB of memory. Gemma 2 9B stored in 16-bit numbers needs about 18 GB for the weights alone, before counting the memory used while the model runs. It does not fit on one T4, but it does fit when Hugging Face's <code>device_map="auto"</code> puts roughly half the layers on each card. The other Kaggle option, a single P100, also has 16 GB and is too small.</p>
+            <p><strong>Why Internet.</strong> The setup cell downloads ARENA's helper code and clones the paper's repository (which holds the transcripts used in Section 2), and the judge calls go out to OpenRouter.</p>
+          </div>
+          <div class="step-check">
+            <p>The session restarts and the panel shows <span class="ui">GPU T4 x2</span> with Internet on. Once you run any cell, the resource meter at the top shows two GPUs.</p>
+          </div>
+          <div class="callout warn">
+            <span class="callout-title">If you pick the wrong accelerator</span>
+            <p>With <span class="ui">None</span> (CPU only) the notebook either stops with a "no GPU" error or crawls for hours. With <span class="ui">GPU P100</span> or a TPU, loading the 9B model runs out of memory. Fix it by changing the accelerator here; the session restarts, so run the cells again from the top.</p>
+          </div>
+        </li>
+
+        <!-- 7 -->
+        <li class="step" id="step-model">
+          <h2>Add Gemma 2 as an input</h2>
+          <ol>
+            <li>In the right-hand panel, find <span class="ui">Input</span> and click <span class="ui">Add Input</span>.</li>
+            <li>Choose the <span class="ui">Models</span> filter, search for <code>Gemma 2</code>, and pick the one published by Google.</li>
+            <li>For <span class="ui">Framework</span>, choose <span class="ui">Transformers</span>.</li>
+            <li>For <span class="ui">Variation</span>, choose <code>gemma-2-9b-it</code> and add it.</li>
+            <li>Repeat and also add <code>gemma-2-2b-it</code> (same model, same framework). This small model is what the smoke test uses.</li>
+          </ol>
+          <figure class="shot" data-img="assets/img/setup/07-add-input-gemma.png">
+            <div class="shot-placeholder"><span class="ph-title">Screenshot placeholder</span><span class="ph-desc">Add Input dialog filtered to Models, with Gemma 2 by Google selected and Framework set to Transformers</span><code>assets/img/setup/07-add-input-gemma.png</code></div>
+            <figcaption>Add Input → Models → Gemma 2, Framework: Transformers.</figcaption>
+          </figure>
+          <figure class="shot" data-img="assets/img/setup/08-model-variation.png">
+            <div class="shot-placeholder"><span class="ph-title">Screenshot placeholder</span><span class="ph-desc">Input panel listing both gemma-2-9b-it and gemma-2-2b-it under Gemma 2 / Transformers</span><code>assets/img/setup/08-model-variation.png</code></div>
+            <figcaption>Both variations attached in the Input panel.</figcaption>
+          </figure>
+          <div class="step-why">
+            <p><strong>Why Transformers.</strong> Kaggle offers the same Gemma 2 weights in several formats: Transformers, PyTorch, Flax, GGUF, Gemma C++, and TFLite. Only the Transformers format loads with Hugging Face's <code>AutoModelForCausalLM</code>, which is what the notebook uses. That library lets us ask for the hidden states between layers (<code>output_hidden_states=True</code>) and attach hooks to each layer, the two things this whole project depends on. The "PyTorch" option here is Google's own standalone implementation with a different file layout, and GGUF, Gemma C++ and TFLite are compressed formats for fast inference that do not give you those internals.</p>
+            <p><strong>Base versus instruction-tuned.</strong> Each size comes in two versions. <code>gemma-2-9b</code> is the <em>base</em> (pre-trained) model: it has only learned to continue text. <code>gemma-2-9b-it</code> is <em>instruction-tuned</em>: it went through post-training to follow instructions and act as a chat Assistant. This project is about the Assistant persona that post-training creates, so we need the <code>-it</code> models. A base model has no default Assistant to find.</p>
+          </div>
+          <div class="step-check">
+            <p>The Input panel lists both models. The files appear under <code>/kaggle/input/</code>, in a folder like <code>/kaggle/input/gemma-2/transformers/gemma-2-9b-it/2</code> (the last number is the model version). The notebook searches <code>/kaggle/input</code> for the right folder itself, so the exact version number does not matter.</p>
+          </div>
+        </li>
+
+        <!-- 8 -->
+        <li class="step" id="step-secret">
+          <h2>Add your OpenRouter key as a Kaggle Secret</h2>
+          <ol>
+            <li>In the editor's top menu, open <span class="ui">Add-ons</span> → <span class="ui">Secrets</span>.</li>
+            <li>Click <span class="ui">Add Secret</span> (or <span class="ui">Add a new secret</span>).</li>
+            <li>For the <strong>label</strong>, type exactly <code>OPENROUTER_API_KEY</code>: all capitals, underscores, no spaces.</li>
+            <li>For the <strong>value</strong>, paste your OpenRouter key. Save.</li>
+            <li>Make sure the box next to <code>OPENROUTER_API_KEY</code> is <strong>ticked</strong>. The tick is what attaches the secret to this particular notebook.</li>
+          </ol>
+          <figure class="shot" data-img="assets/img/setup/09-add-secret.png">
+            <div class="shot-placeholder"><span class="ph-title">Screenshot placeholder</span><span class="ph-desc">Add-ons → Secrets dialog with a secret labelled OPENROUTER_API_KEY, value hidden, and its checkbox ticked</span><code>assets/img/setup/09-add-secret.png</code></div>
+            <figcaption>The secret label must be exactly OPENROUTER_API_KEY, and the box must be ticked.</figcaption>
+          </figure>
+          <p>Inside the notebook, a cell reads the secret by its label. It looks like this:</p>
+          <div class="todo-banner">Replace with the notebook's actual secret-loading cell.</div>
+<pre><code class="language-python">from kaggle_secrets import UserSecretsClient
+
+OPENROUTER_API_KEY = UserSecretsClient().get_secret("OPENROUTER_API_KEY")
+</code></pre>
+          <div class="step-why">
+            <p>Kaggle Secrets keep the key out of the notebook itself. The value is stored by Kaggle and only handed to your running session, so it never appears in a cell, an output, or a saved version.</p>
+          </div>
+          <div class="step-check">
+            <p>The Secrets dialog lists <code>OPENROUTER_API_KEY</code> with a ticked box. When you run the setup cells, no "secret not found" error appears.</p>
+          </div>
+          <div class="callout warn">
+            <span class="callout-title">Secrets do not travel with a notebook</span>
+            <p>If you copy a notebook, or someone shares theirs and you click <span class="ui">Copy &amp; Edit</span>, the secret is not copied. That is deliberate, so nobody can borrow your key. In every new notebook, open <span class="ui">Add-ons</span> → <span class="ui">Secrets</span> and tick your existing secret again.</p>
+          </div>
+        </li>
+
+        <!-- 9 -->
+        <li class="step" id="step-smoke">
+          <h2>Run the smoke test first, then the full 9B run</h2>
+          <p>A <strong>smoke test</strong> is a short, cheap run whose only job is to show that everything is wired up correctly before you spend real time and GPU quota. In our notebook it uses Gemma 2 2B with a handful of personas and questions.</p>
+          <div class="todo-banner">Flag names and defaults are from the adaptation's README. Confirm against the final notebook.</div>
+          <ol>
+            <li>In the first code cell, make sure <code>SMOKE_TEST = True</code>. Leave the other flags at their defaults.</li>
+            <li>Click <span class="ui">Run All</span> (or run cells one at a time with <kbd>Shift</kbd>+<kbd>Enter</kbd> to watch each step).</li>
+            <li>Wait. The setup cell installs packages and downloads helper code (about a minute), then the 2B model loads (about a minute), then Section 1 and Section 2 run (a few more minutes).</li>
+          </ol>
+          <p>The configuration cell has these flags:</p>
+          <div class="table-scroll">
+            <table class="plain">
+              <thead><tr><th>Flag</th><th>Default</th><th>What it does</th></tr></thead>
+              <tbody>
+                <tr><td><code>SMOKE_TEST</code></td><td><code>True</code></td><td>Gemma 2 2B, 10 personas, 2 questions. Set to <code>False</code> for the real run with 9B.</td></tr>
+                <tr><td><code>USE_FULL_PERSONA_LIST</code></td><td><code>False</code></td><td>All 275 roles from the paper and longer responses. Takes hours; not for homework.</td></tr>
+                <tr><td><code>GENERATION_BACKEND</code></td><td><code>"local"</code></td><td>Where persona responses come from. <code>"local"</code> uses the loaded Gemma. <code>"openrouter"</code> asks Gemma 2 27B through the API instead.</td></tr>
+                <tr><td><code>RUN_JUDGE_FILTER</code></td><td><code>False</code></td><td>Scores every persona response with an LLM judge and keeps only fully in-character ones, as the paper does. Adds a little API cost and a few minutes.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <figure class="shot" data-img="assets/img/setup/10-smoke-test-output.png">
+            <div class="shot-placeholder"><span class="ph-title">Screenshot placeholder</span><span class="ph-desc">Notebook output from the smoke test: the model-load message for gemma-2-2b-it followed by the first printed persona responses</span><code>assets/img/setup/10-smoke-test-output.png</code></div>
+            <figcaption>A successful smoke test: the model loads and prints its first in-character responses.</figcaption>
+          </figure>
+          <div class="step-check">
+            <p>The model-loading cell finishes without errors and reports the model it loaded. The first generation cell prints short responses from a few personas (a ghost should sound like a ghost). Further down you get a cosine-similarity heatmap, a PCA scatter plot, the paper's 27B reference plots, drift plots, and steering outputs. With only 10 personas and 2 questions the plots will be noisy. That is expected; the smoke test is checking the plumbing, not the science.</p>
+          </div>
+          <h3>Switching to the full 9B run</h3>
+          <ol>
+            <li>Set <code>SMOKE_TEST = False</code> in the first cell.</li>
+            <li>Restart the session so the 2B model is cleared from GPU memory: <span class="ui">Run</span> → <span class="ui">Restart &amp; clear cell outputs</span> (or the restart button in the toolbar).</li>
+            <li>Run all cells again. Loading 9B takes 3 to 5 minutes, and the whole notebook roughly 30 to 45 minutes.</li>
+          </ol>
+          <p>Results are cached in <code>/kaggle/working/persona_cache/</code>, so if a later cell fails you can fix it and re-run without regenerating everything that already finished.</p>
+        </li>
+
+        <!-- 10 -->
+        <li class="step" id="step-quota">
+          <h2>Understand your GPU quota</h2>
+          <p>Kaggle gives each verified account a weekly allowance of GPU hours. The figure most users see is <strong>around 30 hours per week</strong>, but Kaggle can change it and does not promise a fixed number in its documentation, so check your own. To see it, click your profile picture → <span class="ui">Settings</span> and look for the quota section, or look at the quota meter in the right-hand panel of the notebook editor. The weekly allowance resets once a week.</p>
+          <figure class="shot" data-img="assets/img/setup/11-gpu-quota.png">
+            <div class="shot-placeholder"><span class="ph-title">Screenshot placeholder</span><span class="ph-desc">Kaggle quota display showing GPU hours used and remaining for the week</span><code>assets/img/setup/11-gpu-quota.png</code></div>
+            <figcaption>Where to check how many GPU hours you have left this week.</figcaption>
+          </figure>
+          <ul>
+            <li><strong>Quota is used while a GPU session is running</strong>, not only while a cell is executing. A GPU notebook sitting open in a tab while you read is still spending your hours.</li>
+            <li><strong>Stop the session when you are done</strong>: click the power icon in the top bar of the editor, or <span class="ui">Run</span> → <span class="ui">Stop session</span>. You can also see and stop any running sessions under <span class="ui">View Active Events</span> in the left menu.</li>
+            <li>Kaggle ends an interactive session on its own after about 20 minutes with no activity, and any single session after 12 hours. Do not rely on that to save quota.</li>
+          </ul>
+          <div class="step-why">
+            <p>Two T4s for a full run plus a few re-runs comes to a few hours a week, well within the allowance, but forgetting a session overnight can use up a third of your week.</p>
+          </div>
+        </li>
+
+        <!-- 11 -->
+        <li class="step" id="step-save">
+          <h2>Save your work</h2>
+          <p>The notebook writes its results (responses, persona vectors, scores) under <code>/kaggle/working</code>. During an interactive session, <strong>everything in <code>/kaggle/working</code> is lost when the session ends</strong>, whether you stop it, it times out, or you close the tab and it idles out.</p>
+          <p>To keep your code and outputs, click <span class="ui">Save Version</span> at the top right. You get two choices:</p>
+          <ul>
+            <li><strong>Quick Save</strong> takes a snapshot of the notebook exactly as it looks now: your code and the outputs currently shown in cells (plots and printed results). It does not re-run anything. Use it often.</li>
+            <li><strong>Save &amp; Run All (Commit)</strong> starts a fresh session, runs the whole notebook top to bottom, and keeps the files it writes to <code>/kaggle/working</code> (up to 20 GB) as the version's <span class="ui">Output</span>. This uses GPU quota for the whole run, so use it when you want a clean, complete record, for example before submitting homework.</li>
+          </ul>
+          <figure class="shot" data-img="assets/img/setup/12-save-version.png">
+            <div class="shot-placeholder"><span class="ph-title">Screenshot placeholder</span><span class="ph-desc">Save Version dialog showing the Quick Save and Save &amp; Run All (Commit) options</span><code>assets/img/setup/12-save-version.png</code></div>
+            <figcaption>The Save Version dialog.</figcaption>
+          </figure>
+          <p>A saved version's output files can be attached as an input to a later session (<span class="ui">Add Input</span> → your notebook), which lets you reuse cached responses and vectors instead of recomputing them.</p>
+          <div class="step-check">
+            <p>Your notebook's page lists a version number, and opening the version shows your plots. For a Save &amp; Run All version, its <span class="ui">Output</span> tab lists the files from <code>/kaggle/working</code>.</p>
+          </div>
+        </li>
+      </ol>
+
+      <h2 id="troubleshooting">Troubleshooting</h2>
+      <p>Find the message closest to what you see. If nothing here helps, post the full error (with any key blurred) in the group channel.</p>
+      <div class="todo-banner">Error text for the notebook's own checks (secret loading, model path search, 8-bit fallback) should be copied from the final notebook.</div>
+      <dl class="trouble">
+        <dt>torch.OutOfMemoryError: CUDA out of memory</dt>
+        <dd>
+          <p>The GPUs ran out of memory. Check, in order:</p>
+          <ol>
+            <li>The accelerator is <span class="ui">GPU T4 x2</span>, not P100 (<a href="#step-session">step 6</a>).</li>
+            <li>You restarted the session after switching from the 2B smoke test to 9B. Two models loaded at once will not fit.</li>
+            <li>If it happens during response generation, lower <code>GEN_BATCH_SIZE</code> in the generation cell (try halving it).</li>
+            <li>If it happens while analysing a long transcript in Section 2, lower <code>max_assistant_turns</code> so fewer turns go through the model at once.</li>
+          </ol>
+          <p>After an out-of-memory error, restart the session before trying again; the memory often stays fragmented.</p>
+        </dd>
+
+        <dt>Outputs are NaN, empty strings, or repeated &lt;pad&gt; tokens</dt>
+        <dd>
+          <p>T4 GPUs do not support <code>bfloat16</code> natively, so on Kaggle the model runs in <code>float16</code>. That format has a much smaller range, and Gemma 2's activations can grow large enough to overflow it, which turns numbers into <code>inf</code> and then <code>NaN</code>. The symptom is a heatmap full of blanks, a PCA error about NaN, or generations that are empty or garbage.</p>
+          <p>The notebook can fall back to loading the model in 8-bit (with the <code>bitsandbytes</code> library), which keeps the numbers in a safe range at some cost in speed. If you see NaNs, use that fallback as the notebook describes, restart, and re-run. 8-bit also uses about half the memory.</p>
+        </dd>
+
+        <dt>Secret not found / SecretNotFoundError / OPENROUTER_API_KEY is None</dt>
+        <dd>
+          <p>The notebook could not read your key. Usually one of:</p>
+          <ul>
+            <li>The label is not exactly <code>OPENROUTER_API_KEY</code> (check for a lowercase letter, a space, or a typo).</li>
+            <li>The secret exists but its box is not ticked for this notebook. Open <span class="ui">Add-ons</span> → <span class="ui">Secrets</span> and tick it.</li>
+            <li>This is a copied notebook, and secrets do not carry over. Tick the secret again in this copy.</li>
+          </ul>
+          <p>After fixing it, re-run the cell that loads the secret.</p>
+        </dd>
+
+        <dt>Model path not found / OSError: … is not a valid model identifier / no folder under /kaggle/input</dt>
+        <dd>
+          <p>The model files are not attached, or the wrong format was attached.</p>
+          <ul>
+            <li>Check the Input panel: you need Gemma 2, framework <strong>Transformers</strong>, variation <code>gemma-2-9b-it</code> (and <code>gemma-2-2b-it</code> for the smoke test). If you picked PyTorch, Flax, or GGUF, remove it and add the Transformers one.</li>
+            <li>If the smoke test is on, the 2B variation must be attached; with it off, 9B must be.</li>
+            <li>Run <code>!ls -R /kaggle/input | head -50</code> in a new cell to see what is actually there.</li>
+            <li>If adding the model fails with an access message, you have not accepted the Gemma license yet (<a href="#step-license">step 4</a>).</li>
+          </ul>
+        </dd>
+
+        <dt>Internet is off: pip install fails, "Temporary failure in name resolution", or git clone fails</dt>
+        <dd>
+          <p>The setup cell needs Internet to install packages, download ARENA's helper code, and clone the assistant-axis repository. Turn <span class="ui">Internet</span> on in <span class="ui">Session options</span>. If the switch is greyed out, your phone is not verified yet (<a href="#step-kaggle">step 2</a>). After turning it on, re-run the setup cell.</p>
+        </dd>
+
+        <dt>OpenRouter 401 Unauthorized ("No auth credentials found" or invalid key)</dt>
+        <dd>
+          <p>OpenRouter did not accept the key. The key was mistyped or pasted with extra spaces, was deleted, or was disabled. Create a new key, update the value of the Kaggle Secret, and restart the session so the new value is picked up.</p>
+        </dd>
+
+        <dt>OpenRouter 402 Payment Required (insufficient credits)</dt>
+        <dd>
+          <p>Your account, or this key's credit limit, has no credit left. Check your balance on the <a href="https://openrouter.ai/settings/credits">Credits page</a> and the key's limit on the <a href="https://openrouter.ai/settings/keys">Keys page</a>. Add credit or raise the limit, then retry. Before you do, make sure nothing is looping and making calls you did not expect.</p>
+        </dd>
+
+        <dt>OpenRouter 429 Too Many Requests (rate limited)</dt>
+        <dd>
+          <p>You sent requests faster than OpenRouter or the model provider allows. The notebook sends judge calls in parallel. Lower <code>MAX_WORKERS</code> (try 2 to 4) and run the cell again. Waiting a minute also helps. Cached results mean finished calls are not repeated.</p>
+        </dd>
+
+        <dt>OpenRouter 404 or "No endpoints found" for a model name</dt>
+        <dd>
+          <p>The judge model named in the notebook is no longer offered on OpenRouter. Models are retired from time to time (for example, the Claude 3.5 Haiku judge used by the original ARENA notebook has been removed). Check the model name against <a href="https://openrouter.ai/models">openrouter.ai/models</a> and tell a leader. The fix belongs in the notebook so everyone gets it.</p>
+        </dd>
+
+        <dt>The session restarted or disconnected and my variables are gone</dt>
+        <dd>
+          <p>Kaggle ends an interactive session after about 20 minutes without activity. Re-run from the top. Thanks to the cache in <code>/kaggle/working/persona_cache/</code>, finished steps are fast as long as the same session's files are still there. If the session fully ended, those files are gone too unless you saved a version (<a href="#step-save">step 11</a>).</p>
+        </dd>
+      </dl>
+      <nav class="pager" id="pager"></nav>
+      <footer class="site-footer" id="site-footer">
+        <noscript><p>DataWorks AI Interpretability Lab. Leads and instructors: Rami Abukhater, Alec Min, and Akshar Sinha. Adapted from ARENA notebook 4.4 and The Assistant Axis (Lu et al., 2026).</p></noscript>
+      </footer>
+    </article>
+  </main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<script src="assets/js/site.js"></script>
+</body>
+</html>

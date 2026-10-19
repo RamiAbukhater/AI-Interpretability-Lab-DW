@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resources and glossary · DataWorks AI Interpretability Lab</title>
+<meta name="description" content="The Assistant Axis paper and code, the original ARENA notebook, a glossary of every technical term used on the site, and introductory interpretability reading.">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&amp;family=Source+Sans+3:wght@400;600;700&amp;family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&amp;display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="resources" data-root="">
+<a class="skip" href="#content" style="position:absolute;left:-9999px">Skip to content</a>
+<header class="site-header" id="site-header">
+  <a class="brand" href="index.html">
+    <svg class="brand-mark" viewBox="0 0 26 26" aria-hidden="true">
+      <circle cx="13" cy="13" r="11.5" fill="none" stroke="currentColor" stroke-opacity=".3"/>
+      <circle cx="8" cy="17" r="1.6" style="fill:var(--d-red)"/><circle cx="10.5" cy="19.5" r="1.3" style="fill:var(--d-red)"/>
+      <circle cx="12" cy="12.5" r="1.3" style="fill:var(--d-amber)"/><circle cx="15.5" cy="15" r="1.3" style="fill:var(--d-amber)"/>
+      <circle cx="18" cy="8.5" r="1.6" style="fill:var(--d-blue)"/><circle cx="20" cy="11" r="1.3" style="fill:var(--d-blue)"/>
+      <line x1="4.5" y1="21.5" x2="21.5" y2="4.5" style="stroke:var(--accent)" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-text">DataWorks <span class="dim">AI Interpretability Lab</span></span>
+  </a>
+</header>
+<div class="layout">
+  <nav class="sidebar" id="sidebar" aria-label="Course pages">
+    <noscript><a href="index.html">Home</a> · <a href="setup.html">Setup</a> · <a href="homework.html">Homework</a> · <a href="resources.html">Resources</a></noscript>
+  </nav>
+  <main class="main" id="content">
+    <article class="content">
+<div class="eyebrow">Reference</div>
+      <h1>Resources and glossary</h1>
+      <p class="lede">The primary sources, a glossary of every technical term used on this site, and good places to start if you want to learn more interpretability.</p>
+
+      <h2 id="sources">Primary sources</h2>
+      <ul>
+        <li><strong>The paper.</strong> Christina Lu, Jack Gallagher, Jonathan Michala, Kyle Fish, and Jack Lindsey. <a href="https://arxiv.org/abs/2601.10387"><em>The Assistant Axis: Situating and Stabilizing the Default Persona of Language Models</em></a>. arXiv 2601.10387, 2026. Read Sections 1 to 4 for this project; Sections 5 and 6 cover activation capping.</li>
+        <li><strong>Anthropic's blog post</strong> on the paper: <a href="https://www.anthropic.com/research/assistant-axis">The Assistant Axis</a>. Short and well illustrated; read it first.</li>
+        <li><strong>The paper's code</strong>: <a href="https://github.com/safety-research/assistant-axis">safety-research/assistant-axis</a> (MIT license). Includes the pipeline, analysis notebooks, and the transcripts used in Section 2.</li>
+        <li><strong>The paper's precomputed vectors</strong>: <a href="https://huggingface.co/datasets/lu-christina/assistant-axis-vectors">lu-christina/assistant-axis-vectors</a> on HuggingFace, for Gemma 2 27B, Qwen 3 32B, and Llama 3.3 70B.</li>
+        <li><strong>The original ARENA notebook</strong>: <a href="https://github.com/ARENA-education/ARENA_materials/blob/main/chapter4_alignment_science/exercises/part4_persona_vectors/4.4_LLM_Psychology_%26_Persona_Vectors_exercises.ipynb">4.4 LLM Psychology &amp; Persona Vectors</a>, in <a href="https://github.com/ARENA-education/ARENA_materials">ARENA_materials</a>. Our notebook adapts its Sections 1 and 2. Its Sections 3 and 4 cover the related Persona Vectors paper.</li>
+        <li><strong>Related papers.</strong> <a href="https://arxiv.org/abs/2507.21509">Persona Vectors</a> (Chen et al., 2025), which extracts vectors for specific traits; Sam Marks, <a href="https://www.lesswrong.com/posts/dfoty34sT7CSKeJNn/the-persona-selection-model">The Persona Selection Model</a>; janus, <a href="https://www.lesswrong.com/posts/vJFdjigzmcXMhNTsx/simulators">Simulators</a>.</li>
+      </ul>
+
+      <h2 id="tools">Tools we use</h2>
+      <ul>
+        <li><a href="https://www.kaggle.com/docs/notebooks">Kaggle Notebooks documentation</a>: hardware, session limits, saving versions.</li>
+        <li><a href="https://www.kaggle.com/models/google/gemma-2">Gemma 2 on Kaggle Models</a>.</li>
+        <li><a href="https://openrouter.ai/docs/quickstart">OpenRouter quickstart</a> and <a href="https://openrouter.ai/models">model list</a>.</li>
+        <li><a href="https://huggingface.co/docs/transformers/index">Hugging Face Transformers documentation</a>.</li>
+        <li><a href="https://docs.pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module.register_forward_hook">PyTorch <code>register_forward_hook</code></a>.</li>
+        <li><a href="https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html">scikit-learn <code>PCA</code></a>.</li>
+      </ul>
+
+      <h2 id="glossary">Glossary</h2>
+      <dl class="glossary">
+        <dt id="g-activation">Activation</dt>
+        <dd>Any intermediate value computed inside a neural network while it processes an input. In this project it almost always means the residual-stream vector for one token at one layer. Used interchangeably with <a href="#g-hidden-state">hidden state</a>. <span class="see">See <a href="concepts/03-residual-stream.html">concept 3</a>.</span></dd>
+
+        <dt id="g-assistant-axis">Assistant Axis</dt>
+        <dd>The direction in activation space from the average role-playing persona to the average default Assistant, \(\mu_\text{default} - \mu_\text{roles}\), scaled to length 1. Higher projection means more Assistant-like. <span class="see">See <a href="concepts/05-pca-assistant-axis.html">concept 5</a>.</span></dd>
+
+        <dt id="g-cosine">Cosine similarity</dt>
+        <dd>The cosine of the angle between two vectors, \(u\cdot v / (\lVert u\rVert \lVert v\rVert)\). Ranges from −1 (opposite) through 0 (unrelated) to 1 (same direction), and ignores vector length. <span class="see">See <a href="concepts/04-cosine-similarity.html">concept 4</a>.</span></dd>
+
+        <dt id="g-d-model">d_model</dt>
+        <dd>The number of dimensions of the residual stream, which is the length of every activation vector in it. 3584 for Gemma 2 9B, 2304 for Gemma 2 2B, 4608 for Gemma 2 27B. In Hugging Face it is <code>model.config.hidden_size</code>.</dd>
+
+        <dt id="g-hidden-state">Hidden state</dt>
+        <dd>The residual-stream vector for a token after a given layer. Hugging Face returns them with <code>output_hidden_states=True</code> as a tuple with one entry per layer plus the embeddings, each of shape <span class="shape">(batch, seq_len, d_model)</span>.</dd>
+
+        <dt id="g-hook">Hook (forward hook)</dt>
+        <dd>A function attached to a PyTorch module that is called every time the module runs, with its input and output. It can record the output or return a modified one. Used to read one layer cheaply and to steer. <span class="see">See <a href="concepts/06-hooks-and-drift.html">concept 6</a>.</span></dd>
+
+        <dt id="g-instruction-tuned">Instruction-tuned (-it)</dt>
+        <dd>A model that, after pre-training, was further trained to follow instructions and behave as a chat Assistant. Gemma's instruction-tuned versions end in <code>-it</code>; versions without it are base models that only continue text.</dd>
+
+        <dt id="g-judge">LLM judge (autorater)</dt>
+        <dd>A language model used to grade other models' outputs against a rubric, for example the 0 to 3 role-play scale or the delusion-risk rubric. It runs at temperature 0 so grades are consistent. <span class="see">See <a href="concepts/02-responses-and-judging.html">concept 2</a>.</span></dd>
+
+        <dt id="g-mean-centering">Mean-centering</dt>
+        <dd>Subtracting the average of a set of vectors from each of them, so what remains is how each one differs from the average. Without it, a large shared component makes all persona vectors look alike. <span class="see">See <a href="concepts/04-cosine-similarity.html">concept 4</a>.</span></dd>
+
+        <dt id="g-pca">PCA (principal component analysis)</dt>
+        <dd>A method that finds orthogonal directions along which a set of points varies the most, ordered by how much variance each explains. Used here to show that persona space has one dominant direction. <span class="see">See <a href="concepts/05-pca-assistant-axis.html">concept 5</a>.</span></dd>
+
+        <dt id="g-persona">Persona</dt>
+        <dd>A character the model is asked to play, defined in the notebook by a system prompt. The default Assistant is itself a persona.</dd>
+
+        <dt id="g-persona-drift">Persona drift</dt>
+        <dd>A gradual move of the model's activations away from the Assistant end of the axis over a conversation, often alongside out-of-character or harmful behaviour.</dd>
+
+        <dt id="g-persona-vector">Persona vector</dt>
+        <dd>The average activation, at one layer, over all response tokens of all kept responses for one persona. One vector of length d_model per persona. (Not the same as the trait vectors in the separate <em>Persona Vectors</em> paper.)</dd>
+
+        <dt id="g-pc">Principal component</dt>
+        <dd>One of the directions PCA finds. PC1 is the direction of greatest variance, PC2 the greatest at right angles to PC1, and so on. Its sign is arbitrary.</dd>
+
+        <dt id="g-projection">Projection</dt>
+        <dd>The dot product of a vector with a unit-length direction, \(x\cdot a\): how far \(x\) extends along \(a\). Used to place personas and conversation turns on the Assistant Axis.</dd>
+
+        <dt id="g-residual-stream">Residual stream</dt>
+        <dd>The vector for each token that passes up through a transformer. Each layer reads it and adds its own output to it, so information accumulates. Reading it at a layer gives that layer's hidden state. <span class="see">See <a href="concepts/03-residual-stream.html">concept 3</a>.</span></dd>
+
+        <dt id="g-steering">Steering</dt>
+        <dd>Changing a model's behaviour by adding a vector to its residual stream during generation, \(h \leftarrow h + \alpha s\). The coefficient \(\alpha\) sets direction and strength. <span class="see">See <a href="concepts/07-steering.html">concept 7</a>.</span></dd>
+      </dl>
+      <p class="small">Other terms used along the way: <strong>API key</strong>, a secret string that authenticates your requests to a service (<a href="setup.html#step-openrouter">setup step 3</a>); <strong>KV cache</strong>, stored attention keys and values that let generation process one new token per step (<a href="concepts/06-hooks-and-drift.html">concept 6</a>); <strong>license gate</strong>, a requirement to accept a model's terms before downloading it (<a href="setup.html#step-license">setup step 4</a>).</p>
+
+      <h2 id="learn-more">Learning more interpretability</h2>
+      <ul>
+        <li><a href="https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi">3Blue1Brown, Neural Networks</a>: the visual series on how neural networks and transformers work; chapters 5 to 7 cover transformers and attention.</li>
+        <li><a href="https://transformer-circuits.pub/2021/framework/index.html">A Mathematical Framework for Transformer Circuits</a> (Elhage et al., 2021): where the residual-stream view used on this site comes from.</li>
+        <li><a href="https://www.alignmentforum.org/posts/jP9KDyMkchuv6tHwm/how-to-become-a-mechanistic-interpretability-researcher">How To Become A Mechanistic Interpretability Researcher</a> by Neel Nanda, his current guide to getting started.</li>
+        <li><a href="https://www.neelnanda.io/mechanistic-interpretability/glossary">A Comprehensive Mechanistic Interpretability Explainer and Glossary</a> by Neel Nanda.</li>
+        <li><a href="https://www.arena.education/">ARENA</a>: the full curriculum this lab borrows from. Chapter 1 covers transformer interpretability from the ground up.</li>
+        <li><a href="https://www.anthropic.com/research/persona-vectors">Persona vectors</a> blog post: the companion work on trait-specific directions.</li>
+        <li><a href="https://arxiv.org/abs/2308.10248">Steering Language Models With Activation Engineering</a> (Turner et al., 2023): an early, readable paper on activation steering.</li>
+      </ul>
+      <nav class="pager" id="pager"></nav>
+      <footer class="site-footer" id="site-footer">
+        <noscript><p>DataWorks AI Interpretability Lab. Leads and instructors: Rami Abukhater, Alec Min, and Akshar Sinha. Adapted from ARENA notebook 4.4 and The Assistant Axis (Lu et al., 2026).</p></noscript>
+      </footer>
+    </article>
+  </main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<script src="assets/js/site.js"></script>
+</body>
+</html>
