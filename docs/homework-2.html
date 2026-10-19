@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Homework 2: Propose an extension · DataWorks AI Interpretability Lab</title>
-<meta name="description" content="Homework 2 for the DataWorks AI Interpretability Lab: propose one experiment that extends the Assistant Axis reproduction.">
+<title>Homework 2: Choose and propose an extension · DataWorks AI Interpretability Lab</title>
+<meta name="description" content="Homework 2 for the DataWorks AI Interpretability Lab: a menu of twelve research extensions to the Assistant Axis reproduction, shared constraints, recommended starting points, and how to propose your own.">
 <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,49 +33,330 @@
   <main class="main" id="content">
     <article class="content">
 <div class="eyebrow">Homework 2</div>
-      <h1>Propose an extension</h1>
-      <p class="lede">You have reproduced the core of the paper on Gemma 2 9B. Now propose one experiment that goes beyond the notebook. The best proposals become the group's next projects.</p>
+      <h1>Choose and propose an extension</h1>
+      <p class="lede">The notebook reproduced the paper. Now each team picks one extension and owns it for the rest of the quarter. This page is the menu, plus what your proposal must say.</p>
       <p class="due-line"><strong>Due:</strong> <span class="todo-inline">DUE_DATE_HW2</span></p>
 
       <div class="callout">
         <span class="callout-title">How to submit</span>
-        <p><span class="todo-inline">SUBMISSION_METHOD</span> One document, named <code>lastname_hw2_proposal</code>. You do not need to run the experiment yet. Complete <a href="homework-1.html">Homework 1</a> first; the proposal should build on what you saw there.</p>
+        <p><span class="todo-inline">PROPOSAL_FORM_LINK</span> One proposal per team, listing every member. Leads will post the form link here. Finish <a href="homework-1.html">Homework 1</a> first, because your proposal should build on what you saw in your own runs.</p>
       </div>
 
-      <section class="assignment" id="what">
-        <h2>What to write</h2>
-        <p>One to two paragraphs, roughly 250 to 400 words, that answer:</p>
+      <nav class="page-toc" aria-label="On this page"><strong>On this page</strong><ol>
+        <li><a href="#intro">How this works</a></li><li><a href="#constraints">Constraints for every idea</a></li>
+        <li><a href="#start">Recommended starting points</a></li><li><a href="#ideas">The twelve ideas</a></li>
+        <li><a href="#own">Proposing your own idea</a></li><li><a href="#proposal">What your proposal must answer</a></li></ol></nav>
+
+      <h2 id="intro">How this works</h2>
+      <p>In Homework 1 you rebuilt the paper's main results on a smaller model: you found the Assistant Axis, watched conversations drift along it, and steered the model with it. Reproducing a result is the first half of research. The second half is asking a question nobody has answered yet. The ideas below are grouped by theme: multi-agent, safety, cognitive science, and mechanism and models. Each card says what the idea asks, how you would do it in a few steps, what makes it hard, and which part of the notebook it builds on. Pick one as a team, or propose your own. Either way, your proposal has to answer the checklist at the <a href="#proposal">bottom of this page</a>.</p>
+
+      <div class="callout warn constraints" id="constraints">
+        <span class="callout-title">Read before choosing: constraints that apply to every idea</span>
         <ol>
-          <li><strong>The question.</strong> What do you want to find out, in one sentence?</li>
-          <li><strong>The change.</strong> What exactly would you change in the notebook: a model, a layer, a set of personas, a steering vector, a dataset, a metric? Name the cells or functions involved.</li>
-          <li><strong>The prediction.</strong> What do you expect to see, and why? Point to something in the paper or in your Homework 1 results.</li>
-          <li><strong>The surprise.</strong> What result would surprise you, and what would it mean?</li>
-          <li><strong>Feasibility.</strong> Will it fit on Kaggle's free T4 x2 and within your weekly GPU quota? If not, how would you shrink it?</li>
+          <li><strong>Open weights only.</strong> The method reads internal activations, so it only works on models you run yourself. API models such as GPT or Claude return text, not hidden states. They can be a conversation partner or a judge, but they cannot be measured.</li>
+          <li><strong>Memory.</strong> On Kaggle's T4 x2 (two 16 GB GPUs) you can fit one Gemma 2 9B, or two Gemma 2 2B models at once, but not two 9B models. Larger models need 4-bit quantization or a different machine.</li>
+          <li><strong>Axes from different models cannot be compared directly.</strong> Each model has its own hidden size and its own axis, so compare normalized projections or rankings, not raw vectors (<a href="concepts/05-pca-assistant-axis.html#reference">why</a>).</li>
+          <li><strong>Confounds.</strong> A direction found with PCA might reflect tone, formality, or response length rather than persona. Most projects need a control showing that is not what is being measured.</li>
+          <li><strong>Judge cost and noise.</strong> Every experiment graded by an LLM judge adds OpenRouter spend, and judges make mistakes, so spot-check judge scores by hand.</li>
         </ol>
-      </section>
+      </div>
 
-      <section class="assignment" id="ideas">
-        <h2>Directions to get you thinking</h2>
-        <p>Pick one of these or come up with your own.</p>
-        <ul>
-          <li><strong>Other models.</strong> Does a newer model (for example Gemma 3 or Gemma 4, if it fits on Kaggle) have an Assistant Axis? Is it as dominant?</li>
-          <li><strong>Other layers.</strong> Compute the axis at several layers. Where is it most aligned with PC1, and where does steering work best?</li>
-          <li><strong>New personas.</strong> Add personas the notebook does not include. Where do "customer service agent", "therapist", or "an AI with no restrictions" land?</li>
-          <li><strong>New steering targets.</strong> Steer with the difference between two specific personas (for example ghost minus consultant) instead of the Assistant Axis. Is the effect different?</li>
-          <li><strong>A control.</strong> Steer with a random direction of the same norm and compare it with the axis.</li>
-          <li><strong>The judge filter.</strong> Turn on <code>RUN_JUDGE_FILTER</code>. How much do the persona vectors and PC1 change when only fully in-character responses are kept?</li>
-          <li><strong>New conversations.</strong> Write your own multi-turn conversation in a domain the paper did not test and see whether it drifts.</li>
-        </ul>
-      </section>
+      <div class="callout ok" id="start">
+        <span class="callout-title">Recommended starting points</span>
+        <ol>
+          <li><strong>Flagship team:</strong> ideas <a href="#idea-1">1</a> and <a href="#idea-2">2</a> combined (multi-agent drift and persona contagion). Novel, visual, and builds directly on the drift tools from Section 2. The paper's multi-turn conversations always pair one measured model with a simulated user; it never measures two models talking to each other.</li>
+          <li><strong>Cognitive science team:</strong> idea <a href="#idea-7">7</a> (personality structure in persona space).</li>
+          <li><strong>On-ramp for newer members:</strong> idea <a href="#idea-12">12</a> (robustness across models and compression). Least creative, but most likely to produce a clean result.</li>
+          <li><strong>Safety team:</strong> idea <a href="#idea-4">4</a> (jailbreak early warning). Strongest safety result, but only for a team that follows the content guidelines in that card.</li>
+        </ol>
+      </div>
 
-      <section class="assignment" id="good">
-        <h2>What makes a strong proposal</h2>
-        <ul>
-          <li>It changes <strong>one thing</strong> at a time, so the result is interpretable.</li>
-          <li>It makes a <strong>prediction</strong> that could turn out wrong.</li>
-          <li>It includes a <strong>comparison</strong>: a baseline, a control, or the original result.</li>
-          <li>It is <strong>small enough</strong> to run in a week on free hardware.</li>
-        </ul>
+      <h2 id="ideas">The twelve ideas</h2>
+      <div id="idea-filters" class="idea-filters" hidden>
+        <span class="filters-label" id="filters-label">Show:</span>
+        <div role="group" aria-labelledby="filters-label">
+          <button type="button" data-filter="all" aria-pressed="true">All</button>
+          <button type="button" data-filter="multi-agent" aria-pressed="false">Multi-agent</button>
+          <button type="button" data-filter="safety" aria-pressed="false">Safety</button>
+          <button type="button" data-filter="cogsci" aria-pressed="false">Cognitive science</button>
+          <button type="button" data-filter="mechanism" aria-pressed="false">Mechanism and models</button>
+        </div>
+        <span class="filters-count" aria-live="polite"></span>
+      </div>
+
+      <div class="ideas">
+
+        <!-- ========== Multi-agent ========== -->
+        <article class="idea" id="idea-1" data-theme="multi-agent">
+          <header>
+            <h3><span class="idea-num">1</span> Two models talking to each other</h3>
+            <div class="badges"><span class="badge theme-multi-agent">Multi-agent</span><span class="badge lvl lvl-intermediate">Intermediate</span><span class="badge team">Team of 3 to 4</span></div>
+          </header>
+          <p class="q"><strong>Question.</strong> When two models hold a long conversation, does either drift away from the Assistant, and does one pull the other?</p>
+          <div class="field"><strong>Method.</strong>
+            <ol>
+              <li>Run long conversations between two models (or one model playing both sides).</li>
+              <li>Project each speaker's turns onto its own Assistant Axis with <code>ConversationAnalyzer</code>.</li>
+              <li>Plot both trajectories over turns and compare them.</li>
+            </ol></div>
+          <div class="field"><strong>Constraints.</strong>
+            <ul>
+              <li>The cheapest version is one model playing both sides, which needs only one model in memory. Two different model families needs two small models (for example Gemma 2 2B and Qwen 3 1.7B or 4B) or a larger GPU.</li>
+              <li>Model-to-model conversations often collapse into loops or mutual flattery after a few dozen turns. That could itself be a finding, but the team needs a way to tell drift apart from degeneration (for example, a repetition measure).</li>
+              <li>Use several random seeds and opening prompts. One conversation is an anecdote.</li>
+            </ul></div>
+          <p class="builds"><strong>Builds on</strong> Section 2: drift monitoring and hooks (<a href="concepts/06-hooks-and-drift.html">concept 6</a>).</p>
+        </article>
+
+        <article class="idea" id="idea-2" data-theme="multi-agent">
+          <header>
+            <h3><span class="idea-num">2</span> Persona contagion</h3>
+            <div class="badges"><span class="badge theme-multi-agent">Multi-agent</span><span class="badge lvl lvl-advanced">Advanced</span><span class="badge team">Team of 3 to 4</span></div>
+          </header>
+          <p class="q"><strong>Question.</strong> If a stable Assistant talks with a model pinned to a strong persona (for example a pirate or a conspiracy theorist), does the Assistant drift toward that persona?</p>
+          <div class="field"><strong>Method.</strong>
+            <ol>
+              <li>Pair a normal Assistant with a persona-prompted partner.</li>
+              <li>Track both speakers' projections onto the axis, turn by turn.</li>
+              <li>Use lagged correlation to test whether one model's drift follows the other's.</li>
+            </ol></div>
+          <div class="field"><strong>Constraints.</strong>
+            <ul>
+              <li>Causality is hard. Drift might come from the conversation's topics rather than the partner's persona, so include a control partner that covers the same topics with a neutral persona.</li>
+            </ul></div>
+          <p class="builds"><strong>Builds on</strong> Section 2: drift monitoring (<a href="concepts/06-hooks-and-drift.html">concept 6</a>).</p>
+        </article>
+
+        <article class="idea" id="idea-3" data-theme="multi-agent">
+          <header>
+            <h3><span class="idea-num">3</span> Agents with assigned roles</h3>
+            <div class="badges"><span class="badge theme-multi-agent">Multi-agent</span><span class="badge lvl lvl-advanced">Advanced</span><span class="badge team">Team of 3 to 5</span></div>
+          </header>
+          <p class="q"><strong>Question.</strong> Multi-agent frameworks give models roles like critic, CEO, or adversary. Does role assignment pull agents off the axis, and does that predict failures or broken rules?</p>
+          <div class="field"><strong>Method.</strong>
+            <ol>
+              <li>Run a small multi-agent task with assigned roles.</li>
+              <li>Project each agent's activations onto the axis.</li>
+              <li>Compare projections against task success and rule-following.</li>
+            </ol></div>
+          <div class="field"><strong>Constraints.</strong>
+            <ul>
+              <li>Needs a task with a clear success measure, which is a big setup cost. Best for a team with agent-framework experience.</li>
+              <li>Every agent you want to measure has to be an open-weights model you run yourself (see the shared constraints), so keep agents small or let one model play every role.</li>
+            </ul></div>
+          <p class="builds"><strong>Builds on</strong> Section 1: persona vectors (<a href="concepts/03-residual-stream.html">concept 3</a>), and Section 2: drift monitoring (<a href="concepts/06-hooks-and-drift.html">concept 6</a>).</p>
+        </article>
+
+        <!-- ========== Safety ========== -->
+        <article class="idea" id="idea-4" data-theme="safety">
+          <header>
+            <h3><span class="idea-num">4</span> The axis as an early warning for jailbreaks</h3>
+            <div class="badges"><span class="badge theme-safety">Safety</span><span class="badge lvl lvl-intermediate">Intermediate</span><span class="badge team">Team of 2 to 4</span></div>
+          </header>
+          <p class="q"><strong>Question.</strong> Do jailbreak prompts push activations off the Assistant end of the axis before the model produces anything harmful?</p>
+          <div class="field"><strong>Method.</strong>
+            <ol>
+              <li>Take jailbreak prompts and benign prompts from a public benchmark.</li>
+              <li>Project the activations on each prompt (before any response is generated) onto the axis.</li>
+              <li>Treat the projection as a classifier score and report an ROC curve and its area.</li>
+            </ol></div>
+          <div class="callout danger guidelines">
+            <span class="callout-title">Content guidelines for this project</span>
+            <ul>
+              <li>Use existing public benchmark prompts only: <a href="https://github.com/JailbreakBench/jailbreakbench">JailbreakBench</a> (its <a href="https://huggingface.co/datasets/JailbreakBench/JBB-Behaviors">JBB-Behaviors</a> dataset has matched harmful and benign behaviors, which suits an ROC curve) or <a href="https://github.com/centerforaisafety/HarmBench">HarmBench</a>. Both are public and MIT-licensed.</li>
+              <li><strong>Do not write new harmful prompts.</strong></li>
+              <li><strong>Do not publish or share harmful model completions</strong>, including in slides, notebooks you make public, or chat. Report scores and aggregate results only.</li>
+              <li>Prefer measuring the prompt before generation, so you rarely need to produce completions at all.</li>
+            </ul>
+          </div>
+          <div class="field"><strong>Constraints.</strong>
+            <ul>
+              <li>Role-play jailbreaks will obviously move the projection. The interesting question is whether non-role-play attacks move it too, so report the two kinds separately.</li>
+            </ul></div>
+          <p class="builds"><strong>Builds on</strong> projection onto the axis: Section 1 (<a href="concepts/05-pca-assistant-axis.html">concept 5</a>) and Section 2 (<a href="concepts/06-hooks-and-drift.html">concept 6</a>).</p>
+        </article>
+
+        <article class="idea" id="idea-5" data-theme="safety">
+          <header>
+            <h3><span class="idea-num">5</span> Activation capping on Gemma 2 9B</h3>
+            <div class="badges"><span class="badge theme-safety">Safety</span><span class="badge lvl lvl-advanced">Advanced</span><span class="badge team">Team of 2 to 3</span></div>
+          </header>
+          <p class="q"><strong>Question.</strong> The notebook skips activation capping because the original exercise relies on the paper's precomputed settings for Qwen 3 32B, which does not fit on Kaggle. Can capping be rebuilt on 9B, and what does it cost in helpfulness?</p>
+          <div class="field"><strong>Method.</strong>
+            <ol>
+              <li>Implement the paper's cap (Section 5, Equation 1), which only intervenes when the projection falls below a threshold.</li>
+              <li>Calibrate thresholds and layers for 9B. The paper sets the cap at the 25th percentile of normal projections.</li>
+              <li>Measure drift prevention and general capability, each with and without capping.</li>
+            </ol></div>
+          <div class="field"><strong>Constraints.</strong>
+            <ul>
+              <li>Calibration is fiddly. ARENA notes that capping with a single generic axis works poorly compared with the paper's per-layer calibrated vectors.</li>
+              <li>Needs two evaluations, one for drift and one for capability, so the team can show capping does not just make the model worse.</li>
+            </ul></div>
+          <p class="builds"><strong>Builds on</strong> Section 2: steering (<a href="concepts/07-steering.html">concept 7</a>).</p>
+        </article>
+
+        <article class="idea" id="idea-6" data-theme="safety">
+          <header>
+            <h3><span class="idea-num">6</span> Who the user is</h3>
+            <div class="badges"><span class="badge theme-safety">Safety</span><span class="badge lvl lvl-intermediate">Intermediate</span><span class="badge team">Team of 2 to 3</span></div>
+          </header>
+          <p class="q"><strong>Question.</strong> Keeping the model's own persona fixed, does the user's identity (a child, an expert, someone in distress, a flatterer) move the model along the axis, and does that track sycophancy?</p>
+          <div class="field"><strong>Method.</strong>
+            <ol>
+              <li>Hold the system prompt fixed and vary only the user's described identity.</li>
+              <li>Measure projections onto the axis for each identity.</li>
+              <li>Score responses for sycophancy with a judge and compare.</li>
+            </ol></div>
+          <div class="field"><strong>Constraints.</strong>
+            <ul>
+              <li>The team must define up front how to separate "the model adapts its tone", which is fine, from "the model loses its identity", which is the worrying case.</li>
+              <li>The paper varies user behaviour to create realistic conversations, but never treats user identity as the variable under study, so this is new ground.</li>
+            </ul></div>
+          <p class="builds"><strong>Builds on</strong> Section 2: drift monitoring (<a href="concepts/06-hooks-and-drift.html">concept 6</a>).</p>
+        </article>
+
+        <!-- ========== Cognitive science ========== -->
+        <article class="idea" id="idea-7" data-theme="cogsci">
+          <header>
+            <h3><span class="idea-num">7</span> Personality structure in persona space</h3>
+            <div class="badges"><span class="badge theme-cogsci">Cognitive science</span><span class="badge lvl lvl-intermediate">Intermediate</span><span class="badge team">Team of 2 to 3</span></div>
+          </header>
+          <p class="q"><strong>Question.</strong> The paper focuses on the first principal component. Do the next components (PC2 through PC5) line up with human personality dimensions such as the Big Five? This connects to the lexical hypothesis in psychology, the idea that important personality differences end up encoded in everyday language.</p>
+          <div class="field"><strong>Method.</strong>
+            <ol>
+              <li>Fit PCA with at least five components (the notebook uses two).</li>
+              <li>Have a judge rate each persona on the Big Five traits.</li>
+              <li>Correlate those ratings with each persona's position on PC2 through PC5.</li>
+            </ol></div>
+          <div class="field"><strong>Constraints.</strong>
+            <ul>
+              <li>Interpreting components is subjective. Decide in advance what counts as a match, and compare against shuffled ratings as a baseline.</li>
+              <li>About 20 personas is few for five components. Expect to add personas, or use the paper's 275 roles via <code>USE_FULL_PERSONA_LIST</code> if you have the GPU time.</li>
+              <li>The paper only gives loose readings of PC2 and PC3 (Section 2.2, Table 1; for Gemma, PC2 is roughly "informal or creative" versus "systematic") and never tests the Big Five, so this is new.</li>
+            </ul></div>
+          <p class="builds"><strong>Builds on</strong> Section 1: PCA and the Assistant Axis (<a href="concepts/05-pca-assistant-axis.html">concept 5</a>).</p>
+        </article>
+
+        <article class="idea" id="idea-8" data-theme="cogsci">
+          <header>
+            <h3><span class="idea-num">8</span> Narrator distance</h3>
+            <div class="badges"><span class="badge theme-cogsci">Cognitive science</span><span class="badge lvl lvl-intermediate">Intermediate</span><span class="badge team">Team of 2 to 3</span></div>
+          </header>
+          <p class="q"><strong>Question.</strong> Does writing a character in third person ("the villain said") keep the model nearer the Assistant end than writing it in first person ("I am the villain")? This gets at the difference between simulating a character and becoming one.</p>
+          <div class="field"><strong>Method.</strong>
+            <ol>
+              <li>Build matched prompts that differ only in perspective.</li>
+              <li>Extract response activations as in Section 1 and project them onto the axis.</li>
+              <li>Compare the two perspectives, persona by persona.</li>
+            </ol></div>
+          <div class="field"><strong>Constraints.</strong>
+            <ul>
+              <li>Prompts must be tightly matched, and the content of the responses must stay comparable, or the comparison is not fair.</li>
+            </ul></div>
+          <p class="builds"><strong>Builds on</strong> Section 1: persona vectors (<a href="concepts/03-residual-stream.html">concept 3</a> and <a href="concepts/04-cosine-similarity.html">concept 4</a>).</p>
+        </article>
+
+        <article class="idea" id="idea-9" data-theme="cogsci">
+          <header>
+            <h3><span class="idea-num">9</span> Language and culture</h3>
+            <div class="badges"><span class="badge theme-cogsci">Cognitive science</span><span class="badge lvl lvl-intermediate">Intermediate</span><span class="badge team">Team of 2 to 4, ideally with native speakers</span></div>
+          </header>
+          <p class="q"><strong>Question.</strong> If the axis is built from English prompts, does it still separate personas in Spanish, Mandarin, or Arabic? Is the Assistant one character across languages, or a different one in each?</p>
+          <div class="field"><strong>Method.</strong>
+            <ol>
+              <li>Translate the personas and questions.</li>
+              <li>Extract activations and project them onto the English axis.</li>
+              <li>Also build a separate axis in each language and compare it with the English one by cosine similarity (same model, so this is allowed).</li>
+            </ol></div>
+          <div class="field"><strong>Constraints.</strong>
+            <ul>
+              <li>Judge quality drops outside English, and Gemma's ability varies by language.</li>
+              <li>Translated prompts need review by native speakers.</li>
+            </ul></div>
+          <p class="builds"><strong>Builds on</strong> Section 1: persona vectors and PCA (<a href="concepts/03-residual-stream.html">concept 3</a> and <a href="concepts/05-pca-assistant-axis.html">concept 5</a>).</p>
+        </article>
+
+        <!-- ========== Mechanism and models ========== -->
+        <article class="idea" id="idea-10" data-theme="mechanism">
+          <header>
+            <h3><span class="idea-num">10</span> Base versus instruction-tuned models</h3>
+            <div class="badges"><span class="badge theme-mechanism">Mechanism and models</span><span class="badge lvl lvl-intermediate">Intermediate</span><span class="badge team">Team of 2 to 3</span></div>
+          </header>
+          <p class="q"><strong>Question.</strong> The paper already looked at base models for Gemma 2 27B, but always started from the instruction-tuned model: it reused the <code>-it</code> model's axis to steer the base model (Section 3.2.2), and ran PCA on base-model activations of text the <code>-it</code> model wrote, finding nearly the same top components (Appendix B.3). Does an Assistant direction emerge in <code>gemma-2-9b</code> <em>from its own completions</em>, with no help from <code>gemma-2-9b-it</code>? That bears directly on the claim that post-training selects a character that was already there.</p>
+          <div class="field"><strong>Method.</strong>
+            <ol>
+              <li>Generate persona responses from the base model itself, using completion-style prompts.</li>
+              <li>Build persona space and an axis in the base model, and separately in the <code>-it</code> model.</li>
+              <li>Compare the two axes by cosine similarity, layer by layer, and compare persona rankings.</li>
+            </ol></div>
+          <div class="field"><strong>Constraints.</strong>
+            <ul>
+              <li>Base models do not follow chat formatting, so completion-style prompts are needed (the paper used prefills such as "My job is to"), which makes the comparison less clean.</li>
+              <li>Base and <code>-it</code> share the same hidden size and start from the same weights, so comparing their raw axes is reasonable here, unlike across model families. Still report rankings too.</li>
+              <li>Read Section 3.2.2 and Appendix B.3 first, so you extend the paper rather than repeat it.</li>
+            </ul></div>
+          <p class="builds"><strong>Builds on</strong> Section 1: PCA and the Assistant Axis (<a href="concepts/05-pca-assistant-axis.html">concept 5</a>).</p>
+        </article>
+
+        <article class="idea" id="idea-11" data-theme="mechanism">
+          <header>
+            <h3><span class="idea-num">11</span> Breaking the axis into SAE features</h3>
+            <div class="badges"><span class="badge theme-mechanism">Mechanism and models</span><span class="badge lvl lvl-advanced">Advanced</span><span class="badge team">Team of 2 to 3</span></div>
+          </header>
+          <p class="q"><strong>Question.</strong> What makes up "Assistant-ness"? Which interpretable features, such as refusal, politeness, or self-reference, line up with the axis?</p>
+          <div class="field"><strong>Method.</strong>
+            <ol>
+              <li>Load a <a href="https://huggingface.co/google/gemma-scope">Gemma Scope</a> sparse autoencoder (SAE) for the layer you extract from.</li>
+              <li>Find the SAE features whose directions align most with the axis, and the features most active on Assistant versus role-playing responses.</li>
+              <li>Read and label the top features, using <a href="https://www.neuronpedia.org/gemma-scope">Neuronpedia</a>'s feature pages where they exist.</li>
+            </ol></div>
+          <div class="field"><strong>Constraints.</strong>
+            <ul>
+              <li><strong>Check layer coverage.</strong> Gemma Scope has residual-stream SAEs for every layer of the <em>base</em> Gemma 2 2B (layers 0 to 25) and 9B (0 to 41). For the instruction-tuned 9B it has them only at layers 9, 20 and 31, and none for 2B-it. Our notebook extracts at layer 27 (9B) or 17 (2B). Either re-extract the axis at layer 20 or 31 and use the <code>-it</code> SAEs, or use the base-model SAE at your layer and check how well it reconstructs <code>-it</code> activations.</li>
+              <li>Loading an SAE alongside the model is tight on a T4. Use the narrowest width that works (16k features).</li>
+              <li>Labeling features takes a lot of manual reading.</li>
+            </ul></div>
+          <p class="builds"><strong>Builds on</strong> Section 1: the residual stream (<a href="concepts/03-residual-stream.html">concept 3</a>) and PCA (<a href="concepts/05-pca-assistant-axis.html">concept 5</a>).</p>
+        </article>
+
+        <article class="idea" id="idea-12" data-theme="mechanism">
+          <header>
+            <h3><span class="idea-num">12</span> Robustness across models and compression</h3>
+            <div class="badges"><span class="badge theme-mechanism">Mechanism and models</span><span class="badge lvl lvl-starter">Starter</span><span class="badge team">Team of 2 to 4</span></div>
+          </header>
+          <p class="q"><strong>Question.</strong> Does the axis survive 4-bit quantization? Does it appear in Gemma 4 or Qwen, and how does its shape compare?</p>
+          <div class="field"><strong>Method.</strong>
+            <ol>
+              <li>Rerun the Section 1 pipeline on a 4-bit version of Gemma 2 9B.</li>
+              <li>Rerun it on other model families that fit on a T4 x2. On Kaggle that includes Gemma 4 E2B, E4B, and 12B (instruction-tuned versions) and Qwen 3 4B and 8B.</li>
+              <li>Compare the PCA structure (variance explained by PC1) and the persona rankings along each model's axis.</li>
+            </ol></div>
+          <div class="field"><strong>Constraints.</strong>
+            <ul>
+              <li>Raw vectors cannot be compared across models (see the <a href="#constraints">shared constraints</a>). Compare rankings and variance explained.</li>
+              <li>Other models have different chat templates and layer counts, so check <code>format_messages</code> and pick the extraction layer as a fraction of depth.</li>
+            </ul></div>
+          <p class="builds"><strong>Builds on</strong> the full Section 1 pipeline (concepts <a href="concepts/01-personas.html">1</a> to <a href="concepts/05-pca-assistant-axis.html">5</a>).</p>
+        </article>
+      </div>
+
+      <h2 id="own">Proposing your own idea</h2>
+      <p>You do not have to pick from the menu. If your team has a question you care about more, propose it. Good sources of ideas are anything in Homework 1 that surprised you, the paper's own <em>Limitations</em> and <em>Future work</em> sections (8.1 and 8.2), and other papers in <a href="resources.html">Resources</a>. Your own idea must answer the same checklist as everyone else's.</p>
+
+      <section class="assignment" id="proposal">
+        <h2>What your proposal must answer</h2>
+        <p>Whether you choose a card or your own idea, submit one to two pages per team that answers each item:</p>
+        <ol class="checklist">
+          <li><strong>Research question</strong>, in one sentence.</li>
+          <li><strong>Which notebook method it builds on</strong> (name the section and functions).</li>
+          <li><strong>Which model, and how it fits in memory</strong> on Kaggle's T4 x2.</li>
+          <li><strong>The control or baseline</strong> that rules out the obvious confound.</li>
+          <li><strong>Rough OpenRouter cost</strong>: how many judge calls, which judge model, and an estimate in dollars.</li>
+          <li><strong>What counts as success or failure</strong>: the result that would support your idea, and the result that would count against it.</li>
+          <li><strong>Team</strong>: members, and who owns which part.</li>
+        </ol>
+        <p class="small">A strong proposal changes one thing at a time, makes a prediction that could turn out wrong, includes a comparison, and is small enough to show a first result within two weeks on free hardware.</p>
       </section>
       <nav class="pager" id="pager"></nav>
       <footer class="site-footer" id="site-footer">

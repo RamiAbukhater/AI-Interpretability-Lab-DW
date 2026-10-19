@@ -23,7 +23,7 @@
     { id: "c6", href: "concepts/06-hooks-and-drift.html", title: "PyTorch hooks and monitoring persona drift", short: "Hooks and persona drift", group: "Concepts", step: true },
     { id: "c7", href: "concepts/07-steering.html", title: "Steering along the Assistant Axis", short: "Steering", group: "Concepts", step: true },
     { id: "hw1", href: "homework-1.html", title: "Homework 1: Setup, smoke test, Sections 1 and 2", short: "Homework 1: Notebook", group: "Homework", step: true },
-    { id: "hw2", href: "homework-2.html", title: "Homework 2: Propose an extension", short: "Homework 2: Extension", group: "Homework", step: true },
+    { id: "hw2", href: "homework-2.html", title: "Homework 2: Choose and propose an extension", short: "Homework 2: Extension", group: "Homework", step: true },
     { id: "resources", href: "resources.html", title: "Resources and glossary", short: "Resources and glossary", group: "Reference", icon: "&#9733;" }
   ];
 
@@ -206,6 +206,40 @@
     };
     img.src = src;
   });
+
+  /* ---------- idea filters (Homework 2) ----------
+     Cards carry data-theme. The filter bar is hidden in the HTML and only
+     shown here, so with JavaScript off every card stays visible. */
+  var filters = document.getElementById("idea-filters");
+  if (filters) {
+    var cards = document.querySelectorAll(".idea[data-theme]");
+    var buttons = filters.querySelectorAll("button[data-filter]");
+    var count = filters.querySelector(".filters-count");
+    var applyFilter = function (theme) {
+      var shown = 0;
+      cards.forEach(function (c) {
+        var show = theme === "all" || c.getAttribute("data-theme") === theme;
+        c.hidden = !show;
+        if (show) shown++;
+      });
+      buttons.forEach(function (b) {
+        b.setAttribute("aria-pressed", b.getAttribute("data-filter") === theme ? "true" : "false");
+      });
+      if (count) count.textContent = shown + " of " + cards.length + " ideas";
+    };
+    buttons.forEach(function (b) {
+      b.addEventListener("click", function () { applyFilter(b.getAttribute("data-filter")); });
+    });
+    filters.hidden = false;
+    applyFilter("all");
+    // a link to a card (for example #idea-7) always reveals it
+    var revealTarget = function () {
+      var t = location.hash && document.getElementById(location.hash.slice(1));
+      if (t && t.classList.contains("idea") && t.hidden) applyFilter("all");
+    };
+    window.addEventListener("hashchange", revealTarget);
+    revealTarget();
+  }
 
   /* ---------- math ---------- */
   function renderMath() {

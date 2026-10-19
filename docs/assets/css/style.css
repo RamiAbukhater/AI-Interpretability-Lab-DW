@@ -656,3 +656,57 @@ table.meetings tr.off td { color: var(--ink-faint); }
   table.cal .tm, table.cal .why { font-size: 0.62rem; }
 }
 .due-line { font-family: var(--font-ui); margin: -0.5rem 0 1.25rem; }
+
+/* ---------- extension idea cards (Homework 2) ---------- */
+.callout.constraints ol, .callout#start ol { margin-bottom: 0; padding-left: 1.3rem; }
+.callout.constraints li, .callout#start li { margin-bottom: 0.45rem; }
+.idea-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.75rem; margin: 0.5rem 0 1.25rem; font-family: var(--font-ui); }
+.idea-filters[hidden] { display: none; }
+.idea-filters [role="group"] { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.filters-label { font-size: 0.85rem; font-weight: 650; color: var(--ink-soft); }
+.idea-filters button {
+  font: inherit; font-size: 0.88rem; font-weight: 600;
+  padding: 0.3rem 0.75rem; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--rule); background: var(--bg-raised); color: var(--ink-soft);
+}
+.idea-filters button:hover { border-color: var(--accent); color: var(--accent); }
+.idea-filters button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+.idea-filters button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.filters-count { font-size: 0.85rem; color: var(--ink-faint); }
+.ideas { display: grid; gap: 1.25rem; }
+.idea {
+  border: 1px solid var(--rule); border-radius: var(--radius);
+  background: var(--bg-raised); padding: 1rem 1.2rem 0.5rem;
+  scroll-margin-top: 4.5rem;
+}
+.idea[data-theme="multi-agent"] { border-top: 3px solid var(--d-blue); }
+.idea[data-theme="safety"] { border-top: 3px solid var(--d-red); }
+.idea[data-theme="cogsci"] { border-top: 3px solid var(--d-green); }
+.idea[data-theme="mechanism"] { border-top: 3px solid var(--d-amber); }
+.idea header { margin-bottom: 0.6rem; }
+.idea h3 { margin: 0 0 0.45rem; font-size: 1.15rem; display: flex; gap: 0.55rem; align-items: baseline; }
+.idea-num {
+  flex: none; display: inline-flex; align-items: center; justify-content: center;
+  width: 1.7rem; height: 1.7rem; border-radius: 50%;
+  font-size: 0.85rem; font-weight: 700; background: var(--bg-sunken); border: 1px solid var(--rule); color: var(--ink-soft);
+}
+.badges { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.badge {
+  font-family: var(--font-ui); font-size: 0.74rem; font-weight: 650; letter-spacing: 0.02em;
+  padding: 0.12rem 0.55rem; border-radius: 999px; border: 1px solid var(--rule);
+  color: var(--ink-soft); background: var(--bg);
+}
+.badge.theme-multi-agent { color: var(--d-blue); border-color: currentColor; }
+.badge.theme-safety { color: var(--d-red); border-color: currentColor; }
+.badge.theme-cogsci { color: var(--d-green); border-color: currentColor; }
+.badge.theme-mechanism { color: var(--d-amber); border-color: currentColor; }
+.badge.lvl-starter { background: var(--good-soft); color: var(--good); border-color: transparent; }
+.badge.lvl-intermediate { background: var(--warm-soft); color: var(--warm); border-color: transparent; }
+.badge.lvl-advanced { background: var(--bad-soft); color: var(--bad); border-color: transparent; }
+.idea .q { margin-bottom: 0.75rem; }
+.idea .field { margin-bottom: 0.75rem; }
+.idea .field > ol, .idea .field > ul { margin: 0.3rem 0 0; }
+.idea .builds { font-family: var(--font-ui); font-size: 0.9rem; color: var(--ink-soft); border-top: 1px solid var(--rule); padding-top: 0.6rem; margin-bottom: 0.5rem; }
+.idea .guidelines { margin: 0.5rem 0 1rem; }
+.idea .guidelines ul { margin-bottom: 0; }
+ol.checklist li { margin-bottom: 0.5rem; }
