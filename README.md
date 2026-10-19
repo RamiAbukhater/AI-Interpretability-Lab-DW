@@ -9,7 +9,7 @@ In person we only cover the high-level ideas. Setup, reading, and the notebook a
 - **Setup on Kaggle**: account, phone verification, OpenRouter key, the Gemma 2 license, GPU T4 x2, model inputs, secrets, the smoke test, quota, saving, and troubleshooting.
 - **Seven concept pages**, in the order the notebook uses them, each with intuition, a diagram, the link to the paper, a code walkthrough with tensor shapes, click-to-reveal questions, and common mistakes.
 - **Calendar**: meetings every Wednesday and Thursday, 7 to 8 pm, through the end of Fall 2026 instruction.
-- **Homework 1** (setup, smoke test, Sections 1 and 2) and **Homework 2** (choose and propose a research extension from a menu of twelve ideas), each on its own page.
+- **Homework 1** (setup, smoke test, Sections 1 and 2) and **Homework 2** (choose and propose a research extension from a menu of six ideas), each on its own page.
 - **Resources**: sources, a glossary, and introductory interpretability reading.
 
 Students run an adapted version of ARENA's notebook 4.4, *LLM Psychology & Persona Vectors*, on Kaggle's free tier with Gemma 2 9B Instruct (`gemma-2-9b-it`). The scope is Section 1 (Mapping Persona Space) and Section 2 up to steering along the Assistant Axis. Activation capping and ARENA's Sections 3 and 4 are out of scope for now.
@@ -46,7 +46,7 @@ docs/                   the website (GitHub Pages serves this folder)
   concepts/             01-personas.html … 07-steering.html
   calendar.html         meeting calendar (Wed and Thu, 7–8 pm)
   homework-1.html       setup, smoke test, Sections 1 and 2
-  homework-2.html       extension menu (12 idea cards, theme filters) and proposal checklist
+  homework-2.html       extension menu (6 idea cards, theme filters) and proposal checklist
   resources.html        sources and glossary
   assets/css/style.css  all styles; light and dark themes follow the system setting
   assets/js/site.js     sidebar, prev/next links, footer, copy buttons, screenshot slots, math
@@ -162,10 +162,7 @@ Things that change over time were checked on the live sites on **19 October 2026
 | Judge models: `anthropic/claude-3.5-haiku` **not available**; `anthropic/claude-haiku-4.5`, `openai/gpt-4.1-mini`, `google/gemma-2-27b-it` available | Concept 2, troubleshooting | OpenRouter `/api/v1/models` |
 | Paper claims (sections, figures, 275 roles, 5 prompts per role, 240 questions, 0–3 judge scale with gpt-4.1-mini, PC1 cosine > 0.71 at the middle layer, Section 2.3 "one extreme of PC1", Figure 4 and Figure 7 findings) | Concept pages | [arXiv 2601.10387 (HTML)](https://arxiv.org/html/2601.10387) |
 | Model sizes: Gemma 2 9B has 42 layers and d_model 3584; 2B has 26 and 2304; 27B has 46 and 4608 | Concepts 3 and 5 | `config.json` from public mirrors of the 9B and 2B models (Google's own are gated); 27B shape stated in the ARENA notebook |
-| Gemma Scope residual-stream SAEs: every layer of base Gemma 2 2B (0–25) and 9B (0–41); for 9B-it only layers 9, 20, 31; none for 2B-it | Homework 2, idea 11 | Hugging Face `google/gemma-scope-*` repositories |
-| JailbreakBench (JBB-Behaviors) and HarmBench are public and MIT-licensed | Homework 2, idea 4 | GitHub and Hugging Face |
-| The paper already studies base models (Section 3.2.2, Appendix B.3, Gemma 2 27B) using the instruct model's axis or rollouts | Homework 2, idea 10 | arXiv 2601.10387 |
-| Kaggle hosts Gemma 4 (E2B, E4B, 12B, 26B-A4B, 31B) and Qwen 3 (0.6B to 235B) in Transformers format | Homework 2, idea 12 | Kaggle model API |
+| JailbreakBench (JBB-Behaviors) and HarmBench are public and MIT-licensed | Homework 2, idea 2 | GitHub and Hugging Face |
 | All external links on the site return successfully | Every page | Checked with curl and the browser |
 
 ## Licensing and attribution
