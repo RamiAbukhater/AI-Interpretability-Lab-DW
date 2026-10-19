@@ -14,6 +14,7 @@
   var PAGES = [
     { id: "home", href: "index.html", title: "Home", group: "Start", icon: "&#8962;" },
     { id: "calendar", href: "calendar.html", title: "Calendar", group: "Start", icon: "&#9638;" },
+    { id: "hw0", href: "homework-0.html", title: "Homework 0: Introduce yourself", short: "Homework 0: Introductions", group: "Start", icon: "&#9998;" },
     { id: "setup", href: "setup.html", title: "Setup on Kaggle", group: "Start", step: true },
     { id: "c1", href: "concepts/01-personas.html", title: "Personas and the persona selection model", short: "Personas", group: "Concepts", step: true },
     { id: "c2", href: "concepts/02-responses-and-judging.html", title: "Role-play responses and LLM judges", short: "Responses and judging", group: "Concepts", step: true },

@@ -8,6 +8,7 @@ In person we only cover the high-level ideas. Setup, reading, and the notebook a
 
 - **Setup on Kaggle**: account, phone verification, OpenRouter key, the Gemma 2 license, GPU T4 x2, model inputs, secrets, the smoke test, quota, saving, and troubleshooting.
 - **Seven concept pages**, in the order the notebook uses them, each with intuition, a diagram, the link to the paper, a code walkthrough with tensor shapes, click-to-reveal questions, and common mistakes.
+- **Homework 0**: a short introduction post in the general research chat on Discord, due Friday, October 23.
 - **Calendar**: meetings every Wednesday and Thursday, 7 to 8 pm, through the end of Fall 2026 instruction.
 - **Homework 1** (setup, smoke test, Sections 1 and 2) and **Homework 2** (choose and propose a research extension from a menu of six ideas), each on its own page.
 - **Resources**: sources, a glossary, and introductory interpretability reading.
@@ -45,6 +46,7 @@ docs/                   the website (GitHub Pages serves this folder)
   setup.html            setup on Kaggle (the most important page)
   concepts/             01-personas.html … 07-steering.html
   calendar.html         meeting calendar (Wed and Thu, 7–8 pm)
+  homework-0.html       Discord introduction post, due Fri Oct 23
   homework-1.html       setup, smoke test, Sections 1 and 2
   homework-2.html       extension menu (6 idea cards, theme filters) and proposal checklist
   resources.html        sources and glossary

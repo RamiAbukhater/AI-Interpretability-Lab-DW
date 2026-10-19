@@ -707,3 +707,7 @@ table.meetings tr.off td { color: var(--ink-faint); }
 .idea .guidelines { margin: 0.5rem 0 1rem; }
 .idea .guidelines ul { margin-bottom: 0; }
 ol.checklist li { margin-bottom: 0.5rem; }
+
+table.cal td.due { background: var(--good-soft); box-shadow: inset 3px 0 0 var(--good); }
+table.cal td.due .ev { color: var(--good); }
+.cal-legend .sw.due { background: var(--good-soft); border-color: var(--good); }
