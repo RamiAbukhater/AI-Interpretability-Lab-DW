@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Secrets and local environment
+.env
+.env.*
+*.key
+
+# Graded homework: never commit solutions to a public repo
+*solutions*.ipynb
+
+# Cached notebook outputs, if someone runs locally
+persona_cache/
+*.pt
+
+# OS and editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.claude/
