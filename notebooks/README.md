@@ -23,3 +23,12 @@ The full walkthrough, with screenshots and troubleshooting, is on the site's [Se
 6. Run once with `SMOKE_TEST = True`, then set it to `False` and restart for the full 9B run.
 
 Results are cached under `/kaggle/working/persona_cache/`. They are lost when the session ends unless you use **Save Version**.
+
+## Helper cells
+
+`helper_cells/` holds cells to paste into the notebooks until the final versions include them. See "Unique personas in Homework 1" in the main README.
+
+| File | Paste into | Where |
+|---|---|---|
+| `my_personas_cell.py` | Student and leader notebooks | Right after the Section 1 PCA exercise |
+| `leader_save_shared_pca.py` | Leader solutions notebook only | Right after the Section 1 PCA cell, on the 9B run |

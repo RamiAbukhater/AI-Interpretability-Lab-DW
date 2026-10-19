@@ -36,6 +36,9 @@ LICENSE                 MIT for code, CC BY 4.0 for written content
 .gitignore
 notebooks/
   README.md             which notebook to import into Kaggle and how
+  helper_cells/         cells to paste into the notebooks (Homework 1 Part C personas; leaders' shared PCA)
+scripts/
+  class_persona_map.py  leads: combine students' personas into one class-wide map
   (student notebook goes here)
 docs/                   the website (GitHub Pages serves this folder)
   index.html            home
@@ -70,6 +73,41 @@ The final notebooks have not been added yet. When they are ready:
 
 > **Do not put the solutions notebook in this repository if it is public.** The notebook is graded homework. Leaders keep `persona_axis_kaggle_solutions.ipynb` in a private repository or a shared drive. `.gitignore` also ignores `*solutions*.ipynb` as a safety net.
 
+## Unique personas in Homework 1 (checking individual work)
+
+The notebook scaffolding and ARENA's published solutions mean finished code alone does not show a student did the work. So Homework 1, Part C asks every student to add **two personas of their own** on top of the shared set, run them through the whole pipeline (prompt, generation, judging, activation extraction), and project them onto the **shared** PCA. Every student's plot is different, and because everyone uses the same axes, the leads can combine them into one class-wide persona map.
+
+**Why a shared PCA file?** Each student generates their own responses, so their own Section 1 PCA comes out slightly different (axes can rotate or flip sign). Coordinates from different students' fits cannot go on one map. The leads therefore run the shared set once on 9B and publish the result. Every student's helper cell projects onto that one file.
+
+### Leads: setup before Homework 1 opens
+
+1. **Sign-up sheet.** Make a Google Sheet with columns **Name, Persona 1, Persona 2, Prediction for Persona 1, Prediction for Persona 2, Substitutes**. Paste the shared persona list (the keys of `PERSONAS`) into a second tab so students can check for duplicates. Put the link in `docs/homework-1.html` (`PERSONA_SIGNUP_SHEET`).
+2. **Shared PCA.** In the leader solutions notebook, run Section 1 on `gemma-2-9b-it` and paste [`notebooks/helper_cells/leader_save_shared_pca.py`](notebooks/helper_cells/leader_save_shared_pca.py) right after the PCA cell. It writes `/kaggle/working/shared_pca.json` (shared mean, first two components, Assistant vector, shared coordinates, and a `basis_id` fingerprint). Publish that file as a public Kaggle Dataset and put its name in `docs/homework-1.html` (`SHARED_PCA_DATASET`). Do not regenerate it mid-quarter; a new file means a new `basis_id`, and the map script only combines files that match.
+3. **Student cell.** Paste [`notebooks/helper_cells/my_personas_cell.py`](notebooks/helper_cells/my_personas_cell.py) into the student notebook right after the Section 1 PCA exercise, and into the leader notebook too. Both cells use ARENA's names; rename them if the final notebook differs.
+4. **Kaggle usernames** of the leads, for students to share their notebooks with (`LEAD_KAGGLE_USERNAMES`).
+
+What the student cell does: generates, judges (always, even when `RUN_JUDGE_FILTER` is off), and extracts activations for the two personas at `EXTRACTION_LAYER`, reusing cached results in `/kaggle/working/persona_cache/my_personas/`. It warns if fewer than half of a persona's responses survive judging, then projects onto the attached `shared_pca.json`. If the file is missing, or was made for a different model size or layer (for example the 2B smoke test), it falls back to the student's own fit and marks the result `basis_source: "own"`. It then prints PC1, PC2 and cosine to the Assistant next to the shared PC1 range, and saves `my_personas_plot.png` and `my_personas.json`.
+
+### Leads: making the class map
+
+Collect each student's `my_personas.json` (from the Output tab of their shared Kaggle version) into one folder, then run:
+
+```bash
+python scripts/class_persona_map.py --shared shared_pca.json --students submissions/ --out class_persona_map.png --csv class_personas.csv
+```
+
+It plots the shared personas in grey, the Assistant as a star, and every student persona coloured by student and labelled. It also writes a CSV sorted by PC1. Files made against a student's own fit, or with no surviving responses, are skipped and listed with the reason. It needs `numpy` and `matplotlib`.
+
+**How this was tested:** the notebooks are not in the repository yet, so both cells and the script were run on CPU against a stand-in notebook (fake persona vectors with a known Assistant direction, and stub generation, judge and extraction functions). The checks covered:
+- smoke-test mode with no shared file attached;
+- a persona the judge filters out entirely;
+- re-running from cache;
+- a shared file from the wrong model size;
+- two students on the shared basis, whose near and far personas landed on the predicted sides;
+- the class map with 2 and 14 students, skipping a file made against a student's own fit.
+
+The cells have **not** run inside a real Kaggle session with Gemma yet. Run them once in the leader notebook (smoke test, then 9B) before Homework 1 opens.
+
 ## Still waiting on the leads
 
 - [ ] **Final notebook files**: the student notebook in `notebooks/`, and the solutions notebook kept privately.
@@ -83,9 +121,11 @@ The final notebooks have not been added yet. When they are ready:
   - `docs/concepts/05-pca-assistant-axis.html`: 2 (PCA code; which 27B reference plots are drawn)
   - `docs/concepts/06-hooks-and-drift.html`: 1 (transcripts loaded, `max_assistant_turns`)
   - `docs/concepts/07-steering.html`: 1 (suggested alpha values)
+  - `docs/homework-1.html`: 1 (the personas cell lives in `notebooks/helper_cells/` until it is in the notebook)
 - [ ] **Judge model name.** ARENA's `AUTORATER_MODEL = "anthropic/claude-3.5-haiku"` **is no longer listed on OpenRouter** (checked 2026-10-19), so any judge or autorater call using it will fail. Currently listed options include `anthropic/claude-haiku-4.5` and `openai/gpt-4.1-mini` (the judge the paper used). Make sure the final notebook uses one that exists, and update `concepts/02-responses-and-judging.html` to match.
 - [ ] **Homework due dates and submission method**: `DUE_DATE_HW1` and `SUBMISSION_METHOD` in `docs/homework-1.html`; `DUE_DATE_HW2` and `PROPOSAL_FORM_LINK` in `docs/homework-2.html`.
 - [ ] **Meeting location**: `LOCATION` placeholders in `docs/calendar.html`. Also confirm the date range (Wed Oct 21 to Thu Dec 3, 2026) and that there is no meeting on Veterans Day (Nov 11) or Thanksgiving (Nov 26). To change dates, edit the month tables and the "All meetings" table in that file directly.
+- [ ] **Homework 1, Part C setup**: the persona sign-up sheet (`PERSONA_SIGNUP_SHEET`), the published shared PCA dataset (`SHARED_PCA_DATASET`), and `LEAD_KAGGLE_USERNAMES`, all in `docs/homework-1.html`. Paste the two helper cells into the notebooks, and run them once on Kaggle (see above).
 - [ ] **Screenshots**: 12 placeholders, listed below.
 
 ### Screenshot placeholders

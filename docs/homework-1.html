@@ -49,7 +49,7 @@
 
       <nav class="page-toc" aria-label="On this page"><strong>On this page</strong><ol>
         <li><a href="#part-a">Part A: Setup</a></li><li><a href="#part-b">Part B: Smoke test</a></li>
-        <li><a href="#part-c">Part C: Section 1</a></li><li><a href="#part-d">Part D: Section 2</a></li>
+        <li><a href="#part-c">Part C: Section 1 + your personas</a></li><li><a href="#part-d">Part D: Section 2</a></li>
         <li><a href="#checklist">Submission checklist</a></li></ol></nav>
 
       <section class="assignment" id="part-a">
@@ -73,20 +73,45 @@
       </section>
 
       <section class="assignment" id="part-c">
-        <h2>Part C: Mapping persona space (Section 1)</h2>
+        <h2>Part C: Mapping persona space, with two personas of your own (Section 1)</h2>
+        <p>Everyone runs the same Section 1 pipeline, and then each student adds <strong>two personas nobody else has</strong> and places them on the class's shared Assistant Axis. Your plot will look like nobody else's.</p>
+
+        <div class="callout ok">
+          <span class="callout-title">Why everyone has their own personas</span>
+          <p>The notebook gives you a lot of scaffolding, and ARENA publishes its solutions, so finished code on its own does not show much. Running two brand-new personas through every step (prompt, generation, judging, activation extraction, projection) does. Because everyone's personas are different, everyone's plot is different, which shows you ran the pipeline yourself.</p>
+          <p>It also lets us do something together. Everyone projects onto the same shared axes, so the leads will combine the whole class's personas into one class-wide persona map and show it at the next session. Expect a few surprises.</p>
+        </div>
+
         <dl>
-          <dt>Read first</dt><dd>Concepts <a href="concepts/01-personas.html">1</a> to <a href="concepts/05-pca-assistant-axis.html">5</a>.</dd>
-          <dt>What to do</dt><dd>Complete every Section 1 exercise. Then set <code>SMOKE_TEST = False</code>, restart the session, and run Section 1 with Gemma 2 9B.</dd>
-          <dt>Notebook part</dt><dd>Section 1, Mapping Persona Space: generating responses, (optionally) judging, extracting activations and persona vectors, cosine similarity, PCA, and the 27B reference plots.</dd>
-          <dt>Expected output</dt><dd>A centered cosine-similarity heatmap with visible block structure; a PCA scatter plot whose PC1 separates default and Assistant-like personas from fantastical ones, coloured by projection onto the axis; the axis norm printed as 1.0000.</dd>
-          <dt>Submit</dt><dd>
-            <ol>
-              <li><strong>C1.</strong> The centered cosine-similarity heatmap (9B run).</li>
-              <li><strong>C2.</strong> The PCA plot, with the explained-variance percentages visible on the axes.</li>
-              <li><strong>C3.</strong> A short paragraph (150 to 250 words) interpreting them. Which personas cluster together? What share of variance does PC1 explain? Which personas sit at each end, and does anything surprise you? How does the ordering compare with the paper's 27B reference plots (patterns only, not numbers)?</li>
-            </ol>
-          </dd>
+          <dt>Read first</dt><dd>Concepts <a href="concepts/01-personas.html">1</a> to <a href="concepts/05-pca-assistant-axis.html">5</a>, especially <a href="concepts/05-pca-assistant-axis.html#projecting">projecting new points onto an existing PCA</a>.</dd>
+          <dt>Notebook part</dt><dd>Section 1, Mapping Persona Space, through the PCA exercise, then the <strong>"Your two personas"</strong> cell right after it.</dd>
         </dl>
+
+        <h3>Steps</h3>
+        <ol class="checklist">
+          <li><strong>Claim two personas</strong> on the <a href="#part-c">Persona sign-up sheet</a> <span class="todo-inline">PERSONA_SIGNUP_SHEET</span> before running anything. A persona must not already be in the shared persona list (it is on the sheet's second tab) or claimed by another student. First come, first served.</li>
+          <li><strong>Choose one near and one far:</strong> one persona you expect to land near the Assistant end of the axis, and one you expect to land far from it.</li>
+          <li><strong>Predict before you run.</strong> For each persona, write down where you expect it to land, with one sentence explaining why. Add your predictions to the sign-up sheet too, so they are timestamped.</li>
+          <li><strong>Run Section 1 on <code>gemma-2-9b-it</code></strong>, not the 2B smoke-test model, so results are comparable across the class: complete the Section 1 exercises, set <code>SMOKE_TEST = False</code>, restart, and run through the PCA exercise.</li>
+          <li><strong>Attach the shared PCA.</strong> <span class="ui">Add Input</span> → search for the leads' dataset <span class="todo-inline">SHARED_PCA_DATASET</span> and add it. It holds the class's shared axes (<code>shared_pca.json</code>).</li>
+          <li><strong>Write a system prompt for each persona</strong> in the same style as the shared ones ("You are a … who …", one or two sentences). Put your name and both prompts at the top of the "Your two personas" cell (<code>STUDENT_NAME</code> and <code>MY_PERSONAS</code>), then run it. It generates responses, judges them, and extracts activations at the same layer and settings as the shared run. Do <strong>not</strong> add your personas to the shared <code>PERSONAS</code> dict.</li>
+          <li><strong>Project, do not refit.</strong> The cell projects your two personas onto the PCA fitted on the shared persona set. Do not refit PCA with your personas included; that would move everyone's axes (<a href="concepts/05-pca-assistant-axis.html#projecting">why</a>).</li>
+          <li><strong>Check the plot.</strong> The cell draws the PCA plot with the shared personas in grey, the Assistant as a star, and your two personas highlighted and labelled. It saves <code>my_personas_plot.png</code> and <code>my_personas.json</code> in <code>/kaggle/working</code>.</li>
+          <li><strong>Save and share.</strong> Save a Kaggle version with outputs (<a href="setup.html#step-save">setup step 11</a>), then <span class="ui">Share</span> → add the leads (<span class="todo-inline">LEAD_KAGGLE_USERNAMES</span>) as collaborators who can view. Keep the notebook private otherwise.</li>
+        </ol>
+        <div class="todo-banner">Until the final student notebook includes it, the "Your two personas" cell lives in the repository at <code>notebooks/helper_cells/my_personas_cell.py</code>.</div>
+
+        <h3>If the judge filters out your persona</h3>
+        <p>Some prompts make the model refuse or stay in Assistant mode, and those responses are dropped because they score low on the role-play scale. The cell prints how many of each persona's responses survived, and warns you if fewer than half did. If that happens, <strong>report it with the judge scores</strong> (the cell prints them); a persona the model will not play is a result worth discussing. Then pick a substitute, claim it on the sign-up sheet, and run that one too.</p>
+
+        <h3>What to submit</h3>
+        <ol>
+          <li><strong>C1.</strong> The PCA plot with your two personas highlighted (<code>my_personas_plot.png</code>).</li>
+          <li><strong>C2.</strong> Your predictions, written before running.</li>
+          <li><strong>C3.</strong> Two to four sentences on whether the results matched your predictions, and why you think they did or didn't.</li>
+          <li><strong>C4.</strong> Each persona's cosine similarity to the Assistant persona vector and its projection on PC1. The cell prints both, next to the shared set's PC1 range for reference.</li>
+          <li><strong>C5.</strong> The link to your saved Kaggle version, shared with the leads.</li>
+        </ol>
       </section>
 
       <section class="assignment" id="part-d">
@@ -111,9 +136,11 @@
           <thead><tr><th scope="col">Item</th><th scope="col">What</th><th scope="col">Format</th></tr></thead>
           <tbody>
             <tr><td>B1</td><td>First successful model output (smoke test)</td><td>Screenshot</td></tr>
-            <tr><td>C1</td><td>Centered cosine-similarity heatmap, 9B</td><td>Image</td></tr>
-            <tr><td>C2</td><td>PCA plot with explained variance, 9B</td><td>Image</td></tr>
-            <tr><td>C3</td><td>Interpretation of C1 and C2, 150 to 250 words</td><td>Text</td></tr>
+            <tr><td>C1</td><td>PCA plot with your two personas highlighted, 9B</td><td>Image</td></tr>
+            <tr><td>C2</td><td>Your predictions, written before running</td><td>Text</td></tr>
+            <tr><td>C3</td><td>Did the results match? 2 to 4 sentences</td><td>Text</td></tr>
+            <tr><td>C4</td><td>Cosine to the Assistant and PC1 projection, per persona</td><td>Numbers</td></tr>
+            <tr><td>C5</td><td>Link to your saved Kaggle version, shared with the leads</td><td>Link</td></tr>
             <tr><td>D1</td><td>Steering outputs, at least 3 personas × 4 values of \(\alpha\), plus role adoption</td><td>Table or notebook output</td></tr>
             <tr><td>D2</td><td>Reflection on drift and steering, 200 to 300 words</td><td>Text</td></tr>
           </tbody>

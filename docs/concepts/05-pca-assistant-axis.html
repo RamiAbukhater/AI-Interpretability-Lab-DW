@@ -38,7 +38,7 @@
 
       <nav class="page-toc" aria-label="On this page"><strong>On this page</strong><ol>
         <li><a href="#idea">The big idea</a></li><li><a href="#diagram">Diagram</a></li><li><a href="#paper">Connection to the paper</a></li>
-        <li><a href="#code">The code</a></li><li><a href="#reference">The 27B reference plots</a></li><li><a href="#check">Check your understanding</a></li><li><a href="#mistakes">Common mistakes</a></li></ol></nav>
+        <li><a href="#code">The code</a></li><li><a href="#projecting">Refit or project?</a></li><li><a href="#reference">The 27B reference plots</a></li><li><a href="#check">Check your understanding</a></li><li><a href="#mistakes">Common mistakes</a></li></ol></nav>
 
       <h2 id="idea">The big idea</h2>
       <p>Each persona is a point in a 3584-dimensional space. We cannot look at 3584 dimensions, but we can ask: <em>along which direction do these points spread out the most?</em> That direction is the <strong>first principal component</strong> (PC1). The direction of greatest spread that is at right angles to PC1 is PC2, and so on. <strong>Principal component analysis (PCA)</strong> finds these directions and tells you what fraction of the total spread (variance) each one accounts for.</p>
@@ -178,7 +178,18 @@ projections = (vectors_normalized @ assistant_axis).float().cpu().numpy()
           <li>Expect defaults and professional roles at the top, fantastical roles at the bottom, and creative roles like philosopher or storyteller in between. This is the semantic reading of the axis: roughly grounded and professional versus dramatic and fantastical.</li>
         </ul>
       </div>
-      <p>Save the PCA plot. It is the second plot you submit in <a href="../homework-1.html#part-c">Homework 1, Part C</a>.</p>
+      <p>In <a href="../homework-1.html#part-c">Homework 1, Part C</a> you add two personas of your own to this plot by projecting them onto it (see <a href="#projecting">below</a>).</p>
+
+      <h2 id="projecting">Adding new personas: refit or project?</h2>
+      <p>Suppose you want to place a new persona, say a lighthouse keeper, on a PCA plot you already have. There are two ways to do it, and they give different answers.</p>
+      <ul>
+        <li><strong>Refitting</strong> means adding the new vector to the set and running PCA again. The new point now helps decide where the axes point, and the mean you subtract changes too. With about 20 personas, one unusual newcomer can visibly rotate PC1 and PC2, or even flip their sign. Every other point moves, and the plot is no longer the one anyone else made.</li>
+        <li><strong>Projecting</strong> means keeping the PCA you fitted on the shared set exactly as it is, and asking where the new point lands in it. The axes and the mean stay fixed; only the new point is placed.</li>
+      </ul>
+      <p>To project a new persona vector \(v\), subtract the <em>shared</em> mean \(\bar v\) (the mean of the shared persona set, not a new mean that includes \(v\)), then take the dot product with each shared principal component \(u_k\):</p>
+      \[ z_k = (v - \bar v) \cdot u_k, \qquad k = 1, 2. \]
+      <p>The pair \((z_1, z_2)\) is the new persona's position on the PC1 and PC2 axes of the original plot. In scikit-learn this is <code>pca.transform</code>, as long as you apply the same centering you used before fitting. Cosine similarity to the Assistant uses the same shared centering: \(\cos(v - \bar v,\; v_\text{Assistant} - \bar v)\).</p>
+      <p>Projecting is why a whole class can share one map. If everyone projects onto the same fitted axes, every student's personas land in one common coordinate system and can be plotted together. If everyone refitted with their own personas included, each student would have slightly different axes and the points could not be compared. This is what you do in <a href="../homework-1.html#part-c">Homework 1, Part C</a>, using the class's shared PCA.</p>
 
       <h2 id="reference">The paper's 27B results, as a visual comparison only</h2>
       <div class="todo-banner">Describe the exact reference plots the final notebook draws.</div>
