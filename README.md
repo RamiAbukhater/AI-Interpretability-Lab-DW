@@ -55,8 +55,8 @@ docs/                   the website (GitHub Pages serves this folder)
   homework-2.html       extension menu (6 idea cards, theme filters) and proposal checklist
   resources.html        sources and glossary
   assets/css/style.css  all styles; light and dark themes follow the system setting
-  assets/js/site.js     sidebar, prev/next links, footer, copy buttons, screenshot slots, math
-  assets/img/           favicon, and setup/ for screenshots
+  assets/js/site.js     sidebar, prev/next links, footer, copy buttons, idea filters, math
+  assets/img/           favicon
 ```
 
 ### Editing the site
@@ -132,26 +132,6 @@ Run the leader notebook once on Kaggle (smoke test, then 9B) before Homework 1 o
 - [ ] **Publish the shared PCA** from that 9B run as a Kaggle Dataset (see above).
 - [ ] **Calendar details**: meeting locations and the lab dinner's time and place are marked tentative in `docs/calendar.html`. When they are confirmed, replace the "Location tentative" and "Time and location tentative" text. To change dates, edit the Key dates table, the month tables, and the All meetings table in that file.
 - [ ] **Homework 1, Part C setup**: the persona sign-up sheet (`PERSONA_SIGNUP_SHEET`), the published shared PCA dataset (`SHARED_PCA_DATASET`), and `LEAD_KAGGLE_USERNAMES`, all in `docs/homework-1.html`. The cells themselves are already in the notebooks.
-- [ ] **Screenshots**: 12 placeholders, listed below.
-
-### Screenshot placeholders
-
-Each placeholder on the setup page shows a striped box with a description until the matching file exists. **To add one, save a PNG with exactly the file name below into `docs/assets/img/setup/`.** The page picks it up automatically; no HTML edits needed. Blur any API key, email address, or phone number before saving.
-
-| File (in `docs/assets/img/setup/`) | Setup step | What it should show |
-|---|---|---|
-| `01-kaggle-phone-verification.png` | 2 | Kaggle Settings page with the Phone verification section visible, showing a verified status |
-| `02-openrouter-credits.png` | 3 | OpenRouter Credits page showing a small positive balance after adding credit |
-| `03-openrouter-create-key.png` | 3 | OpenRouter Create API Key dialog with a name filled in and a credit limit set, key value blurred |
-| `04-gemma-license.png` | 4 | Gemma 2 model page on Kaggle with the "Access Gemma 2 on Kaggle" box and its Request Access button |
-| `05-import-notebook.png` | 5 | Kaggle notebook editor with the File menu open and Import Notebook highlighted, plus the import dialog |
-| `06-session-options.png` | 6 | Session options panel with Accelerator set to GPU T4 x2 and the Internet switch on |
-| `07-add-input-gemma.png` | 7 | Add Input dialog filtered to Models, with Gemma 2 by Google selected and Framework set to Transformers |
-| `08-model-variation.png` | 7 | Input panel listing both gemma-2-9b-it and gemma-2-2b-it under Gemma 2 / Transformers |
-| `09-add-secret.png` | 8 | Add-ons → Secrets dialog with a secret labelled OPENROUTER_API_KEY, value hidden, and its checkbox ticked |
-| `10-smoke-test-output.png` | 9 | Notebook output from the smoke test: the model-load message for gemma-2-2b-it followed by the first printed persona responses |
-| `11-gpu-quota.png` | 10 | Kaggle quota display showing GPU hours used and remaining for the week |
-| `12-save-version.png` | 11 | Save Version dialog showing the Quick Save and Save & Run All (Commit) options |
 
 ## Facts checked against live sources (2026-10-19)
 

@@ -192,22 +192,6 @@
     wrap.appendChild(btn);
   });
 
-  /* ---------- screenshot slots ----------
-     <figure class="shot" data-img="assets/img/setup/06-session-options.png">
-     shows a placeholder until the image file exists, then shows the image.
-     A leader only has to drop the PNG into docs/assets/img/setup/. */
-  document.querySelectorAll("figure[data-img]").forEach(function (fig) {
-    var src = root + fig.getAttribute("data-img");
-    var img = new Image();
-    img.onload = function () {
-      var holder = fig.querySelector(".shot-placeholder");
-      img.alt = (fig.querySelector(".ph-desc") || {}).textContent || "";
-      img.loading = "lazy";
-      if (holder) holder.replaceWith(img);
-    };
-    img.src = src;
-  });
-
   /* ---------- idea filters (Homework 2) ----------
      Cards carry data-theme. The filter bar is hidden in the HTML and only
      shown here, so with JavaScript off every card stays visible. */

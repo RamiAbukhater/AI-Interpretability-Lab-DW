@@ -330,26 +330,9 @@ kbd {
 .step-check::before { content: "You should see"; color: var(--good); }
 .step-why > :last-child, .step-check > :last-child { margin-bottom: 0; }
 
-/* screenshot placeholders */
+/* figures */
 figure { margin: 1.5rem 0; }
 figcaption { font-family: var(--font-ui); font-size: 0.88rem; color: var(--ink-soft); margin-top: 0.5rem; }
-.shot {
-  border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden;
-  background: var(--bg-raised);
-}
-.shot img { display: block; width: 100%; }
-.shot-placeholder {
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.35rem;
-  min-height: 9.5rem; padding: 1.25rem;
-  text-align: center; font-family: var(--font-ui);
-  color: var(--ink-faint);
-  background:
-    repeating-linear-gradient(135deg, transparent 0 10px, color-mix(in srgb, var(--rule) 45%, transparent) 10px 11px),
-    var(--bg-sunken);
-}
-.shot-placeholder .ph-title { font-weight: 700; color: var(--ink-soft); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; }
-.shot-placeholder .ph-desc { font-size: 0.95rem; color: var(--ink); max-width: 32rem; }
-.shot-placeholder code { font-size: 0.8rem; }
 
 /* diagrams */
 .diagram {
