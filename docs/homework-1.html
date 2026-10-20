@@ -89,7 +89,7 @@
 
         <h3>Steps</h3>
         <ol class="checklist">
-          <li><strong>Claim two personas</strong> on the <a href="#part-c">Persona sign-up sheet</a> <span class="todo-inline">PERSONA_SIGNUP_SHEET</span> before running anything. A persona must not already be in the shared persona list (the 53 names in the notebook's <code>PERSONAS</code>, also on the sheet's second tab) or claimed by another student. First come, first served.</li>
+          <li><strong>Claim two personas</strong> on the <a href="https://docs.google.com/spreadsheets/d/1BPhfDKYrC4GYDJyut9dvJrWTFwQ05oBes5sC9zcURaE/edit?usp=sharing">Persona sign-up sheet</a> before running anything. A persona must not already be in the shared persona list (the 53 names in the notebook's <code>PERSONAS</code>, also on the sheet's second tab) or claimed by another student. First come, first served.</li>
           <li><strong>Choose one near and one far:</strong> one persona you expect to land near the Assistant end of the axis, and one you expect to land far from it.</li>
           <li><strong>Predict before you run.</strong> For each persona, write down where you expect it to land, with one sentence explaining why. Add your predictions to the sign-up sheet too, so they are timestamped.</li>
           <li><strong>Run Section 1 on <code>gemma-2-9b-it</code></strong>, not the 2B smoke-test model, so results are comparable across the class: complete the Section 1 exercises, set <code>SMOKE_TEST = False</code>, restart, and run through the PCA exercise.</li>
@@ -97,7 +97,7 @@
           <li><strong>Write a system prompt for each persona</strong> in the same style as the shared ones ("You are a … who …", one or two sentences). Put your name and both prompts at the top of the "Your two personas" cell (<code>STUDENT_NAME</code> and <code>MY_PERSONAS</code>), then run it. It generates responses, judges them, and extracts activations at the same layer and settings as the shared run. Do <strong>not</strong> add your personas to the shared <code>PERSONAS</code> dict.</li>
           <li><strong>Project, do not refit.</strong> The cell projects your two personas onto the PCA fitted on the shared persona set. Do not refit PCA with your personas included; that would move everyone's axes (<a href="concepts/05-pca-assistant-axis.html#projecting">why</a>).</li>
           <li><strong>Check the plot.</strong> The cell draws the PCA plot with the shared personas in grey, the Assistant as a star, and your two personas highlighted and labelled. It saves <code>my_personas_plot.png</code> and <code>my_personas.json</code> in <code>/kaggle/working</code>.</li>
-          <li><strong>Save and share.</strong> Save a Kaggle version with outputs (<a href="setup.html#step-save">setup step 11</a>), then <span class="ui">Share</span> → add the leads (<span class="todo-inline">LEAD_KAGGLE_USERNAMES</span>) as collaborators who can view. Keep the notebook private otherwise.</li>
+          <li><strong>Save and share.</strong> Save a Kaggle version with outputs (<a href="setup.html#step-save">setup step 11</a>), then <span class="ui">Share</span> → add Rami (Kaggle username <code>ramiabukhater</code>) as a collaborator who can view. Keep the notebook private otherwise.</li>
         </ol>
 
         <h3>If the judge filters out your persona</h3>

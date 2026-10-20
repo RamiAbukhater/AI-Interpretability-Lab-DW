@@ -90,10 +90,10 @@ The notebook scaffolding and ARENA's published solutions mean finished code alon
 
 ### Leads: setup before Homework 1 opens
 
-1. **Sign-up sheet.** Make a Google Sheet with columns **Name, Persona 1, Persona 2, Prediction for Persona 1, Prediction for Persona 2, Substitutes**. Paste the shared persona list (the keys of `PERSONAS`) into a second tab so students can check for duplicates. Put the link in `docs/homework-1.html` (`PERSONA_SIGNUP_SHEET`).
+1. **Sign-up sheet** ([Persona Sign-Up Sheet](https://docs.google.com/spreadsheets/d/1BPhfDKYrC4GYDJyut9dvJrWTFwQ05oBes5sC9zcURaE/edit?usp=sharing), linked from Homework 1). Give it columns **Name, Persona 1, Persona 2, Prediction for Persona 1, Prediction for Persona 2, Substitutes**, and paste the shared persona list (the 53 keys of `PERSONAS` in the workshop run) into a second tab so students can check for duplicates. Students need edit access.
 2. **Shared PCA.** Run the leader solutions notebook on `gemma-2-9b-it` (`SMOKE_TEST = False`, default persona list). The cell under "Leaders: save the shared PCA", right after the Section 1 PC1 check, writes `/kaggle/working/shared_pca.json` (shared mean, first two components, Assistant vector, shared coordinates, and a `basis_id` fingerprint). Publish that file as a public Kaggle Dataset and put its name in `docs/homework-1.html` (`SHARED_PCA_DATASET`). Do not regenerate it mid-quarter; a new file means a new `basis_id`, and the map script only combines files that match.
 3. **Student cell.** The "Your two personas (Homework 1, Part C)" cell is already in the student notebook right after the PC1 check. The leader notebook has the same cell with a worked example filled in (`tax_auditor` and `stage_magician`), so a full leader run tests it end to end. The plain-Python copies in [`notebooks/helper_cells/`](notebooks/helper_cells/) are the source; if you edit a cell, edit both the `.py` file and the notebooks.
-4. **Kaggle usernames** of the leads, for students to share their notebooks with (`LEAD_KAGGLE_USERNAMES`).
+4. **Who students share with:** Homework 1 tells students to add Rami (Kaggle username `ramiabukhater`) as a viewer of their saved notebook.
 
 What the student cell does: generates, judges (always, even when `RUN_JUDGE_FILTER` is off), and extracts activations for the two personas at `EXTRACTION_LAYER`, reusing cached results in `CACHE_DIR/my_personas/` (under `/kaggle/working/persona_cache/`). It warns if fewer than half of a persona's responses survive judging, then projects onto the attached `shared_pca.json`. If the file is missing, or was made for a different model size or layer (for example the 2B smoke test), it falls back to the student's own fit and marks the result `basis_source: "own"`. It then prints PC1, PC2 and cosine to the Assistant next to the shared PC1 range, and saves `my_personas_plot.png` and `my_personas.json`.
 
@@ -129,9 +129,9 @@ Run the leader notebook once on Kaggle (smoke test, then 9B) before Homework 1 o
 ## Still waiting on the leads
 
 - [ ] **Run the leader notebook on Kaggle** once with `SMOKE_TEST = True` and once with `SMOKE_TEST = False`, before Homework 1 opens. Nothing has run on Kaggle hardware or against the real OpenRouter judge yet (see the testing notes in `notebooks/KAGGLE_NOTEBOOK_NOTES.md`). The 9B run times on the site are estimates until then.
-- [ ] **Publish the shared PCA** from that 9B run as a Kaggle Dataset (see above).
+- [ ] **Publish the shared PCA** from that 9B run as a public Kaggle Dataset, then replace `SHARED_PCA_DATASET` in `docs/homework-1.html` with its name and link. [`notebooks/SHARED_PCA_RUN_HANDOFF.md`](notebooks/SHARED_PCA_RUN_HANDOFF.md) is a step-by-step handoff for another agent (or a person) to do the run and the publishing.
 - [ ] **Calendar details**: meeting locations and the lab dinner's time and place are marked tentative in `docs/calendar.html`. When they are confirmed, replace the "Location tentative" and "Time and location tentative" text. To change dates, edit the Key dates table, the month tables, and the All meetings table in that file.
-- [ ] **Homework 1, Part C setup**: the persona sign-up sheet (`PERSONA_SIGNUP_SHEET`), the published shared PCA dataset (`SHARED_PCA_DATASET`), and `LEAD_KAGGLE_USERNAMES`, all in `docs/homework-1.html`. The cells themselves are already in the notebooks.
+- [ ] **Set up the sign-up sheet.** As of 2026-10-20 it is public but empty (one tab, no headers). Add the headers and the second tab described above.
 
 ## Facts checked against live sources (2026-10-19)
 
