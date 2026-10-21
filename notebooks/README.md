@@ -1,6 +1,15 @@
 # Notebooks
 
-How the notebook differs from ARENA's original is summarized in the main README. Leaders keep fuller notes, with run details and private links, in `KAGGLE_NOTEBOOK_NOTES.md` in this folder; that file is gitignored and never published.
+The student notebook adapts ARENA's notebook 4.4 to Kaggle's free T4 x2:
+
+- Gemma 2 9B instead of 27B.
+- Persona responses are generated locally.
+- A current Claude Haiku is the judge.
+- 53 personas.
+- Activations are read with a hook at block 27.
+- A Homework 1, Part C cell is added.
+
+Leaders keep fuller notes in a gitignored `KAGGLE_NOTEBOOK_NOTES.md`.
 
 ## Which notebook to import
 

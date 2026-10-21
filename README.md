@@ -1,179 +1,116 @@
-# DataWorks AI Interpretability Lab
+# <div align="center">DataWorks AI Interpretability Lab</div>
+### <div align="center">UC San Diego DataWorks Research Group</div>
+#### <div align="center">Reproducing and extending Anthropic's <em>Assistant Axis</em></div>
 
-A UCSD DataWorks research group reproducing and extending Anthropic's [The Assistant Axis](https://arxiv.org/abs/2601.10387) (Lu, Gallagher, Michala, Fish, and Lindsey, 2026).
+<p align="center">
+  <img alt="Python" src="https://img.shields.io/badge/Python-notebooks-3776AB?style=flat-square&logo=python&logoColor=white">
+  <img alt="PyTorch" src="https://img.shields.io/badge/PyTorch-forward%20hooks-EE4C2C?style=flat-square&logo=pytorch&logoColor=white">
+  <img alt="Hugging Face Transformers" src="https://img.shields.io/badge/Transformers-Gemma%202%209B-FFD21E?style=flat-square&logo=huggingface&logoColor=black">
+  <img alt="Kaggle" src="https://img.shields.io/badge/Kaggle-GPU%20T4%20x2-20BEFF?style=flat-square&logo=kaggle&logoColor=white">
+  <img alt="OpenRouter" src="https://img.shields.io/badge/OpenRouter-LLM%20judge-111111?style=flat-square">
+  <img alt="GitHub Pages" src="https://img.shields.io/badge/GitHub%20Pages-course%20site-222222?style=flat-square&logo=github&logoColor=white">
+  <img alt="License" src="https://img.shields.io/badge/License-MIT%20%2B%20CC%20BY%204.0-2E7D32?style=flat-square">
+</p>
 
-**Leads and instructors:** Rami Abukhater, Alec Min, and Akshar Sinha.
+<p align="center"><strong><a href="https://ramiabukhater.github.io/AI-Interpretability-Lab-DW/">Course site: ramiabukhater.github.io/AI-Interpretability-Lab-DW</a></strong></p>
 
-In person we only cover the high-level ideas. Setup, reading, and the notebook are homework. This repository holds the student notebook and a static website that walks students through all of it on their own:
+Repository for the UC San Diego DataWorks AI Interpretability Lab. It holds the lab notebook, which runs on Kaggle's free GPUs, and the course site, which walks students through setup, every concept the notebook covers, and the homework.
 
-- **Setup on Kaggle**: account, phone verification, OpenRouter key, the Gemma 2 license, GPU T4 x2, model inputs, secrets, the smoke test, quota, saving, and troubleshooting.
-- **Seven concept pages**, in the order the notebook uses them, each with intuition, a diagram, the link to the paper, a code walkthrough with tensor shapes, click-to-reveal questions, and common mistakes.
-- **Homework 0**: a short introduction post in the general research chat on Discord, due Friday, October 23. Homework 1 is due Wednesday, October 28 (a screenshot of the PCA plot with the student's projected personas, posted in the homework submissions channel on Discord), and Homework 2 is due Friday, October 30 (a reply and reaction to Rami's message in that channel).
-- **Calendar**: meetings every Wednesday and Thursday, 7 to 8 pm, three workshops, homework deadlines, the final paper (Sun Nov 29), the lab dinner (Dec 3), and the tentative showcase (Dec 4–5).
-- **Homework 1** (setup, smoke test, Sections 1 and 2) and **Homework 2** (choose and propose a research extension from a menu of six ideas), each on its own page.
-- **Resources**: sources, a glossary, and introductory interpretability reading.
+In meetings we cover the ideas at a high level. Setup, reading, and the notebook are done as homework, so the site is written to be followed on your own.
 
-Students run an adapted version of ARENA's notebook 4.4, *LLM Psychology & Persona Vectors*, on Kaggle's free tier with Gemma 2 9B Instruct (`gemma-2-9b-it`). The scope is Section 1 (Mapping Persona Space) and Section 2 up to steering along the Assistant Axis. Activation capping and ARENA's Sections 3 and 4 are out of scope for now.
+## Abstract
 
-## Viewing the site
+Language models learn to play many characters during pre-training, and post-training makes one of them, the helpful Assistant, the default. [The Assistant Axis](https://arxiv.org/abs/2601.10387) (Lu, Gallagher, Michala, Fish, and Lindsey, 2026) finds a single direction in a model's activations that separates the Assistant from everything else. Projecting onto that direction shows when a conversation is pulling the model out of character, and adding it during generation steers the model's behaviour.
 
-**Locally.** Open `docs/index.html` in a browser. Every link is relative and nothing is fetched at runtime, so the site works straight from the file system. (Fonts, KaTeX, and Prism load from CDNs, so you need to be online for those.)
+This lab reproduces the core results on Gemma 2 9B Instruct, using an adapted version of [ARENA's notebook 4.4](https://github.com/ARENA-education/ARENA_materials/blob/main/chapter4_alignment_science/exercises/part4_persona_vectors/4.4_LLM_Psychology_%26_Persona_Vectors_exercises.ipynb). Students map persona space, build the Assistant Axis, monitor drift in real transcripts, and steer the model. Then each team proposes an extension of its own.
 
-**On GitHub Pages.** The site is plain HTML in `docs/`, so no build step or Actions workflow is needed.
+- **Organization**: UC San Diego DataWorks
+- **Leads and instructors**: Rami Abukhater, Akshar Sinha
+- **Paper**: [arXiv 2601.10387](https://arxiv.org/abs/2601.10387) · [code](https://github.com/safety-research/assistant-axis)
 
-1. Push this repository to GitHub.
-2. Go to the repository's **Settings → Pages**.
-3. Under **Build and deployment**, set **Source** to **Deploy from a branch**.
-4. Set **Branch** to `main` and the folder to `/docs`, then click **Save**.
-5. After a minute or so the page shows the site's address, usually `https://<user-or-org>.github.io/<repo-name>/`.
+## Project Goals
 
-`docs/.nojekyll` tells GitHub Pages to serve the files as they are, without Jekyll processing.
+- Reproduce the Assistant Axis on a model that fits on free hardware (Gemma 2 9B on Kaggle's T4 x2).
+- Give every student a self-contained path from setup to results, with each concept explained in plain language.
+- Make individual work checkable: each student adds two personas of their own and projects them onto a shared PCA.
+- Combine the class's personas into one shared persona map.
+- Seed student research extensions, from multi-agent drift to personality structure.
 
-## Repository layout
+## Repository Structure
 
+```text
+AI-Interpretability-Lab-DW/
+├── README.md
+├── LICENSE                          # MIT for code, CC BY 4.0 for written content
+├── docs/                            # the course site, served by GitHub Pages
+│   ├── index.html                   # home
+│   ├── calendar.html                # meetings, workshops, deadlines
+│   ├── setup.html                   # Kaggle setup walkthrough
+│   ├── concepts/                    # seven concept pages, 01 to 07
+│   ├── homework-0.html … homework-2.html
+│   ├── resources.html               # sources and glossary
+│   ├── notebooks/                   # download copy of the student notebook
+│   └── assets/                      # css, js, favicon
+├── notebooks/
+│   ├── persona_axis_kaggle_exercises.ipynb   # the student notebook
+│   ├── helper_cells/                # Homework 1 Part C cells as plain Python
+│   ├── SHARED_PCA_RUN_HANDOFF.md    # how to regenerate the shared PCA
+│   └── README.md
+└── scripts/
+    └── class_persona_map.py         # combines students' personas into one class map
 ```
-README.md               this file
-LICENSE                 MIT for code, CC BY 4.0 for written content
-.gitignore
-notebooks/
-  persona_axis_kaggle_exercises.ipynb   the student notebook (the one students import)
-  persona_axis_kaggle_solutions.ipynb   leaders only; gitignored, never committed
-  KAGGLE_NOTEBOOK_NOTES.md              leaders only; gitignored (run details and private notebook links)
-  README.md                             which notebook to import into Kaggle and how
-  smoke_test_pca_2b.png                 PCA plot from the leader's CPU smoke test
-  helper_cells/                         the Homework 1 Part C cells, as plain .py (also inside the notebooks)
-scripts/
-  class_persona_map.py  leads: combine students' personas into one class-wide map
-docs/                   the website (GitHub Pages serves this folder)
-  notebooks/            a copy of the student notebook, so the site can link to it as a download
-  index.html            home
-  setup.html            setup on Kaggle (the most important page)
-  concepts/             01-personas.html … 07-steering.html
-  calendar.html         key dates, month view, and all meetings
-  homework-0.html       Discord introduction post, due Fri Oct 23
-  homework-1.html       setup, smoke test, Sections 1 and 2
-  homework-2.html       extension menu (6 idea cards, theme filters) and proposal checklist
-  resources.html        sources and glossary
-  assets/css/style.css  all styles; light and dark themes follow the system setting
-  assets/js/site.js     sidebar, prev/next links, footer, copy buttons, idea filters, math
-  assets/img/           favicon
-```
 
-### Editing the site
+## Quick Start
 
-- Pages are plain HTML. Edit them directly.
-- The page order, sidebar, prev/next links, and step numbers all come from the `PAGES` list at the top of `docs/assets/js/site.js`. To add or reorder a page, edit that list and give the new page's `<body>` a matching `data-page` id and the right `data-root` (`""` at the top level, `"../"` inside `concepts/`). Copy an existing page as a template.
-- The footer (names and attribution) is also in `site.js`.
-- Math uses KaTeX with `\( … \)` for inline and `\[ … \]` for display.
-- Code blocks are `<pre><code class="language-python">…</code></pre>`. Highlighting and the copy button are added automatically. Escape `<` and `&` inside code as `&lt;` and `&amp;`.
-- Click-to-reveal answers and hints are native `<details>` elements, so they work without JavaScript.
+**Students.** Open the [course site](https://ramiabukhater.github.io/AI-Interpretability-Lab-DW/) and start with [Setup on Kaggle](https://ramiabukhater.github.io/AI-Interpretability-Lab-DW/setup.html). In short:
 
-## The notebooks
+1. Download [`persona_axis_kaggle_exercises.ipynb`](notebooks/persona_axis_kaggle_exercises.ipynb) and import it into Kaggle (**File → Import Notebook**).
+2. In **Session options**, set Accelerator to **GPU T4 x2** and turn on **Internet**.
+3. In **Add Input → Models**, add **Gemma 2**, framework **Transformers**, variations `gemma-2-9b-it` and `gemma-2-2b-it`.
+4. In **Add-ons → Secrets**, add your OpenRouter key with the label exactly `OPENROUTER_API_KEY`, and tick it.
+5. Run once with `SMOKE_TEST = True`, then set it to `False` for the full 9B run (about 12 minutes).
 
-The student notebook is [`notebooks/persona_axis_kaggle_exercises.ipynb`](notebooks/persona_axis_kaggle_exercises.ipynb). It adapts ARENA's notebook 4.4 to run on Kaggle's free T4 x2. The main differences from ARENA's version:
-
-- **Model:** Gemma 2 9B instruct in float16, loaded from a Kaggle Models input, with a NaN/inf check after loading. A 2B smoke-test mode is also available.
-- **Generation:** persona responses are generated locally by the same model, not by Gemma 2 27B over the API.
-- **Judge:** the judge is `anthropic/claude-haiku-5.5`, since ARENA's `claude-3.5-haiku` is retired.
-- **Personas and questions:** 53 personas (ARENA's 20 plus 33 roles from the paper's repository), 5 questions, and 128-token responses.
-- **Activations:** read with a forward hook on block 27, which fixes ARENA's off-by-one between Sections 1 and 2.
-- **Homework 1, Part C:** a "Your two personas" cell for each student.
-- **Removed:** activation capping and Sections 3 and 4.
-
-Leader-only notes (the full change list, run details, and links to the private leader notebook) are kept in `notebooks/KAGGLE_NOTEBOOK_NOTES.md`, which is gitignored and never published.
-
-**The site links to a copy.** GitHub Pages only serves `docs/`, so the site's download links point to `docs/notebooks/persona_axis_kaggle_exercises.ipynb`. After editing the student notebook, copy it over so the two stay identical:
+**Viewing the site locally.** Open `docs/index.html` in a browser, or serve the folder:
 
 ```bash
-cp notebooks/persona_axis_kaggle_exercises.ipynb docs/notebooks/
+python3 -m http.server 8000 --directory docs
 ```
 
-**Keep the site in sync.** The code on the concept pages and the setup page is quoted from the student notebook (function names, variables, flags, layer choices, cache paths, error messages). If you change one of those in the notebook, search the HTML for it and update the matching page.
+## Recommended Reading Order
 
-> **Never commit the solutions notebook.** `persona_axis_kaggle_solutions.ipynb` can sit in `notebooks/` locally because `.gitignore` ignores `*solutions*.ipynb`, but keep the shared copy in a private repository or shared drive. (Like ARENA's, the student notebook does include collapsible reference solutions under each exercise. Homework 1's unique personas are what show a student did the work.)
+1. [Home](https://ramiabukhater.github.io/AI-Interpretability-Lab-DW/) and the [Calendar](https://ramiabukhater.github.io/AI-Interpretability-Lab-DW/calendar.html)
+2. [Homework 0](https://ramiabukhater.github.io/AI-Interpretability-Lab-DW/homework-0.html): introduce yourself on Discord
+3. [Setup on Kaggle](https://ramiabukhater.github.io/AI-Interpretability-Lab-DW/setup.html)
+4. Concepts 1 to 7: [personas](https://ramiabukhater.github.io/AI-Interpretability-Lab-DW/concepts/01-personas.html), judging, the residual stream, cosine similarity, PCA and the Assistant Axis, hooks and drift, steering
+5. [Homework 1](https://ramiabukhater.github.io/AI-Interpretability-Lab-DW/homework-1.html): run the notebook and place two personas of your own
+6. [Homework 2](https://ramiabukhater.github.io/AI-Interpretability-Lab-DW/homework-2.html): choose and propose an extension
 
-## Unique personas in Homework 1 (checking individual work)
+## Development Workflow
 
-The notebook scaffolding and ARENA's published solutions mean finished code alone does not show a student did the work. So Homework 1, Part C asks every student to add **two personas of their own** on top of the shared set, run them through the whole pipeline (prompt, generation, judging, activation extraction), and project them onto the **shared** PCA. Every student's plot is different, and because everyone uses the same axes, the leads can combine them into one class-wide persona map.
+The site is plain HTML, CSS, and a little JavaScript, with no build step. Commit to `main` and GitHub Pages republishes `docs/` within a minute or two.
 
-**Why a shared PCA file?** Each student generates their own responses, so their own Section 1 PCA comes out slightly different (axes can rotate or flip sign). Coordinates from different students' fits cannot go on one map. The leads therefore run the shared set once on 9B and publish the result. Every student's helper cell projects onto that one file.
+- **Pages:** edit the files in `docs/` directly. The page order, sidebar, and prev/next links come from the `PAGES` list in `docs/assets/js/site.js`, and the footer is defined there too. Math uses KaTeX (`\( … \)` and `\[ … \]`); code blocks are `<pre><code class="language-python">`.
+- **Notebook:** the concept pages quote the student notebook's code. If you change a function, variable, or flag in the notebook, update the matching page. After editing the notebook, refresh the site's download copy:
 
-### Leads: setup before Homework 1 opens
+  ```bash
+  cp notebooks/persona_axis_kaggle_exercises.ipynb docs/notebooks/
+  ```
 
-1. **Sign-up sheet** ([Persona Sign-Up Sheet](https://docs.google.com/spreadsheets/d/1BPhfDKYrC4GYDJyut9dvJrWTFwQ05oBes5sC9zcURaE/edit?usp=sharing), linked from Homework 1). Its "Sign-ups" tab has the columns **Name, Persona 1, Persona 2, Prediction for Persona 1, Prediction for Persona 2, Substitutes**, and its "Shared personas" tab lists the 53 keys of `PERSONAS` in the workshop run so students can check for duplicates. Students need edit access.
-2. **Shared PCA (done 2026-10-21).** Published as the public dataset [ramiabukhater/dataworks-shared-pca](https://www.kaggle.com/datasets/ramiabukhater/dataworks-shared-pca): `shared_pca.json`, basis `8ac3ff730a74`, from the leaders' 9B run. Homework 1 tells students to attach it. **Do not regenerate it mid-quarter**; a new file means a new `basis_id`, and the map script only combines files that match. Run details are in the leaders' private notes (`notebooks/KAGGLE_NOTEBOOK_NOTES.md`, gitignored). [`notebooks/SHARED_PCA_RUN_HANDOFF.md`](notebooks/SHARED_PCA_RUN_HANDOFF.md) has the steps if it ever has to be redone.
-3. **Student cell.** The "Your two personas (Homework 1, Part C)" cell is already in the student notebook right after the PC1 check. The leader notebook has the same cell with a worked example filled in (`tax_auditor` and `stage_magician`), so a full leader run tests it end to end. The plain-Python copies in [`notebooks/helper_cells/`](notebooks/helper_cells/) are the source; if you edit a cell, edit both the `.py` file and the notebooks.
-4. **Who students share with:** Homework 1 tells students to add Rami (Kaggle username `ramiabukhater`) as a viewer of their saved notebook.
+- **Homework 1, Part C cells:** these live both in `notebooks/helper_cells/` and inside the notebook, so edit both.
+- **Shared PCA:** the published [DataWorks Shared PCA](https://www.kaggle.com/datasets/ramiabukhater/dataworks-shared-pca) dataset (basis `8ac3ff730a74`) must not be regenerated mid-quarter. Students' results only combine on the class map when they use the same basis.
+- **Class map:** collect students' `my_personas.json` files into one folder, then run:
 
-What the student cell does: generates, judges (always, even when `RUN_JUDGE_FILTER` is off), and extracts activations for the two personas at `EXTRACTION_LAYER`, reusing cached results in `CACHE_DIR/my_personas/` (under `/kaggle/working/persona_cache/`). It warns if fewer than half of a persona's responses survive judging, then projects onto the attached `shared_pca.json`. If the file is missing, or was made for a different model size or layer (for example the 2B smoke test), it falls back to the student's own fit and marks the result `basis_source: "own"`. It then prints PC1, PC2 and cosine to the Assistant next to the shared PC1 range, and saves `my_personas_plot.png` and `my_personas.json`.
+  ```bash
+  python scripts/class_persona_map.py --shared shared_pca.json --students submissions/ --out class_persona_map.png --csv class_personas.csv
+  ```
 
-### Leads: making the class map
+- **Never commit** the solutions notebook or the leaders' notes. Both are gitignored on purpose; the notebook is graded homework.
 
-Collect each student's `my_personas.json` (from the Output tab of their shared Kaggle version) into one folder, then run:
+## Acknowledgments
 
-```bash
-python scripts/class_persona_map.py --shared shared_pca.json --students submissions/ --out class_persona_map.png --csv class_personas.csv
-```
+The exercises adapt ARENA's notebook 4.4, *LLM Psychology & Persona Vectors* ([ARENA](https://github.com/ARENA-education/ARENA_materials)), and the science is that of Lu et al. (2026), [The Assistant Axis](https://arxiv.org/abs/2601.10387) ([code](https://github.com/safety-research/assistant-axis), MIT). Explanations on the site are our own; code excerpts are quoted from those sources for teaching. ARENA's repository states no license, so its material remains its authors'. Gemma 2 is used under Google's [Gemma Terms of Use](https://ai.google.dev/gemma/terms).
 
-It plots the shared personas in grey, the Assistant as a star, and every student persona coloured by student and labelled. It also writes a CSV sorted by PC1. Files made against a student's own fit, or with no surviving responses, are skipped and listed with the reason. It needs `numpy` and `matplotlib`.
-
-**How this was tested.** On Kaggle, on 2026-10-21: the leaders' full 9B run, including both Part C cells, against the real judge. It surfaced one bug, which is now fixed: the judge model thinks before answering, so a 200-token autorater call could come back empty. Two student personas projected onto the published basis gave sensible results. Before that, on a Mac CPU without Kaggle, a GPU, or the real OpenRouter judge:
-
-- **Inside the real notebook.** The leader solutions notebook was run top to bottom in smoke-test mode with the two Part C cells in place. It used `transformers` 4.46 and a tiny random Gemma 2 test model (`hf-internal-testing/tiny-random-Gemma2ForCausalLM`, 4 layers) in a fake `/kaggle/input`, plus a fake OpenRouter client that scores one test persona 1 and everything else 3. The leader cell wrote `shared_pca.json`. The student cell then:
-  - generated and judged both personas with the notebook's own functions;
-  - warned about the persona the judge filtered out and skipped it;
-  - projected the other onto the published shared PCA;
-  - saved the plot and JSON.
-
-  The random model means the geometry is meaningless; this checks that names, shapes and files line up. The only failing cells were ARENA's judge and autorater checks, which the fake judge cannot pass by design.
-- **Against a stand-in notebook.** Both cells and the map script also passed 16 checks against fake persona vectors with a known Assistant direction:
-  - no shared file attached;
-  - a fully filtered persona;
-  - re-running from cache;
-  - a shared file from the wrong model size;
-  - two students whose near and far personas landed on the predicted sides;
-  - the class map with 2 and 14 students.
-
-Run the leader notebook once on Kaggle (smoke test, then 9B) before Homework 1 opens.
-
-## Still waiting on the leads
-
-- [ ] **Calendar details**: rooms are booked for Oct 22 (Student Services Center 350) and Oct 28 and 29 (SSC 450). The other meetings and the lab dinner still show as tentative in `docs/calendar.html`; add rooms there as they are booked. To change dates, edit the Key dates table, the month tables, and the All meetings table in that file.
-- [ ] **Check the sign-up sheet's sharing.** The sheet is set up (2026-10-20): a "Sign-ups" tab with the six columns and a "Shared personas" tab with the 53 names. Students need to edit it, so under Share set "Anyone with the link" (or UCSD) to Editor.
-
-## Facts checked against live sources (2026-10-19)
-
-Things that change over time were checked on the live sites on **19 October 2026**. Re-check them each term.
-
-| Fact | Where it is used | Source |
-|---|---|---|
-| Kaggle T4 x2 = 2 × NVIDIA T4, 4 CPU cores, 29 GB RAM; 12-hour GPU sessions; 20-minute idle timeout; 20 GB saved in `/kaggle/working`; Quick Save vs Save & Run All | Setup steps 6, 10, 11 | [Kaggle Notebooks docs](https://www.kaggle.com/docs/notebooks) |
-| Weekly GPU quota: Kaggle's docs give no fixed number; about 30 hours/week is the commonly reported figure, shown in account settings | Setup step 10 | Kaggle docs (no number stated); independent reports |
-| Phone verification gates GPU and Internet in notebooks | Setup step 2 | Kaggle UI messages as reported by course guides; not stated in Kaggle's docs page |
-| Gemma 2 on Kaggle requires "Request Access"; Transformers variations `gemma-2-9b-it`, `gemma-2-2b-it` (version 2) exist, alongside PyTorch, Flax, GGUF, Gemma C++, and TFLite | Setup steps 4, 7 | [Kaggle model page](https://www.kaggle.com/models/google/gemma-2) and its public API |
-| OpenRouter pages: `openrouter.ai/settings/credits`, `openrouter.ai/settings/keys` (`/keys` redirects there); keys can have a credit limit and are shown once | Setup step 3 | openrouter.ai |
-| OpenRouter error codes 401 (invalid key), 402 (insufficient credits), 429 (rate limited) | Troubleshooting | [OpenRouter errors docs](https://openrouter.ai/docs/api_reference/errors-and-debugging) |
-| Judge models: `anthropic/claude-3.5-haiku` **not available**; the notebook's `anthropic/claude-haiku-5.5` ($0.10 / $0.50 per million input / output tokens) and `google/gemma-2-27b-it` available | Concept 2, troubleshooting | OpenRouter `/api/v1/models` |
-| Paper claims (sections, figures, 275 roles, 5 prompts per role, 240 questions, 0–3 judge scale with gpt-4.1-mini, PC1 cosine > 0.71 at the middle layer, Section 2.3 "one extreme of PC1", Figure 4 and Figure 7 findings) | Concept pages | [arXiv 2601.10387 (HTML)](https://arxiv.org/html/2601.10387) |
-| Model sizes: Gemma 2 9B has 42 layers and d_model 3584; 2B has 26 and 2304; 27B has 46 and 4608 | Concepts 3 and 5 | `config.json` from public mirrors of the 9B and 2B models (Google's own are gated); 27B shape stated in the ARENA notebook |
-| JailbreakBench (JBB-Behaviors) and HarmBench are public and MIT-licensed | Homework 2, idea 2 | GitHub and Hugging Face |
-| Shared PCA dataset `ramiabukhater/dataworks-shared-pca` is public (CC0, 153 kB) | Homework 1, Part C | Kaggle dataset API, 2026-10-21 |
-| Full 9B leader run took 702.6 s on T4 x2 | Home, setup run times | Leader run, 2026-10-21 |
-| All external links on the site return successfully | Every page | Checked with curl and the browser |
-
-## Licensing and attribution
-
-**Our content.** Code in this repository (`docs/assets/js`, `docs/assets/css`, and the HTML structure) is under the **MIT License**. Written content on the site (explanations, diagrams, questions, homework) is under **Creative Commons Attribution 4.0 International (CC BY 4.0)**. See [`LICENSE`](LICENSE).
-
-**Third-party material.** Code excerpts quoted on the concept pages, and the adapted notebook, come from:
-
-- **ARENA**, notebook 4.4 *LLM Psychology & Persona Vectors*, in [ARENA-education/ARENA_materials](https://github.com/ARENA-education/ARENA_materials). As of 2026-10-19 that repository **has no license file and states no license**, which by default means all rights are reserved. We therefore link to it, attribute it, write every explanation in our own words, and quote only the code students need to see (function signatures, docstrings, and provided helper cells, not exercise solutions). Those excerpts remain ARENA's and are not covered by our license. **Recommendation:** before making this repository public with the adapted notebook in it, ask the ARENA team for permission or a license statement.
-- **The Assistant Axis** code, [safety-research/assistant-axis](https://github.com/safety-research/assistant-axis), by Christina Lu, Jack Gallagher, Jonathan Michala, Kyle Fish, and Jack Lindsey. Its README states the **MIT License** (the repository has no separate LICENSE file). The notebook clones this repository at runtime for its transcripts and does not redistribute it here.
-- **Gemma 2** weights are used under Google's [Gemma Terms of Use](https://ai.google.dev/gemma/terms), which each student accepts on Kaggle. No weights are stored in this repository.
-
-The site footer on every page credits ARENA and the paper's authors.
-
-### Citation
+Our code is MIT-licensed and our written content is CC BY 4.0; see [`LICENSE`](LICENSE).
 
 ```bibtex
 @misc{lu2026assistant,
@@ -187,6 +124,8 @@ The site footer on every page credits ARENA and the paper's authors.
 }
 ```
 
-## Credits
+## Contacts
 
-Built for UCSD DataWorks by Rami Abukhater, Alec Min, and Akshar Sinha. The exercises adapt ARENA's notebook 4.4, and the science is that of Lu et al. (2026).
+* Rami Abukhater: [@RamiAbukhater](https://github.com/RamiAbukhater)
+* Akshar Sinha
+* Lab members: the general research chat on the DataWorks Discord
