@@ -1,6 +1,6 @@
 # Notebooks
 
-Leader notes on how the notebook differs from ARENA's original, and what has and hasn't been tested, are in [KAGGLE_NOTEBOOK_NOTES.md](KAGGLE_NOTEBOOK_NOTES.md).
+How the notebook differs from ARENA's original is summarized in the main README. Leaders keep fuller notes, with run details and private links, in `KAGGLE_NOTEBOOK_NOTES.md` in this folder; that file is gitignored and never published.
 
 ## Which notebook to import
 

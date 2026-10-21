@@ -17,6 +17,9 @@ venv/
 # Graded homework: never commit solutions to a public repo
 *solutions*.ipynb
 
+# Leader-only notes (run details, private notebook links): kept locally, never published
+notebooks/KAGGLE_NOTEBOOK_NOTES.md
+
 # Cached notebook outputs, if someone runs locally
 persona_cache/
 *.pt
