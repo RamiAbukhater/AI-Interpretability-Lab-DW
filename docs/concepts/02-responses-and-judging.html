@@ -163,7 +163,12 @@ def generate_responses_parallel(messages_list, model=OPENROUTER_MODEL, max_token
             response = openrouter_client.chat.completions.create(
                 model=model, messages=messages, max_tokens=max_tokens, temperature=temperature,
             )
-            return response.choices[0].message.content
+            choice = response.choices[0]
+            if not choice.message.content:
+                # Some replies come back with no text (e.g. the model declined, or ran out of tokens).
+                print(f"API returned no text (finish_reason={choice.finish_reason!r}, "
+                      f"refusal={getattr(choice.message, 'refusal', None)!r})")
+            return choice.message.content or ""
         except Exception as e:
             print(f"API error: {e}")
             return ""
@@ -176,7 +181,7 @@ def generate_responses_parallel(messages_list, model=OPENROUTER_MODEL, max_token
           <li>A <strong>conversation</strong> is a list of message dictionaries such as <code>{"role": "user", "content": "..."}</code>. <code>messages_list</code> is a list of conversations, one per response.</li>
           <li><strong>Local batching.</strong> Prompts are sorted by length and generated <code>GEN_BATCH_SIZE</code> at a time (32 on 9B). Padding goes on the <em>left</em> so every prompt ends right where generation starts. Generation stops at Gemma's <code>&lt;end_of_turn&gt;</code> token. If you run out of GPU memory here, lower <code>GEN_BATCH_SIZE</code>.</li>
           <li><strong>API calls</strong> run <code>MAX_WORKERS</code> at a time (4) in threads. More workers is faster until you hit a rate limit (HTTP 429); then lower it.</li>
-          <li>API errors are caught and turned into an empty string <code>""</code>, so one failed call does not crash a run. That is why later code skips empty responses. It also means a bad key or no credit shows up as a stream of printed <code>API error</code> lines, not as one crash, so read the output.</li>
+          <li>API errors and empty replies are both turned into an empty string <code>""</code>, so one failed call does not crash a run. An empty reply also prints its <code>finish_reason</code>; <code>'length'</code> means the model ran out of tokens. That is why later code skips empty responses. It also means a bad key or no credit shows up as a stream of printed <code>API error</code> lines, not as one crash, so read the output.</li>
           <li><code>temperature=0.7</code> for persona responses (some variety); the judges use <code>temperature=0.0</code> so the same response always gets the same score.</li>
         </ul>
       </div>

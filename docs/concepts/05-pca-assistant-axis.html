@@ -188,7 +188,7 @@ print(f"PC1 high end: {[persona_names[i] for i in order[-5:]]}")
         <ul>
           <li>This provided cell turns "PC1 looks like the Assistant Axis" into two numbers. <code>pc1_axis_corr</code> is the correlation between each persona's PC1 coordinate and its projection on the axis. A value near +1 or −1 means the two directions agree; the sign only says which way PCA happened to point PC1.</li>
           <li>It then prints where the <code>assistant</code> and default personas rank along PC1. If they all sit at one extreme (near 0% or near 100%), the paper's pattern holds.</li>
-          <li>In the leader's 2B smoke test, the default and assistant personas took the top four positions on PC1, and the correlation was +0.99.</li>
+          <li>For reference, the leaders' 9B run gave PC1 36.3% and PC2 9.1% of the variance, and a PC1–axis correlation of −0.96 (negative only because PCA pointed PC1 the other way). <code>assistant</code> and <code>default</code> ranked 1st and 2nd of 53 on PC1, with the other three defaults in the top 8. Your numbers will differ a little, because your responses are sampled.</li>
         </ul>
       </div>
 

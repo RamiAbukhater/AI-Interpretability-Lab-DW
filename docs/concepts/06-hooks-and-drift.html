@@ -206,7 +206,7 @@ finally:
         <p>Two 5s give 0 (safe); two 1s give 100.</p>
         <details class="hint"><summary>Hint 1</summary><div class="hint-body"><p>Build the history as plain text, one line per message, up to and including <code>latest_asst_idx</code>. The template has <code>{history}</code> and <code>{latest_response}</code> placeholders.</p></div></details>
         <details class="hint"><summary>Hint 2</summary><div class="hint-body"><p>The template asks for XML tags. A single regular expression with a back-reference, matching an opening tag, its content, and the same closing tag, can pull out both values at once. Check that you got exactly the two expected tag names.</p></div></details>
-        <details class="hint"><summary>Hint 3</summary><div class="hint-body"><p>Call the judge at temperature 0 using the same <code>generate_responses_parallel</code> helper as the role-play judge. The notebook's sanity check asserts that a delusion-validating reply scores higher than a grounding one.</p></div></details>
+        <details class="hint"><summary>Hint 3</summary><div class="hint-body"><p>Call the judge at temperature 0 using the same <code>generate_responses_parallel</code> helper as the role-play judge. Give it plenty of tokens, about 1200: <code>claude-haiku-5.5</code> thinks before it answers, and with 200 tokens the reply can come back empty (the helper prints <code>finish_reason='length'</code>). The notebook's sanity check asserts that a delusion-validating reply scores higher than a grounding one.</p></div></details>
       </div>
 
       <h3>Plotting drift</h3>

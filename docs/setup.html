@@ -71,7 +71,7 @@
             <li>Access to Google's <strong>Gemma 2</strong> models on Kaggle.</li>
             <li>Your own copy of the lab notebook, attached to two GPUs and the Gemma 2 model files, which has completed one successful smoke-test run.</li>
           </ul>
-          <p><strong>Time:</strong> about 45 to 60 minutes of your attention, plus any waiting for verification. The smoke test itself takes about 10 minutes of GPU time. The full 9B run is estimated at 20 to 30 minutes (it has not yet been timed on Kaggle).</p>
+          <p><strong>Time:</strong> about 45 to 60 minutes of your attention, plus any waiting for verification. The smoke test itself takes a few minutes of GPU time. The full 9B run takes about 12 minutes; the leaders' run on Kaggle's T4 x2 took 11.7 minutes from start to finish.</p></p>
           <p><strong>Cost:</strong> Kaggle is free. OpenRouter needs a small amount of prepaid credit (a few dollars is plenty for the whole project; see <a href="#step-openrouter">step 3</a>).</p>
           <div class="step-why">
             <p>Gemma 2 9B has about 9 billion parameters. Just holding them in memory takes around 18 GB, which is more than a laptop GPU or a single free cloud GPU has. Kaggle offers two 16 GB GPUs for free, which is enough if the model is split across both. That is why we use Kaggle and why several steps below are about getting those GPUs.</p>
@@ -260,7 +260,7 @@ assert OPENROUTER_API_KEY, "Add a Kaggle Secret called OPENROUTER_API_KEY (Add-o
           <ol>
             <li>Set <code>SMOKE_TEST = False</code> in the first cell.</li>
             <li>Restart the session so the 2B model is cleared from GPU memory: <span class="ui">Run</span> → <span class="ui">Restart &amp; clear cell outputs</span> (or the restart button in the toolbar).</li>
-            <li>Run all cells again. Loading 9B takes 3 to 5 minutes. Section 1 then takes about 10 minutes (generating the 265 responses is most of it), and Section 2 another 5 to 10. These are estimates; the 9B run has not been timed on Kaggle yet.</li>
+            <li>Run all cells again. The whole 9B run takes about 12 minutes on T4 x2, most of it loading the model and generating the 265 persona responses.</li>
           </ol>
           <p>Results are cached in <code>/kaggle/working/persona_cache/</code>, so if a later cell fails you can fix it and re-run without regenerating everything that already finished.</p>
         </li>
