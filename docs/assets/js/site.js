@@ -28,7 +28,7 @@
     { id: "resources", href: "resources.html", title: "Resources and glossary", short: "Resources and glossary", group: "Reference", icon: "&#9733;" }
   ];
 
-  var INSTRUCTORS = "Rami Abukhater, Alec Min, and Akshar Sinha";
+  var INSTRUCTORS = "Rami Abukhater and Akshar Sinha";
 
   var body = document.body;
   var root = body.getAttribute("data-root") || "";
