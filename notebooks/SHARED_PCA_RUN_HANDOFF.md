@@ -15,8 +15,7 @@ You work in Rami's browser, signed in to Kaggle as **`ramiabukhater`**. **Do not
 1. Signed in to [kaggle.com](https://www.kaggle.com) as `ramiabukhater`, with phone verification done. Without it, the GPU and Internet options are locked.
 2. Gemma 2 access accepted at [kaggle.com/models/google/gemma-2](https://www.kaggle.com/models/google/gemma-2). If that page still shows a "Request Access" box, access is not granted yet.
 3. An OpenRouter API key saved in Kaggle **Add-ons → Secrets** under the label exactly `OPENROUTER_API_KEY`, with some credit on the OpenRouter account. The run makes a few hundred cheap judge calls to `anthropic/claude-haiku-5.5`, well under a dollar. **Never enter or view the key yourself.** If the secret does not exist yet, stop and ask Rami to add it.
-4. The notebook file is on this computer at:
-   `/Users/ramiabukhater/Desktop/ClaudeOS/dataworks-ai-interpretability-lab/notebooks/persona_axis_kaggle_solutions.ipynb`
+4. The notebook file is in this repository at `notebooks/persona_axis_kaggle_solutions.ipynb` on Rami's computer.
    It is gitignored on purpose; it contains the answers to graded homework.
 
 ## Rules
