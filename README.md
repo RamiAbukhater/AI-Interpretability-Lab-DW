@@ -91,7 +91,7 @@ The notebook scaffolding and ARENA's published solutions mean finished code alon
 ### Leads: setup before Homework 1 opens
 
 1. **Sign-up sheet** ([Persona Sign-Up Sheet](https://docs.google.com/spreadsheets/d/1BPhfDKYrC4GYDJyut9dvJrWTFwQ05oBes5sC9zcURaE/edit?usp=sharing), linked from Homework 1). Its "Sign-ups" tab has the columns **Name, Persona 1, Persona 2, Prediction for Persona 1, Prediction for Persona 2, Substitutes**, and its "Shared personas" tab lists the 53 keys of `PERSONAS` in the workshop run so students can check for duplicates. Students need edit access.
-2. **Shared PCA.** Run the leader solutions notebook on `gemma-2-9b-it` (`SMOKE_TEST = False`, default persona list). The cell under "Leaders: save the shared PCA", right after the Section 1 PC1 check, writes `/kaggle/working/shared_pca.json` (shared mean, first two components, Assistant vector, shared coordinates, and a `basis_id` fingerprint). Publish that file as a public Kaggle Dataset and put its name in `docs/homework-1.html` (`SHARED_PCA_DATASET`). Do not regenerate it mid-quarter; a new file means a new `basis_id`, and the map script only combines files that match.
+2. **Shared PCA (done 2026-10-21).** Published as the public dataset [ramiabukhater/dataworks-shared-pca](https://www.kaggle.com/datasets/ramiabukhater/dataworks-shared-pca): `shared_pca.json`, basis `8ac3ff730a74`, from the leaders' 9B run. Homework 1 tells students to attach it. **Do not regenerate it mid-quarter**; a new file means a new `basis_id`, and the map script only combines files that match. Run details, including the private leader notebook versions, are in `notebooks/KAGGLE_NOTEBOOK_NOTES.md`. [`notebooks/SHARED_PCA_RUN_HANDOFF.md`](notebooks/SHARED_PCA_RUN_HANDOFF.md) has the steps if it ever has to be redone.
 3. **Student cell.** The "Your two personas (Homework 1, Part C)" cell is already in the student notebook right after the PC1 check. The leader notebook has the same cell with a worked example filled in (`tax_auditor` and `stage_magician`), so a full leader run tests it end to end. The plain-Python copies in [`notebooks/helper_cells/`](notebooks/helper_cells/) are the source; if you edit a cell, edit both the `.py` file and the notebooks.
 4. **Who students share with:** Homework 1 tells students to add Rami (Kaggle username `ramiabukhater`) as a viewer of their saved notebook.
 
@@ -107,7 +107,7 @@ python scripts/class_persona_map.py --shared shared_pca.json --students submissi
 
 It plots the shared personas in grey, the Assistant as a star, and every student persona coloured by student and labelled. It also writes a CSV sorted by PC1. Files made against a student's own fit, or with no surviving responses, are skipped and listed with the reason. It needs `numpy` and `matplotlib`.
 
-**How this was tested** (on a Mac CPU, without Kaggle, a GPU, or the real OpenRouter judge):
+**How this was tested.** On Kaggle, on 2026-10-21: the leaders' full 9B run, including both Part C cells, against the real judge. It surfaced one bug, an empty autorater reply, which is now fixed; see the leader notes. Two student personas projected onto the published basis gave sensible results. Before that, on a Mac CPU without Kaggle, a GPU, or the real OpenRouter judge:
 
 - **Inside the real notebook.** The leader solutions notebook was run top to bottom in smoke-test mode with the two Part C cells in place. It used `transformers` 4.46 and a tiny random Gemma 2 test model (`hf-internal-testing/tiny-random-Gemma2ForCausalLM`, 4 layers) in a fake `/kaggle/input`, plus a fake OpenRouter client that scores one test persona 1 and everything else 3. The leader cell wrote `shared_pca.json`. The student cell then:
   - generated and judged both personas with the notebook's own functions;
@@ -128,8 +128,6 @@ Run the leader notebook once on Kaggle (smoke test, then 9B) before Homework 1 o
 
 ## Still waiting on the leads
 
-- [ ] **Run the leader notebook on Kaggle** once with `SMOKE_TEST = True` and once with `SMOKE_TEST = False`, before Homework 1 opens. Nothing has run on Kaggle hardware or against the real OpenRouter judge yet (see the testing notes in `notebooks/KAGGLE_NOTEBOOK_NOTES.md`). The 9B run times on the site are estimates until then.
-- [ ] **Publish the shared PCA** from that 9B run as a public Kaggle Dataset, then replace `SHARED_PCA_DATASET` in `docs/homework-1.html` with its name and link. [`notebooks/SHARED_PCA_RUN_HANDOFF.md`](notebooks/SHARED_PCA_RUN_HANDOFF.md) is a step-by-step handoff for another agent (or a person) to do the run and the publishing.
 - [ ] **Calendar details**: meeting locations and the lab dinner's time and place are marked tentative in `docs/calendar.html`. When they are confirmed, replace the "Location tentative" and "Time and location tentative" text. To change dates, edit the Key dates table, the month tables, and the All meetings table in that file.
 - [ ] **Check the sign-up sheet's sharing.** The sheet is set up (2026-10-20): a "Sign-ups" tab with the six columns and a "Shared personas" tab with the 53 names. Students need to edit it, so under Share set "Anyone with the link" (or UCSD) to Editor.
 
@@ -149,6 +147,8 @@ Things that change over time were checked on the live sites on **19 October 2026
 | Paper claims (sections, figures, 275 roles, 5 prompts per role, 240 questions, 0–3 judge scale with gpt-4.1-mini, PC1 cosine > 0.71 at the middle layer, Section 2.3 "one extreme of PC1", Figure 4 and Figure 7 findings) | Concept pages | [arXiv 2601.10387 (HTML)](https://arxiv.org/html/2601.10387) |
 | Model sizes: Gemma 2 9B has 42 layers and d_model 3584; 2B has 26 and 2304; 27B has 46 and 4608 | Concepts 3 and 5 | `config.json` from public mirrors of the 9B and 2B models (Google's own are gated); 27B shape stated in the ARENA notebook |
 | JailbreakBench (JBB-Behaviors) and HarmBench are public and MIT-licensed | Homework 2, idea 2 | GitHub and Hugging Face |
+| Shared PCA dataset `ramiabukhater/dataworks-shared-pca` is public (CC0, 153 kB) | Homework 1, Part C | Kaggle dataset API, 2026-10-21 |
+| Full 9B leader run took 702.6 s on T4 x2 | Home, setup run times | Leader run, 2026-10-21 |
 | All external links on the site return successfully | Every page | Checked with curl and the browser |
 
 ## Licensing and attribution
