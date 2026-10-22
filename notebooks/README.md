@@ -22,7 +22,7 @@ Students import **only** `persona_axis_kaggle_exercises.ipynb`.
 
 ## How to import it into Kaggle
 
-The full walkthrough, with screenshots and troubleshooting, is on the site's [Setup page](../docs/setup.html). In short:
+The full walkthrough, with troubleshooting, is on the site's [Setup page](../docs/setup.html). In short:
 
 1. Download the `.ipynb` file from this folder on GitHub (open it, then **Download raw file**).
 2. On Kaggle: **Code → New Notebook**, then in the editor **File → Import Notebook**, and upload the file.
@@ -35,7 +35,7 @@ Results are cached under `/kaggle/working/persona_cache/`. They are lost when th
 
 ## Helper cells
 
-`helper_cells/` holds plain-Python copies of the Homework 1, Part C cells. Both are already in the notebooks, right after the Section 1 PC1 check; the `.py` files are the source, so edit both if you change one. See "Unique personas in Homework 1" in the main README.
+`helper_cells/` holds plain-Python copies of the Homework 1, Part C cells. Both are already in the notebooks, right after the Section 1 PC1 check; the `.py` files are the source, so edit both if you change one. See [Homework 1](https://ramiabukhater.github.io/AI-Interpretability-Lab-DW/homework-1.html), Part C, on the course site.
 
 | File | In which notebook |
 |---|---|

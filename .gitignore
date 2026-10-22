@@ -19,6 +19,7 @@ venv/
 
 # Leader-only notes (run details, private notebook links): kept locally, never published
 notebooks/KAGGLE_NOTEBOOK_NOTES.md
+notebooks/SHARED_PCA_RUN_HANDOFF.md
 
 # Cached notebook outputs, if someone runs locally
 persona_cache/

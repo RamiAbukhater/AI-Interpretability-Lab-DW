@@ -56,7 +56,6 @@ AI-Interpretability-Lab-DW/
 ├── notebooks/
 │   ├── persona_axis_kaggle_exercises.ipynb   # the student notebook
 │   ├── helper_cells/                # Homework 1 Part C cells as plain Python
-│   ├── SHARED_PCA_RUN_HANDOFF.md    # how to regenerate the shared PCA
 │   └── README.md
 └── scripts/
     └── class_persona_map.py         # combines students' personas into one class map

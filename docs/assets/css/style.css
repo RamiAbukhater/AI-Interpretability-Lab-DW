@@ -13,7 +13,7 @@
   --accent: #1f4e79;          /* deep ink blue */
   --accent-soft: #e4edf6;
   --accent-ink: #163a5c;
-  --warm: #9a5b13;            /* muted amber for TODO / warnings */
+  --warm: #9a5b13;            /* muted amber for warnings */
   --warm-soft: #fbf1e1;
   --good: #2f6b3f;
   --good-soft: #e6f2e8;
@@ -278,24 +278,6 @@ kbd {
 .callout.danger { border-color: var(--bad); background: var(--bad-soft); }
 .callout.ok { border-color: var(--good); background: var(--good-soft); }
 
-.todo-banner {
-  display: block;
-  font-family: var(--font-ui); font-size: 0.88rem;
-  background: var(--warm-soft); color: var(--ink);
-  border: 1px dashed var(--warm);
-  border-radius: var(--radius);
-  padding: 0.55rem 0.85rem; margin: 1.25rem 0 0.5rem;
-}
-.todo-banner::before {
-  content: "TODO, sync with final notebook";
-  display: block; margin-bottom: 0.1rem;
-  font-weight: 700; color: var(--warm); text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.78rem;
-}
-.todo-inline {
-  font-family: var(--font-ui); font-size: 0.85em; font-weight: 650;
-  color: var(--warm); background: var(--warm-soft);
-  border: 1px dashed var(--warm); border-radius: 4px; padding: 0.02em 0.4em;
-}
 
 /* numbered setup steps */
 .steps-list { counter-reset: step; list-style: none; padding: 0; }
