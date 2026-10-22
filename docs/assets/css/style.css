@@ -718,3 +718,24 @@ table.keydates td:first-child { white-space: nowrap; font-family: var(--font-ui)
   table.cal td { overflow-wrap: anywhere; }
 }
 .content a { overflow-wrap: anywhere; }
+
+/* ---------- AI notice and key papers ---------- */
+.ai-notice {
+  border: 1px solid var(--rule); border-left: 3px solid var(--warm);
+  background: var(--warm-soft);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 0.6rem 1rem; margin: 0 0 1.25rem;
+  font-family: var(--font-ui); font-size: 0.9rem; color: var(--ink);
+}
+.ai-notice p { margin: 0; }
+.ai-notice-title { display: block; font-weight: 700; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--warm); margin-bottom: 0.15rem; }
+.papers {
+  border: 1px solid var(--rule); border-radius: var(--radius);
+  background: var(--bg-raised); padding: 0.8rem 1.1rem 0.4rem; margin: 0 0 1.25rem;
+  font-family: var(--font-ui); font-size: 0.92rem;
+}
+.papers-title { display: block; font-weight: 700; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint); margin-bottom: 0.35rem; }
+.papers ul { margin: 0 0 0.4rem; padding-left: 1.1rem; }
+.papers li { margin-bottom: 0.4rem; line-height: 1.4; color: var(--ink-soft); }
+.papers li a { color: var(--accent); }
+.site-footer .ai-line { font-style: italic; }

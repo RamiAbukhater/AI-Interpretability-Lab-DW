@@ -36,6 +36,20 @@
       <h1>Steering along the Assistant Axis</h1>
       <p class="lede">So far we have only <em>watched</em> the axis. Now we push on it. By adding the axis vector into the residual stream while the model writes, we can make it more or less Assistant-like, and that is the strongest evidence that the axis is something the model actually uses.</p>
 
+      <div class="ai-notice" role="note">
+        <span class="ai-notice-title">AI-generated content</span>
+        <p>This page was written with Claude, an AI model, and may contain inaccuracies or mistakes. If something looks wrong or confusing, please point it out to Rami or Akshar (or post in the Discord) so it can be fixed.</p>
+      </div>
+      <aside class="papers" aria-label="Key papers">
+        <span class="papers-title">Key papers for this page</span>
+        <ul>
+          <li><a href="https://arxiv.org/abs/2308.10248">Turner et al. (2023). <em>Steering Language Models With Activation Engineering</em></a>. Activation addition: adding a direction to the residual stream to change behaviour.</li>
+          <li><a href="https://arxiv.org/abs/2312.06681">Panickssery et al. (2023). <em>Steering Llama 2 via Contrastive Activation Addition</em></a>. Steering with a difference-of-means vector from contrasting prompts, scaled by a coefficient, the same recipe as our axis.</li>
+          <li><a href="https://arxiv.org/abs/2306.03341">Li et al. (2023). <em>Inference-Time Intervention</em></a>. Shifts activations along a learned direction during generation to make answers more truthful.</li>
+          <li><a href="https://arxiv.org/abs/2406.11717">Arditi et al. (2024). <em>Refusal in Language Models Is Mediated by a Single Direction</em></a>. A causal test: adding or removing one direction switches refusal on and off.</li>
+        </ul>
+      </aside>
+
       <nav class="page-toc" aria-label="On this page"><strong>On this page</strong><ol>
         <li><a href="#idea">The big idea</a></li><li><a href="#diagram">Diagram</a></li><li><a href="#paper">Connection to the paper</a></li>
         <li><a href="#code">The code</a></li><li><a href="#check">Check your understanding</a></li><li><a href="#mistakes">Common mistakes</a></li></ol></nav>

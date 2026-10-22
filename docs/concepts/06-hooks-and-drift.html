@@ -36,6 +36,20 @@
       <h1>PyTorch hooks and monitoring persona drift</h1>
       <p class="lede">With the Assistant Axis in hand we can use it as a gauge. This page shows how to read the model's activations in the middle of a forward pass with a hook, and how to track a whole conversation turn by turn to see whether the model is drifting out of its Assistant role.</p>
 
+      <div class="ai-notice" role="note">
+        <span class="ai-notice-title">AI-generated content</span>
+        <p>This page was written with Claude, an AI model, and may contain inaccuracies or mistakes. If something looks wrong or confusing, please point it out to Rami or Akshar (or post in the Discord) so it can be fixed.</p>
+      </div>
+      <aside class="papers" aria-label="Key papers">
+        <span class="papers-title">Key papers for this page</span>
+        <ul>
+          <li><a href="https://arxiv.org/abs/1610.01644">Alain &amp; Bengio (2016). <em>Understanding Intermediate Layers Using Linear Classifier Probes</em></a>. Reading information out of intermediate activations, the idea behind monitoring.</li>
+          <li><a href="https://arxiv.org/abs/2310.01405">Zou et al. (2023). <em>Representation Engineering</em></a>. Monitors concepts such as honesty and harmfulness by projecting activations onto directions.</li>
+          <li><a href="https://arxiv.org/abs/2507.21509">Chen et al. (2025). <em>Persona Vectors</em></a>. Uses projections onto persona directions to monitor and predict personality shifts.</li>
+          <li><a href="https://arxiv.org/abs/2601.10387">Lu et al. (2026). <em>The Assistant Axis</em></a>. Section 4 tracks persona drift turn by turn in multi-turn conversations.</li>
+        </ul>
+      </aside>
+
       <div class="callout warn">
         <span class="callout-title">Content note</span>
         <p>Section 2 uses real case-study transcripts from the paper's repository, including conversations where a model validates a user's delusions or responds badly to someone in distress.</p>

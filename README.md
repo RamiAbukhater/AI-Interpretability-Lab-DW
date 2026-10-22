@@ -18,6 +18,8 @@ Repository for the UC San Diego DataWorks AI Interpretability Lab. It holds the 
 
 In meetings we cover the ideas at a high level. Setup, reading, and the notebook are done as homework, so the site is written to be followed on your own.
 
+> **AI-generated content.** The course site's pages were written with Claude, an AI model, and may contain inaccuracies or mistakes. If something looks wrong, please point it out to Rami or Akshar so it can be fixed.
+
 ## Abstract
 
 Language models learn to play many characters during pre-training, and post-training makes one of them, the helpful Assistant, the default. [The Assistant Axis](https://arxiv.org/abs/2601.10387) (Lu, Gallagher, Michala, Fish, and Lindsey, 2026) finds a single direction in a model's activations that separates the Assistant from everything else. Projecting onto that direction shows when a conversation is pulling the model out of character, and adding it during generation steers the model's behaviour.

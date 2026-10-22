@@ -36,6 +36,20 @@
       <h1>The residual stream and extracting activations</h1>
       <p class="lede">This is where we stop treating the model as a black box. We run each in-character response back through Gemma, read the model's internal state at one layer, and compress it into a single vector per persona.</p>
 
+      <div class="ai-notice" role="note">
+        <span class="ai-notice-title">AI-generated content</span>
+        <p>This page was written with Claude, an AI model, and may contain inaccuracies or mistakes. If something looks wrong or confusing, please point it out to Rami or Akshar (or post in the Discord) so it can be fixed.</p>
+      </div>
+      <aside class="papers" aria-label="Key papers">
+        <span class="papers-title">Key papers for this page</span>
+        <ul>
+          <li><a href="https://arxiv.org/abs/1706.03762">Vaswani et al. (2017). <em>Attention Is All You Need</em></a>. The original transformer architecture.</li>
+          <li><a href="https://transformer-circuits.pub/2021/framework/index.html">Elhage et al. (2021). <em>A Mathematical Framework for Transformer Circuits</em></a>. Introduces the residual-stream view this page uses: every layer reads from and adds to one shared stream.</li>
+          <li><a href="https://arxiv.org/abs/2303.08112">Belrose et al. (2023). <em>Eliciting Latent Predictions from Transformers with the Tuned Lens</em></a>. Shows how information builds up across layers of the residual stream.</li>
+          <li><a href="https://arxiv.org/abs/2408.00118">Gemma Team (2024). <em>Gemma 2: Improving Open Language Models at a Practical Size</em></a>. The model we study: its layers, width, and soft-capped attention.</li>
+        </ul>
+      </aside>
+
       <nav class="page-toc" aria-label="On this page"><strong>On this page</strong><ol>
         <li><a href="#idea">The big idea</a></li><li><a href="#diagram">Diagram</a></li><li><a href="#paper">Connection to the paper</a></li>
         <li><a href="#code">The code</a></li><li><a href="#check">Check your understanding</a></li><li><a href="#mistakes">Common mistakes</a></li></ol></nav>

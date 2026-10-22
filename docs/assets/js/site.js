@@ -133,7 +133,8 @@
       '<p>Adapted from ARENA\'s notebook 4.4, <a href="https://github.com/ARENA-education/ARENA_materials/tree/main/chapter4_alignment_science/exercises/part4_persona_vectors">LLM Psychology &amp; Persona Vectors</a> (ARENA), ' +
       'which reproduces <a href="https://arxiv.org/abs/2601.10387">The Assistant Axis</a> by Christina Lu, Jack Gallagher, Jonathan Michala, Kyle Fish, and Jack Lindsey ' +
       '(<a href="https://github.com/safety-research/assistant-axis">code</a>, MIT). Explanations on this site are our own; code excerpts are quoted from those sources for teaching.</p>' +
-      '<p>Site text CC BY 4.0, site code MIT. See the repository README for details.</p>';
+      '<p>Site text CC BY 4.0, site code MIT. See the repository README for details.</p>' +
+      '<p class="ai-line">Pages on this site were written with Claude, an AI model, and may contain mistakes. Please point anything that looks wrong out to Rami or Akshar so it can be fixed.</p>';
   }
 
   /* ---------- copy buttons on code blocks ---------- */

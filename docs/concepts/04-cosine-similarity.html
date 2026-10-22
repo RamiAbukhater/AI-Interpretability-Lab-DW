@@ -36,6 +36,19 @@
       <h1>Persona vectors and cosine similarity</h1>
       <p class="lede">You now have one 3584-dimensional vector per persona. The first question to ask is simple: which personas does the model treat as similar? This page covers the tool for that, cosine similarity, and the one-line fix (mean-centering) without which the answer is useless.</p>
 
+      <div class="ai-notice" role="note">
+        <span class="ai-notice-title">AI-generated content</span>
+        <p>This page was written with Claude, an AI model, and may contain inaccuracies or mistakes. If something looks wrong or confusing, please point it out to Rami or Akshar (or post in the Discord) so it can be fixed.</p>
+      </div>
+      <aside class="papers" aria-label="Key papers">
+        <span class="papers-title">Key papers for this page</span>
+        <ul>
+          <li><a href="https://arxiv.org/abs/1909.00512">Ethayarajh (2019). <em>How Contextual are Contextualized Word Representations?</em></a>. Finds that hidden states sit in a narrow cone, so raw cosine similarities are all high.</li>
+          <li><a href="https://arxiv.org/abs/1702.01417">Mu &amp; Viswanath (2018). <em>All-but-the-Top</em></a>. Removing the common mean vector makes similarities meaningful, the same fix as mean-centering here.</li>
+          <li><a href="https://arxiv.org/abs/2109.04404">Timkey &amp; van Schijndel (2021). <em>All Bark and No Bite</em></a>. A few large "rogue" dimensions can dominate cosine similarity in transformers.</li>
+        </ul>
+      </aside>
+
       <nav class="page-toc" aria-label="On this page"><strong>On this page</strong><ol>
         <li><a href="#idea">The big idea</a></li><li><a href="#diagram">Diagram</a></li><li><a href="#paper">Connection to the paper</a></li>
         <li><a href="#code">The code</a></li><li><a href="#check">Check your understanding</a></li><li><a href="#mistakes">Common mistakes</a></li></ol></nav>

@@ -36,6 +36,20 @@
       <h1>Role-play responses and LLM judges</h1>
       <p class="lede">To find where a persona lives inside the model, we first need text of the model actually playing that persona. This page covers how the notebook produces those responses and how it uses a second model, a judge, to check they really are in character.</p>
 
+      <div class="ai-notice" role="note">
+        <span class="ai-notice-title">AI-generated content</span>
+        <p>This page was written with Claude, an AI model, and may contain inaccuracies or mistakes. If something looks wrong or confusing, please point it out to Rami or Akshar (or post in the Discord) so it can be fixed.</p>
+      </div>
+      <aside class="papers" aria-label="Key papers">
+        <span class="papers-title">Key papers for this page</span>
+        <ul>
+          <li><a href="https://arxiv.org/abs/2306.05685">Zheng et al. (2023). <em>Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena</em></a>. Shows strong LLM judges agree with human graders about as often as humans agree with each other, and documents their biases.</li>
+          <li><a href="https://arxiv.org/abs/2303.16634">Liu et al. (2023). <em>G-Eval</em></a>. Rubric-based grading with an LLM, the same idea as our 0 to 3 role-play scale.</li>
+          <li><a href="https://arxiv.org/abs/2305.17926">Wang et al. (2023). <em>Large Language Models are not Fair Evaluators</em></a>. Judges can be swayed by answer order and wording, which is why you spot-check their scores.</li>
+          <li><a href="https://arxiv.org/abs/2601.10387">Lu et al. (2026). <em>The Assistant Axis</em></a>. Section 2.1.1 describes the role-play judge and the score-3 filter.</li>
+        </ul>
+      </aside>
+
       <nav class="page-toc" aria-label="On this page"><strong>On this page</strong><ol>
         <li><a href="#idea">The big idea</a></li><li><a href="#diagram">Diagram</a></li><li><a href="#paper">Connection to the paper</a></li>
         <li><a href="#code">The code</a></li><li><a href="#check">Check your understanding</a></li><li><a href="#mistakes">Common mistakes</a></li></ol></nav>
