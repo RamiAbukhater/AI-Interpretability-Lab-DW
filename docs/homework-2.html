@@ -123,6 +123,15 @@
               <li><strong>Setup cost (Focus C).</strong> Needs a task with a clear success measure, which is a big setup cost. Best owned by members with agent-framework experience.</li>
               <li><strong>Coordination.</strong> Agree on the shared infrastructure and data format before splitting up, and start Focus C's task design early since it takes longest.</li>
             </ul></div>
+          <div class="field reading"><strong>Further reading.</strong>
+            <ul>
+              <li><a href="https://arxiv.org/abs/2402.10962">Li et al. (2024). <em>Measuring and Controlling Instruction (In)Stability in Language Model Dialogs</em></a>. Two system-prompted chatbots talking to each other drift from their instructions within about eight rounds. The closest precedent for Focus A.</li>
+              <li><a href="https://arxiv.org/abs/2505.21588">Cho et al. (2025). <em>Herd Behavior: Investigating Peer Influence in LLM-based Multi-Agent Systems</em></a>. Agents conform to their peers, and how much depends on relative confidence. Behavioural evidence for Focus B.</li>
+              <li><a href="https://arxiv.org/abs/2511.11789">Li et al. (2025). <em>From Single to Societal: Analyzing Persona-Induced Bias in Multi-Agent Interactions</em></a>. Assigned personas change trust and insistence between agents, with in-group conformity.</li>
+              <li><a href="https://arxiv.org/abs/2503.13657">Cemri et al. (2025). <em>Why Do Multi-Agent LLM Systems Fail?</em></a>. A taxonomy of 14 failure modes across 1,600+ traces, including agents disobeying their role. A ready-made failure measure for Focus C.</li>
+              <li><a href="https://arxiv.org/abs/2303.17760">Li et al. (2023). <em>CAMEL: Communicative Agents for “Mind” Exploration of Large Language Model Society</em></a>. Role-playing agent pairs, which report role flipping and infinite conversation loops (the degeneration problem).</li>
+              <li><a href="https://arxiv.org/abs/2410.07283">Lee &amp; Tiwari (2024). <em>Prompt Infection: LLM-to-LLM Prompt Injection within Multi-Agent Systems</em></a>. Malicious prompts spread from agent to agent: contagion at the text level, which you would study at the activation level.</li>
+            </ul></div>
           <p class="builds"><strong>Builds on</strong> Section 2: drift monitoring and hooks (<a href="concepts/06-hooks-and-drift.html">concept 6</a>), and for Focus C, Section 1 persona vectors (<a href="concepts/03-residual-stream.html">concept 3</a>).</p>
         </article>
 
@@ -152,6 +161,14 @@
             <ul>
               <li>Role-play jailbreaks will obviously move the projection. The interesting question is whether non-role-play attacks move it too, so report the two kinds separately.</li>
             </ul></div>
+          <div class="field reading"><strong>Further reading.</strong>
+            <ul>
+              <li><a href="https://arxiv.org/abs/2406.11717">Arditi et al. (2024). <em>Refusal in Language Models Is Mediated by a Single Direction</em></a>. Jailbreak suffixes work partly by suppressing a single refusal direction, so a linear read-out can see attacks.</li>
+              <li><a href="https://arxiv.org/abs/2409.03788">Qian et al. (2024). <em>HSF: Defending against Jailbreak Attacks with Hidden State Filtering</em></a>. Jailbreak, safe and harmful prompts cluster separately in hidden states before any generation, which is the same pre-generation setup as this idea.</li>
+              <li><a href="https://arxiv.org/abs/2411.03343">Kirch et al. (2024). <em>What Features in Prompts Jailbreak LLMs? Investigating the Mechanisms Behind Attacks</em></a>. Probes predict jailbreak success but transfer poorly across attack families. Expect the axis to catch some attacks and not others.</li>
+              <li><a href="https://arxiv.org/abs/2311.03348">Shah et al. (2023). <em>Scalable and Transferable Black-Box Jailbreaks for Language Models via Persona Modulation</em></a>. Persona-based jailbreaks, the role-play family the axis should catch most easily.</li>
+              <li><a href="https://arxiv.org/abs/2404.01318">Chao et al. (2024). <em>JailbreakBench: An Open Robustness Benchmark for Jailbreaking Large Language Models</em></a>. The benchmark to use: matched harmful and benign behaviours.</li>
+            </ul></div>
           <p class="builds"><strong>Builds on</strong> projection onto the axis: Section 1 (<a href="concepts/05-pca-assistant-axis.html">concept 5</a>) and Section 2 (<a href="concepts/06-hooks-and-drift.html">concept 6</a>).</p>
         </article>
 
@@ -171,6 +188,14 @@
             <ul>
               <li>The team must define up front how to separate "the model adapts its tone", which is fine, from "the model loses its identity", which is the worrying case.</li>
               <li>The paper varies user behaviour to create realistic conversations, but never treats user identity as the variable under study, so this is new ground.</li>
+            </ul></div>
+          <div class="field reading"><strong>Further reading.</strong>
+            <ul>
+              <li><a href="https://arxiv.org/abs/2406.12094">Ghandeharioun et al. (2024). <em>Who’s asking? User personas and the mechanics of latent misalignment</em></a>. Whether a model refuses depends strongly on who it thinks the user is, and the user persona’s geometry in activations predicts the effect. The closest precedent.</li>
+              <li><a href="https://arxiv.org/abs/2406.07882">Chen et al. (2024). <em>Designing a Dashboard for Transparency and Control of Conversational AI</em></a>. An open model linearly encodes the user’s age, gender, education and socioeconomic status, so user identity is readable from activations.</li>
+              <li><a href="https://arxiv.org/abs/2310.13548">Sharma et al. (2023). <em>Towards Understanding Sycophancy in Language Models</em></a>. Sycophancy is widespread in assistants; useful definitions and evaluation formats for the judge.</li>
+              <li><a href="https://arxiv.org/abs/2212.09251">Perez et al. (2022). <em>Discovering Language Model Behaviors with Model-Written Evaluations</em></a>. Models echo the views a user’s self-description implies. Early evidence that described identity changes answers.</li>
+              <li><a href="https://arxiv.org/abs/2507.21509">Chen et al. (2025). <em>Persona Vectors: Monitoring and Controlling Character Traits in Language Models</em></a>. Includes a sycophancy direction you could compare with the axis.</li>
             </ul></div>
           <p class="builds"><strong>Builds on</strong> Section 2: drift monitoring (<a href="concepts/06-hooks-and-drift.html">concept 6</a>).</p>
         </article>
@@ -194,6 +219,13 @@
               <li>The workshop run's 53 personas are enough for a first look at five components, but more personas make the later components more trustworthy. The paper's 275 roles are one flag away (<code>USE_FULL_PERSONA_LIST</code>) if you have the GPU time.</li>
               <li>The paper only gives loose readings of PC2 and PC3 (Section 2.2, Table 1; for Gemma, PC2 is roughly "informal or creative" versus "systematic") and never tests the Big Five, so this is new.</li>
             </ul></div>
+          <div class="field reading"><strong>Further reading.</strong>
+            <ul>
+              <li><a href="https://arxiv.org/abs/2203.02092">Cutler &amp; Condon (2022). <em>Deep Lexical Hypothesis: Identifying personality structure in natural language</em></a>. Language-model adjective similarities recover the first factors of human personality structure, which supports the lexical-hypothesis framing (Neuroticism and Openness were weaker).</li>
+              <li><a href="https://arxiv.org/abs/2307.00184">Serapio-García et al. (2023). <em>Personality Traits in Large Language Models</em></a>. Psychometrically valid Big Five measurement in LLM outputs, stronger for larger instruction-tuned models. Use it to design the judge’s ratings.</li>
+              <li><a href="https://arxiv.org/abs/2206.07550">Jiang et al. (2022). <em>Evaluating and Inducing Personality in Pre-trained Language Models</em></a>. A Big Five inventory for models, and prompting that induces specific traits.</li>
+              <li><a href="https://arxiv.org/abs/2412.10427">Allbert et al. (2024). <em>Identifying and Manipulating Personality Traits in LLMs Through Activation Engineering</em></a>. Personality traits correspond to directions in activation space, using the same toolkit as this lab.</li>
+            </ul></div>
           <p class="builds"><strong>Builds on</strong> Section 1: PCA and the Assistant Axis (<a href="concepts/05-pca-assistant-axis.html">concept 5</a>).</p>
         </article>
 
@@ -212,6 +244,13 @@
           <div class="field"><strong>Constraints.</strong>
             <ul>
               <li>Prompts must be tightly matched, and the content of the responses must stay comparable, or the comparison is not fair.</li>
+            </ul></div>
+          <div class="field reading"><strong>Further reading.</strong>
+            <ul>
+              <li><a href="https://arxiv.org/abs/2305.16367">Shanahan et al. (2023). <em>Role-Play with Large Language Models</em></a>. The simulator versus simulacra framing: the model as an author voicing characters, not becoming them.</li>
+              <li><a href="https://arxiv.org/abs/2311.03191">Li et al. (2023). <em>DeepInception: Hypnotize Large Language Model to Be Jailbreaker</em></a>. Nested third-person fiction changes safety behaviour, so narrative framing measurably matters.</li>
+              <li><a href="https://arxiv.org/abs/2307.02483">Wei et al. (2023). <em>Jailbroken: How Does LLM Safety Training Fail?</em></a>. Explains why fictional and role-play framings slip past safety training (competing objectives).</li>
+              <li><a href="https://arxiv.org/abs/2601.10387">Lu et al. (2026). <em>The Assistant Axis</em></a>. Role-play and persona prompts pull the model off the axis. Nobody has yet compared first and third person, so this is untested.</li>
             </ul></div>
           <p class="builds"><strong>Builds on</strong> Section 1: persona vectors (<a href="concepts/03-residual-stream.html">concept 3</a> and <a href="concepts/04-cosine-similarity.html">concept 4</a>).</p>
         </article>
@@ -232,6 +271,14 @@
             <ul>
               <li>Judge quality drops outside English, and Gemma's ability varies by language.</li>
               <li>Translated prompts need review by native speakers.</li>
+            </ul></div>
+          <div class="field reading"><strong>Further reading.</strong>
+            <ul>
+              <li><a href="https://arxiv.org/abs/2402.10588">Wendler et al. (2024). <em>Do Llamas Work in English? On the Latent Language of Multilingual Transformers</em></a>. Middle layers work in an English-leaning concept space, so an English axis plausibly transfers.</li>
+              <li><a href="https://arxiv.org/abs/2502.15603">Schut et al. (2025). <em>Do Multilingual LLMs Think In English?</em></a>. Steering vectors computed in English work better than ones computed in the input language. Direct support for the transfer test.</li>
+              <li><a href="https://arxiv.org/abs/2505.17306">Wang et al. (2025). <em>Refusal Direction is Universal Across Safety-Aligned Languages</em></a>. A refusal direction from English transfers across 14 languages, and directions from different languages are nearly parallel. The template for your cosine comparison.</li>
+              <li><a href="https://arxiv.org/abs/2310.06474">Deng et al. (2023). <em>Multilingual Jailbreak Challenges in Large Language Models</em></a>. Safety is weaker in lower-resource languages, a reason the Assistant might be “less itself” outside English.</li>
+              <li><a href="https://arxiv.org/abs/2402.13231">AlKhamissi et al. (2024). <em>Investigating Cultural Alignment of Large Language Models</em></a>. Prompting language shifts a model’s cultural alignment, so the Assistant may differ by language.</li>
             </ul></div>
           <p class="builds"><strong>Builds on</strong> Section 1: persona vectors and PCA (<a href="concepts/03-residual-stream.html">concept 3</a> and <a href="concepts/05-pca-assistant-axis.html">concept 5</a>).</p>
         </article>
