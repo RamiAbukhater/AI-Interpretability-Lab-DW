@@ -178,27 +178,31 @@
             <h3><span class="idea-num">3</span> Who the user is</h3>
             <div class="badges"><span class="badge theme-safety">Safety</span><span class="badge team">Team of 2 to 3</span></div>
           </header>
-          <p class="q"><strong>Question.</strong> Keeping the model's own persona fixed, does the user's identity (a child, an expert, someone in distress, a flatterer) move the model along the axis, and does that track sycophancy?</p>
+          <p class="q"><strong>Question.</strong> When the user's identity changes (a child, an expert, someone in distress, a flatterer), does the model only update its picture of the <em>user</em>, or does its picture of <em>itself</em> move too, shifting it along the Assistant Axis? And does that shift track sycophancy?</p>
+          <p><strong>Where this starts.</strong> Two papers already show that the model tracks who it is talking to. <a href="https://arxiv.org/abs/2406.12094">Ghandeharioun et al. (2024)</a> found that the user's persona changes whether a model refuses harmful requests, and that the persona's position in activation space predicts the effect. <a href="https://arxiv.org/abs/2406.07882">Chen et al. (2024)</a> read the user's age, gender, education and socioeconomic status straight out of a model's activations. What neither asks is whether the model's <em>own</em> persona moves. That is the gap this project fills, and it is about sycophancy on ordinary requests rather than refusal of harmful ones.</p>
           <div class="field"><strong>Method.</strong>
             <ol>
               <li>Hold the system prompt fixed and vary only the user's described identity.</li>
-              <li>Measure projections onto the axis for each identity.</li>
-              <li>Score responses for sycophancy with a judge and compare.</li>
+              <li>Measure each response's projection onto the Assistant Axis for each identity.</li>
+              <li>Build a "user identity" direction (difference of means between two identities, for example child versus adult) and compare it with the Assistant Axis by cosine similarity. Is information about the user kept separate from the model's sense of itself?</li>
+              <li>Score responses for sycophancy with a judge and test whether movement along the axis tracks it.</li>
+              <li><em>Optional:</em> if it does, steer back toward the Assistant end with <code>axis_steer</code> and check whether sycophancy drops while appropriate changes in tone survive.</li>
             </ol></div>
           <div class="field"><strong>Constraints.</strong>
             <ul>
               <li>The team must define up front how to separate "the model adapts its tone", which is fine, from "the model loses its identity", which is the worrying case.</li>
-              <li>The paper varies user behaviour to create realistic conversations, but never treats user identity as the variable under study, so this is new ground.</li>
+              <li>The axis may not move with user identity at all. That still counts: "the model's picture of the user is stored separately from its own identity" is a clean result, especially if the cosine test backs it up.</li>
+              <li>Ghandeharioun et al. study refusal on harmful requests. Keep this project on benign requests and sycophancy, so it does not repeat their work.</li>
             </ul></div>
           <div class="field reading"><strong>Further reading.</strong>
             <ul>
-              <li><a href="https://arxiv.org/abs/2406.12094">Ghandeharioun et al. (2024). <em>Who’s asking? User personas and the mechanics of latent misalignment</em></a>. Whether a model refuses depends strongly on who it thinks the user is, and the user persona’s geometry in activations predicts the effect. The closest precedent.</li>
+              <li><a href="https://arxiv.org/abs/2406.12094">Ghandeharioun et al. (2024). <em>Who’s asking? User personas and the mechanics of latent misalignment</em></a>. Whether a model refuses depends strongly on who it thinks the user is, and the user persona’s geometry in activations predicts the effect. The starting point: it covers refusal, and this project covers the model’s own persona and sycophancy.</li>
               <li><a href="https://arxiv.org/abs/2406.07882">Chen et al. (2024). <em>Designing a Dashboard for Transparency and Control of Conversational AI</em></a>. An open model linearly encodes the user’s age, gender, education and socioeconomic status, so user identity is readable from activations.</li>
               <li><a href="https://arxiv.org/abs/2310.13548">Sharma et al. (2023). <em>Towards Understanding Sycophancy in Language Models</em></a>. Sycophancy is widespread in assistants; useful definitions and evaluation formats for the judge.</li>
               <li><a href="https://arxiv.org/abs/2212.09251">Perez et al. (2022). <em>Discovering Language Model Behaviors with Model-Written Evaluations</em></a>. Models echo the views a user’s self-description implies. Early evidence that described identity changes answers.</li>
-              <li><a href="https://arxiv.org/abs/2507.21509">Chen et al. (2025). <em>Persona Vectors: Monitoring and Controlling Character Traits in Language Models</em></a>. Includes a sycophancy direction you could compare with the axis.</li>
+              <li><a href="https://arxiv.org/abs/2507.21509">Chen et al. (2025). <em>Persona Vectors: Monitoring and Controlling Character Traits in Language Models</em></a>. Its recipe builds a sycophancy direction from contrasting prompts; build one on Gemma the same way and compare it with the axis.</li>
             </ul></div>
-          <p class="builds"><strong>Builds on</strong> Section 2: drift monitoring (<a href="concepts/06-hooks-and-drift.html">concept 6</a>).</p>
+          <p class="builds"><strong>Builds on</strong> Section 2: drift monitoring (<a href="concepts/06-hooks-and-drift.html">concept 6</a>), cosine similarity (<a href="concepts/04-cosine-similarity.html">concept 4</a>), and for the optional step, steering (<a href="concepts/07-steering.html">concept 7</a>).</p>
         </article>
 
         <!-- ========== Cognitive science ========== -->
