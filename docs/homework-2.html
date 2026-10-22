@@ -69,7 +69,7 @@
       <div class="callout ok" id="start">
         <span class="callout-title">Recommended starting points</span>
         <ol>
-          <li><strong>Flagship team:</strong> idea <a href="#idea-1">1</a> (multi-agent persona dynamics), one paper covering all three multi-agent questions. Novel, visual, and builds directly on the drift tools from Section 2.</li>
+          <li><strong>Flagship team:</strong> idea <a href="#idea-1">1</a> (multi-agent persona dynamics), one paper covering all three multi-agent questions. Starts from a known behavioural result (Li et al., 2024) and takes it inside the model, so it is visual and builds directly on the drift tools from Section 2.</li>
           <li><strong>Cognitive science team:</strong> idea <a href="#idea-4">4</a> (personality structure in persona space).</li>
           <li><strong>On-ramp for newer members:</strong> idea <a href="#idea-5">5</a> (narrator distance). It reuses the Section 1 pipeline almost unchanged with matched prompts, so it is the most likely to produce a clean result.</li>
           <li><strong>Safety team:</strong> idea <a href="#idea-2">2</a> (jailbreak early warning). Strongest safety result, but only for a team that follows the content guidelines in that card.</li>
@@ -96,7 +96,8 @@
             <h3><span class="idea-num">1</span> Multi-agent persona dynamics</h3>
             <div class="badges"><span class="badge theme-multi-agent">Multi-agent</span><span class="badge team">Team of 6 to 9, in three sub-groups</span></div>
           </header>
-          <p>One team takes on all three multi-agent questions as parts of a single paper. The three questions share most of their tools: a loop that runs conversations between models, a per-speaker projection onto the axis, a check for degenerate conversations, and a set of seeds and opening prompts. So the team builds those once and then splits into three sub-groups, each owning one focus. Together they tell one story: what happens when models talk (A), whether one model can pull another (B), and what assigned roles do inside a working group of agents (C). This is new ground: the paper's multi-turn conversations always pair one measured model with a simulated user, and never measure two models talking to each other.</p>
+          <p>One team takes on all three multi-agent questions as parts of a single paper. The three questions share most of their tools: a loop that runs conversations between models, a per-speaker projection onto the axis, a check for degenerate conversations, and a set of seeds and opening prompts. So the team builds those once and then splits into three sub-groups, each owning one focus. Together they tell one story: what happens when models talk (A), whether one model can pull another (B), and what assigned roles do inside a working group of agents (C).</p>
+          <p><strong>Where this starts.</strong> Focus A and B extend <a href="https://arxiv.org/abs/2402.10962">Li et al. (2024)</a>, who had two system-prompted chatbots talk to each other and found that within about eight rounds the agent stops following its own system prompt and starts taking on its partner's. They measured this from behaviour only, by asking probe questions and scoring the answers ("does it still act like its prompt?"). Their <a href="https://github.com/likenneth/persona_drift">code is public</a>. The new part is looking inside: we found no work that tracks this drift along the Assistant Axis, asks whether the activations move before the behaviour does, or tests whether contagion shows up as movement toward the partner's persona. The Assistant Axis paper itself only ever pairs one measured model with a simulated user. We also found no direct precedent for Focus C.</p>
 
           <div class="field"><strong>The three focus questions.</strong>
             <ol class="focus" type="A">
@@ -108,8 +109,8 @@
           <div class="field"><strong>Method.</strong>
             <ol>
               <li><strong>Shared infrastructure (whole team, first):</strong> a conversation runner for two or more speakers; per-speaker projections onto each model's own axis with <code>ConversationAnalyzer</code>; a degeneration measure such as repetition; a fixed set of seeds and opening prompts.</li>
-              <li><strong>Focus A:</strong> run long conversations (or one model playing both sides) and plot both speakers' trajectories over turns.</li>
-              <li><strong>Focus B:</strong> pair a normal Assistant with a persona-prompted partner, track both projections, and use lagged correlation to test whether one model's drift follows the other's.</li>
+              <li><strong>Focus A:</strong> first replicate Li et al.'s instruction drift on Gemma with their protocol (two system-prompted speakers, a probe question every round, a stability score). Then add the axis: plot each speaker's projection over turns and test whether it tracks, or runs ahead of, the behavioural stability score.</li>
+              <li><strong>Focus B:</strong> Li et al. saw an agent take on its partner's system prompt; test whether that shows up in activations. Pair a normal Assistant with a persona-prompted partner, track both projections, check whether the Assistant moves toward the partner persona's vector (cosine similarity), and use lagged correlation to test whether one model's drift follows the other's.</li>
               <li><strong>Focus C:</strong> run a small multi-agent task with assigned roles, project each agent's activations, and compare them against task success and rule-following.</li>
               <li><strong>Write-up:</strong> one paper with a shared methods section and a results section per focus.</li>
             </ol></div>
@@ -125,7 +126,7 @@
             </ul></div>
           <div class="field reading"><strong>Further reading.</strong>
             <ul>
-              <li><a href="https://arxiv.org/abs/2402.10962">Li et al. (2024). <em>Measuring and Controlling Instruction (In)Stability in Language Model Dialogs</em></a>. Two system-prompted chatbots talking to each other drift from their instructions within about eight rounds. The closest precedent for Focus A.</li>
+              <li><a href="https://arxiv.org/abs/2402.10962">Li et al. (2024). <em>Measuring and Controlling Instruction (In)Stability in Language Model Dialogs</em></a>. The starting point for Focus A and B. Two system-prompted chatbots drift from their own instructions within about eight rounds and begin adopting their partner's, measured from behaviour only. Replicate this, then add the axis.</li>
               <li><a href="https://arxiv.org/abs/2505.21588">Cho et al. (2025). <em>Herd Behavior: Investigating Peer Influence in LLM-based Multi-Agent Systems</em></a>. Agents conform to their peers, and how much depends on relative confidence. Behavioural evidence for Focus B.</li>
               <li><a href="https://arxiv.org/abs/2511.11789">Li et al. (2025). <em>From Single to Societal: Analyzing Persona-Induced Bias in Multi-Agent Interactions</em></a>. Assigned personas change trust and insistence between agents, with in-group conformity.</li>
               <li><a href="https://arxiv.org/abs/2503.13657">Cemri et al. (2025). <em>Why Do Multi-Agent LLM Systems Fail?</em></a>. A taxonomy of 14 failure modes across 1,600+ traces, including agents disobeying their role. A ready-made failure measure for Focus C.</li>
