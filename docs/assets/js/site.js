@@ -25,6 +25,8 @@
     { id: "c7", href: "concepts/07-steering.html", title: "Steering along the Assistant Axis", short: "Steering", group: "Concepts", step: true },
     { id: "hw1", href: "homework-1.html", title: "Homework 1: Setup, smoke test, Sections 1 and 2", short: "Homework 1: Notebook", group: "Homework", step: true },
     { id: "hw2", href: "homework-2.html", title: "Homework 2: Choose and propose an extension", short: "Homework 2: Extension", group: "Homework", step: true },
+    { id: "hw3", href: "homework-3.html", title: "Homework 3: Find your team and set a meeting", short: "Homework 3: Teams", group: "Homework", step: true },
+    { id: "hw4", href: "homework-4.html", title: "Homework 4: Write your team's project proposal", short: "Homework 4: Proposal", group: "Homework", step: true },
     { id: "resources", href: "resources.html", title: "Resources and glossary", short: "Resources and glossary", group: "Reference", icon: "&#9733;" }
   ];
 
@@ -54,7 +56,7 @@
     links.innerHTML =
       '<a href="' + root + 'calendar.html">Calendar</a>' +
       '<a href="' + root + 'setup.html">Setup</a>' +
-      '<a href="' + root + 'homework-1.html">Homework</a>' +
+      '<a href="' + root + 'homework-3.html">Homework</a>' +
       '<a href="' + root + 'resources.html">Glossary</a>';
     header.appendChild(links);
 
@@ -92,7 +94,7 @@
         '<span class="label">' + esc(p.short || p.title) + "</span></a></li>";
     });
     html += "</ol>";
-    html += '<p class="meta">Work through the numbered pages in order: setup (0), concepts 1 to 7, then Homework 1 (8) and Homework 2 (9).</p>';
+    html += '<p class="meta">Work through the numbered pages in order: setup (0), concepts 1 to 7, then Homeworks 1 to 4 (8 to 11).</p>';
     sidebar.innerHTML = html;
 
     // close the drawer on phone after choosing a page, or on Escape

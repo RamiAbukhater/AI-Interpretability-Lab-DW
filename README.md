@@ -49,7 +49,7 @@ AI-Interpretability-Lab-DW/
 │   ├── calendar.html                # meetings, workshops, deadlines
 │   ├── setup.html                   # Kaggle setup walkthrough
 │   ├── concepts/                    # seven concept pages, 01 to 07
-│   ├── homework-0.html … homework-2.html
+│   ├── homework-0.html … homework-4.html
 │   ├── resources.html               # sources and glossary
 │   ├── notebooks/                   # download copy of the student notebook
 │   └── assets/                      # css, js, favicon
@@ -85,6 +85,8 @@ python3 -m http.server 8000 --directory docs
 4. Concepts 1 to 7: [personas](https://ramiabukhater.github.io/AI-Interpretability-Lab-DW/concepts/01-personas.html), judging, the residual stream, cosine similarity, PCA and the Assistant Axis, hooks and drift, steering
 5. [Homework 1](https://ramiabukhater.github.io/AI-Interpretability-Lab-DW/homework-1.html): run the notebook and place two personas of your own
 6. [Homework 2](https://ramiabukhater.github.io/AI-Interpretability-Lab-DW/homework-2.html): choose and propose an extension
+7. [Homework 3](https://ramiabukhater.github.io/AI-Interpretability-Lab-DW/homework-3.html): find your team and set a meeting
+8. [Homework 4](https://ramiabukhater.github.io/AI-Interpretability-Lab-DW/homework-4.html): write your team's project proposal
 
 ## Development Workflow
 
